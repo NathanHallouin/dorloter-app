@@ -16,24 +16,24 @@ export const relations = defineRelations(schema, (r) => ({
   },
 
   shelters: {
-    cats: r.many.cats(),
+    pets: r.many.pets(),
     admins: r.many.users(),
   },
 
-  cats: {
+  pets: {
     shelter: r.one.shelters({
-      from: r.cats.shelterId,
+      from: r.pets.shelterId,
       to: r.shelters.id,
     }),
-    photos: r.many.catPhotos(),
+    photos: r.many.petPhotos(),
     applications: r.many.applications(),
     favorites: r.many.favorites(),
   },
 
-  catPhotos: {
-    cat: r.one.cats({
-      from: r.catPhotos.catId,
-      to: r.cats.id,
+  petPhotos: {
+    pet: r.one.pets({
+      from: r.petPhotos.petId,
+      to: r.pets.id,
     }),
   },
 
@@ -64,9 +64,9 @@ export const relations = defineRelations(schema, (r) => ({
   },
 
   applications: {
-    cat: r.one.cats({
-      from: r.applications.catId,
-      to: r.cats.id,
+    pet: r.one.pets({
+      from: r.applications.petId,
+      to: r.pets.id,
     }),
     user: r.one.users({
       from: r.applications.userId,
@@ -79,9 +79,9 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.favorites.userId,
       to: r.users.id,
     }),
-    cat: r.one.cats({
-      from: r.favorites.catId,
-      to: r.cats.id,
+    pet: r.one.pets({
+      from: r.favorites.petId,
+      to: r.pets.id,
     }),
   },
 

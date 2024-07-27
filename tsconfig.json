@@ -20,7 +20,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@infra/*": ["./src/infrastructure/*"],
+      "@messaging/*": ["./src/domains/messaging/*"],
+      "@moderation/*": ["./src/domains/moderation/*"],
+      "@gamification/*": ["./src/domains/gamification/*"],
+      "@shelters/*": ["./src/domains/shelters/*"],
+      "@lost-found/*": ["./src/domains/lost-found/*"],
+      "@adoption/*": ["./src/domains/adoption/*"],
+      "@identity/*": ["./src/domains/identity/*"],
+      "@notifications/*": ["./src/domains/notifications/*"],
+      "@pensions/*": ["./src/domains/pensions/*"]
     }
   },
   "include": [
@@ -31,5 +42,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "tests/e2e", "playwright.config.ts"]
 }

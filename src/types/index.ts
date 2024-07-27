@@ -2,8 +2,10 @@ import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import type {
   users,
   shelters,
-  cats,
-  catPhotos,
+  pets,
+  petPhotos,
+  pensions,
+  pensionPhotos,
   reports,
   reportPhotos,
   reportMatches,
@@ -16,8 +18,10 @@ import type {
 
 export type User = InferSelectModel<typeof users>;
 export type Shelter = InferSelectModel<typeof shelters>;
-export type Cat = InferSelectModel<typeof cats>;
-export type CatPhoto = InferSelectModel<typeof catPhotos>;
+export type Pet = InferSelectModel<typeof pets>;
+export type PetPhoto = InferSelectModel<typeof petPhotos>;
+export type Pension = InferSelectModel<typeof pensions>;
+export type PensionPhoto = InferSelectModel<typeof pensionPhotos>;
 export type Report = InferSelectModel<typeof reports>;
 export type ReportPhoto = InferSelectModel<typeof reportPhotos>;
 export type ReportMatch = InferSelectModel<typeof reportMatches>;
@@ -29,8 +33,8 @@ export type Notification = InferSelectModel<typeof notifications>;
 
 export type NewUser = InferInsertModel<typeof users>;
 export type NewShelter = InferInsertModel<typeof shelters>;
-export type NewCat = InferInsertModel<typeof cats>;
-export type NewCatPhoto = InferInsertModel<typeof catPhotos>;
+export type NewPet = InferInsertModel<typeof pets>;
+export type NewPetPhoto = InferInsertModel<typeof petPhotos>;
 export type NewReport = InferInsertModel<typeof reports>;
 export type NewReportPhoto = InferInsertModel<typeof reportPhotos>;
 export type NewReportMatch = InferInsertModel<typeof reportMatches>;
@@ -39,8 +43,8 @@ export type NewNotification = InferInsertModel<typeof notifications>;
 
 // ─── Types composés ─────────────────────────────────────────────────────────
 
-export type CatWithPhotos = Cat & {
-  photos: CatPhoto[];
+export type PetWithPhotos = Pet & {
+  photos: PetPhoto[];
 };
 
 export type ReportWithPhotos = Report & {
@@ -52,9 +56,9 @@ export type ReportMatchWithReports = ReportMatch & {
   foundReport: ReportWithPhotos;
 };
 
-export type CatWithShelter = Cat & {
+export type PetWithShelter = Pet & {
   shelter: Shelter;
-  photos: CatPhoto[];
+  photos: PetPhoto[];
 };
 
 // ─── Action response ────────────────────────────────────────────────────────

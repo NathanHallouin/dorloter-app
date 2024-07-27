@@ -1,14 +1,16 @@
-# CLAUDE.md — Miaou
+# CLAUDE.md — Dorloter
 
 ## Identité du projet
 
-Miaou est une plateforme web française dédiée aux chats, réunissant deux fonctions complémentaires :
+Dorloter est une plateforme web française d'adoption et de retrouvailles d'animaux domestiques. MVP centré sur **chat et chien** ; extensible aux NAC (lapin, rongeur, reptile…) sans refonte. Trois fonctions :
 
-1. **Adoption** — une vitrine moderne pour les refuges et associations, permettant de publier des profils de chats à adopter avec photos, caractère, besoins médicaux, et compatibilités. Système de matching adoptant/chat inspiré de Tinder (swipe ou filtres avancés), formulaire de candidature en ligne, et suivi du processus d'adoption.
+1. **Adoption** — vitrine des refuges et associations, profils d'animaux à adopter (photos, caractère, besoins médicaux, compatibilités). Matching adoptant/animal en swipe ou en liste filtrée, formulaire de candidature en ligne, suivi du processus.
 
-2. **Perdus / Trouvés** — un réseau de signalement géolocalisé. Les particuliers signalent un chat perdu ou trouvé, et le système rapproche automatiquement les signalements par localisation, description physique (couleur, race, signes distinctifs) et date. Notifications aux utilisateurs proches d'un signalement.
+2. **Perdus / Trouvés** — réseau de signalement géolocalisé. Les particuliers signalent un animal perdu ou trouvé, le système rapproche automatiquement les signalements par localisation, espèce, description physique et date. Notifications aux utilisateurs proches.
 
-L'objectif est de devenir le réflexe unique en France quand on cherche à adopter un chat ou qu'on en a perdu/trouvé un. Le projet est développé en solo par un développeur fullstack freelance basé en France. La priorité est de sortir un prototype fonctionnel rapidement.
+3. **Pensions** — annuaire des pensions professionnelles agréées (chatteries, chenils). **Pros uniquement** — SIRET et agrément préfecture vérifiés manuellement par l'équipe Dorloter avant publication. Pas de garde entre particuliers, pas de booking intégré en MVP — contact téléphone/email direct.
+
+Domaine : `dorloter.fr`. Projet solo, développeur fullstack freelance basé en France. Priorité MVP : un prototype fonctionnel, pas une architecture parfaite.
 
 ## Stack technique
 
@@ -28,182 +30,102 @@ L'objectif est de devenir le réflexe unique en France quand on cherche à adopt
 
 ## Architecture du projet
 
+Organisation modulaire (monolithe à bounded contexts). Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) pour la philosophie complète, les règles d'import et le graphe de dépendances.
+
 ```
-miaou/
-├── CLAUDE.md
-├── docker-compose.yml            # PostgreSQL + PostGIS + MinIO
-├── drizzle.config.ts
-├── next.config.ts
-├── package.json
-├── tsconfig.json
-├── .env.local.example
+src/
+├── app/                          # Next.js routes — orchestration pure
+│   ├── (public)/                 # Pages sans auth (adopter, perdus-trouves, refuges)
+│   ├── (app)/                    # Pages avec auth user (dashboard, candidater, signaler)
+│   ├── (shelter)/                # Pages refuge admin (shelter-animaux, candidatures, stats)
+│   ├── (admin)/                  # Pages plateforme admin (modération, users)
+│   ├── (auth)/                   # Login / register / password flows
+│   ├── api/                      # Routes API (cron, upload, auth handler, SSE messages)
+│   ├── layout.tsx                # Root layout + metadata Dorloter
+│   ├── manifest.ts               # PWA manifest
+│   └── instrumentation.ts        # Next.js register() — bootstrap listeners event-bus
 │
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx             # Root layout, providers, fonts
-│   │   ├── page.tsx               # Landing page publique
-│   │   │
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx
-│   │   │   ├── register/page.tsx
-│   │   │   └── layout.tsx         # Layout auth (centré, minimal)
-│   │   │
-│   │   ├── (public)/              # Pages accessibles sans auth
-│   │   │   ├── adopter/
-│   │   │   │   ├── page.tsx       # Catalogue chats à adopter (filtres, grille, carte)
-│   │   │   │   └── [id]/page.tsx  # Fiche détaillée chat + bouton candidature
-│   │   │   ├── perdus-trouves/
-│   │   │   │   ├── page.tsx       # Carte des signalements + liste
-│   │   │   │   └── [id]/page.tsx  # Détail signalement + correspondances
-│   │   │   └── refuges/
-│   │   │       ├── page.tsx       # Annuaire des refuges partenaires
-│   │   │       └── [id]/page.tsx  # Page refuge + ses chats
-│   │   │
-│   │   ├── (app)/                 # Pages nécessitant auth
-│   │   │   ├── layout.tsx         # Layout app (navbar, sidebar mobile)
-│   │   │   ├── dashboard/page.tsx # Accueil utilisateur (mes favoris, mes signalements)
-│   │   │   ├── signaler/
-│   │   │   │   └── page.tsx       # Formulaire signalement perdu/trouvé
-│   │   │   ├── candidatures/
-│   │   │   │   └── page.tsx       # Mes candidatures d'adoption
-│   │   │   ├── mes-signalements/
-│   │   │   │   └── page.tsx       # Mes signalements actifs
-│   │   │   ├── notifications/
-│   │   │   │   └── page.tsx       # Centre de notifications
-│   │   │   └── profil/
-│   │   │       └── page.tsx       # Mon profil, préférences, localisation
-│   │   │
-│   │   ├── (shelter)/             # Espace refuge (auth + rôle shelter)
-│   │   │   ├── layout.tsx         # Layout admin refuge
-│   │   │   ├── mes-chats/
-│   │   │   │   ├── page.tsx       # Gestion chats du refuge
-│   │   │   │   ├── [id]/edit/page.tsx
-│   │   │   │   └── new/page.tsx   # Ajouter un chat
-│   │   │   ├── candidatures/
-│   │   │   │   └── page.tsx       # Candidatures reçues
-│   │   │   └── stats/
-│   │   │       └── page.tsx       # Stats du refuge (adoptions, vues)
-│   │   │
-│   │   └── api/
-│   │       ├── auth/
-│   │       │   └── [...all]/route.ts    # Better Auth handler
-│   │       ├── upload/
-│   │       │   └── route.ts             # Upload images → S3
-│   │       └── notifications/
-│   │           └── subscribe/route.ts   # Web Push subscription
-│   │
-│   ├── server/
-│   │   ├── db/
-│   │   │   ├── index.ts           # Connexion Drizzle
-│   │   │   ├── schema.ts          # Schéma complet (tables, relations, enums)
-│   │   │   └── migrations/        # Migrations Drizzle Kit
-│   │   ├── actions/
-│   │   │   ├── cats.ts            # Server Actions chats (CRUD refuge)
-│   │   │   ├── reports.ts         # Server Actions signalements perdu/trouvé
-│   │   │   ├── applications.ts    # Server Actions candidatures adoption
-│   │   │   ├── favorites.ts       # Server Actions favoris utilisateur
-│   │   │   └── shelters.ts        # Server Actions gestion refuge
-│   │   ├── queries/
-│   │   │   ├── cats.ts            # Chats à adopter (filtres, géo, pagination)
-│   │   │   ├── reports.ts         # Signalements (géo, matching)
-│   │   │   ├── matching.ts        # Algo correspondance perdu/trouvé
-│   │   │   ├── shelters.ts        # Refuges (listing, détail)
-│   │   │   └── stats.ts           # Agrégations dashboard refuge
-│   │   └── auth/
-│   │       ├── auth.ts            # Config Better Auth (server)
-│   │       └── auth-client.ts     # Client Better Auth
-│   │
-│   ├── components/
-│   │   ├── ui/                    # Composants shadcn/ui
-│   │   ├── map/
-│   │   │   ├── report-map.tsx     # Carte signalements MapLibre
-│   │   │   ├── shelter-map.tsx    # Carte refuges
-│   │   │   ├── location-picker.tsx # Sélecteur de position (formulaire)
-│   │   │   └── map-controls.tsx
-│   │   ├── cats/
-│   │   │   ├── cat-card.tsx       # Card chat (grille adoption)
-│   │   │   ├── cat-profile.tsx    # Profil détaillé
-│   │   │   ├── cat-gallery.tsx    # Galerie photos swipeable
-│   │   │   ├── cat-filters.tsx    # Filtres (race, âge, sexe, compatibilité)
-│   │   │   └── cat-form.tsx       # Formulaire ajout/edit chat (refuge)
-│   │   ├── reports/
-│   │   │   ├── report-card.tsx    # Card signalement
-│   │   │   ├── report-form.tsx    # Formulaire signalement
-│   │   │   ├── report-matches.tsx # Liste correspondances trouvées
-│   │   │   └── report-status-badge.tsx
-│   │   ├── adoption/
-│   │   │   ├── application-form.tsx    # Formulaire candidature
-│   │   │   ├── application-status.tsx  # Suivi candidature
-│   │   │   └── matching-score.tsx      # Score compatibilité adoptant/chat
-│   │   ├── shelters/
-│   │   │   ├── shelter-card.tsx
-│   │   │   └── shelter-profile.tsx
-│   │   ├── notifications/
-│   │   │   ├── notification-bell.tsx
-│   │   │   └── notification-list.tsx
-│   │   └── layout/
-│   │       ├── navbar.tsx
-│   │       ├── footer.tsx
-│   │       └── mobile-nav.tsx
-│   │
-│   ├── lib/
-│   │   ├── validators/            # Schémas Zod
-│   │   │   ├── cat.ts
-│   │   │   ├── report.ts
-│   │   │   ├── application.ts
-│   │   │   └── shelter.ts
-│   │   ├── s3.ts                  # Client S3 (upload, signed URLs, resize)
-│   │   ├── geo.ts                 # Helpers PostGIS (ST_DWithin, GeoJSON, distance)
-│   │   ├── matching.ts            # Algo matching perdu/trouvé (scoring)
-│   │   ├── notifications.ts       # Helpers Web Push + email
-│   │   └── utils.ts               # Helpers génériques
-│   │
-│   ├── hooks/
-│   │   ├── use-geolocation.ts     # Hook géolocalisation navigateur
-│   │   └── use-push-notifications.ts
-│   │
-│   └── types/
-│       └── index.ts               # Types partagés (inférés du schema Drizzle)
+├── domains/                      # Bounded contexts métier
+│   ├── adoption/                 # pets, applications, favorites, testimonials
+│   ├── lost-found/               # reports, matching, résolution
+│   ├── shelters/                 # refuges, follows, invitations
+│   ├── pensions/                 # pensions pro agréées (SIRET + agrément)
+│   ├── identity/                 # users, sessions, profil, admin users
+│   ├── messaging/                # conversations, messages, bus SSE
+│   ├── moderation/               # content reports, vérif refuges
+│   ├── notifications/            # emit + listeners cross-domain
+│   └── gamification/             # crédits résolution, badges
+│   # chaque domaine = schema.ts + actions/ + queries/ + components/
+│   # + public.ts (+ public.client.ts si besoin) + events.ts + listeners.ts
 │
-├── public/
-│   ├── sw.js                      # Service Worker (push notifications)
-│   └── manifest.json              # PWA manifest
+├── infrastructure/               # Plomberie — zéro métier
+│   ├── db/                       # Clients Drizzle (app + admin), enums partagés
+│   ├── auth/                     # Better Auth + session helpers
+│   ├── storage/                  # S3 client
+│   ├── email/                    # Resend wrapper + templates
+│   ├── push/                     # Web Push VAPID
+│   ├── event-bus/                # Pub/sub in-process typé
+│   ├── logger/                   # JSON structured
+│   ├── rate-limit/               # In-memory rate limiting
+│   ├── cron/                     # Auth pour routes cron
+│   └── nsfw/                     # Classification image safety
 │
-└── tests/
-    ├── unit/
-    └── e2e/
+├── shared/                       # Primitives zéro métier
+│   ├── ui/                       # Composants shadcn/ui
+│   └── utils/                    # cn, geo, cities, map, placeholder-images
+│
+├── server/db/                    # Barrel global du schéma (re-export depuis domains/*/schema)
+│   ├── schema.ts                 # Re-exports pour drizzle-kit (vue unique)
+│   ├── relations.ts              # Drizzle relations
+│   └── migrations/               # Migrations Drizzle-kit
+│
+├── components/                   # Composants transversaux
+│   ├── layout/                   # navbar, footer, page-container, bottom-nav
+│   ├── map/                      # location-picker, location-view (cross-domain)
+│   ├── pwa/                      # service-worker-register, install-prompt
+│   └── shared/                   # share-link-button (générique)
+│
+├── hooks/                        # Hooks React cross-domain
+└── types/                        # Types TS partagés (inférés Drizzle + ActionResponse)
 ```
+
+**Règles de frontière** (appliquées par dependency-cruiser + CI — voir `.dependency-cruiser.cjs`) :
+- `shared/` n'importe rien d'`infrastructure/`, `domains/`, `app/`
+- `infrastructure/` n'importe rien de `domains/` ou `app/`
+- `domains/X` ne peut importer d'un autre domaine que via `public.ts`, `public.client.ts`, `events.ts`, `schema.ts`
+- Un client component qui appelle un server action d'un autre domaine passe par `@<domain>/public.client` (séparation server/client-bundle, cf. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md))
+
+**Path aliases** : `@shared/*`, `@infra/*`, `@adoption/*`, `@shelters/*`, `@pensions/*`, `@lost-found/*`, `@messaging/*`, `@moderation/*`, `@notifications/*`, `@identity/*`, `@gamification/*`.
 
 ## Modèle de données
 
 ### Tables métier
 
-**cats** — chats à adopter (gérés par les refuges)
+**pets** — animaux à adopter (gérés par les refuges)
 - `id` : UUID (pk, gen_random_uuid)
 - `shelter_id` : UUID (fk → shelters), not null
+- `species` : enum('chat', 'chien') — enum extensible pour les NAC à terme
 - `name` : varchar(255), not null
 - `description` : text — personnalité, histoire
-- `breed` : varchar(100) — race ("Européen", "Siamois", "Inconnu"...)
+- `breed` : varchar(100) — race ("Européen", "Golden retriever", "Croisé"...)
 - `color` : varchar(100) — couleur du pelage
 - `sex` : enum('male', 'femelle', 'inconnu')
-- `age_category` : enum('chaton', 'jeune', 'adulte', 'senior') — tranches plutôt qu'âge exact
+- `age_category` : enum('chaton', 'jeune', 'adulte', 'senior') — "chaton" couvre aussi le chiot
 - `estimated_birth` : date — nullable, approximatif
-- `is_sterilized` : boolean
-- `is_chipped` : boolean
-- `is_vaccinated` : boolean
-- `fiv_felv` : enum('negatif', 'fiv_positif', 'felv_positif', 'fiv_felv_positif', 'non_teste')
-- `ok_with_cats` : enum('oui', 'non', 'inconnu')
-- `ok_with_dogs` : enum('oui', 'non', 'inconnu')
-- `ok_with_children` : enum('oui', 'non', 'inconnu')
-- `indoor_only` : boolean — chat d'intérieur uniquement
+- `is_sterilized`, `is_chipped`, `is_vaccinated` : boolean
+- `fiv_felv` : enum('negatif', 'fiv_positif', 'felv_positif', 'fiv_felv_positif', 'non_teste') — **nullable, chat uniquement**
+- `indoor_only` : boolean — **nullable, chat uniquement**
+- `ok_with_cats`, `ok_with_dogs`, `ok_with_children` : enum('oui', 'non', 'inconnu')
 - `special_needs` : text — besoins spécifiques (régime, médicaments...)
 - `status` : enum('disponible', 'reserve', 'adopte', 'retire')
 - `adoption_fee` : decimal(8,2) — frais d'adoption
 - `created_at`, `updated_at` : timestamp
 
-**cat_photos** — plusieurs photos par chat (galerie)
+Les champs `fiv_felv` et `indoor_only` sont **nullables** : le formulaire les masque si `species != 'chat'`. Côté UI, toujours null-checker avant affichage.
+
+**pet_photos** — plusieurs photos par animal (galerie)
 - `id` : UUID (pk)
-- `cat_id` : UUID (fk → cats)
+- `pet_id` : UUID (fk → pets)
 - `url` : text, not null
 - `is_primary` : boolean — photo principale affichée en card
 - `order` : integer — ordre dans la galerie
@@ -214,7 +136,8 @@ miaou/
 - `user_id` : UUID (fk → users), not null
 - `type` : enum('perdu', 'trouve'), not null
 - `status` : enum('actif', 'resolu', 'expire')
-- `cat_name` : varchar(255) — nullable (trouvé = pas de nom)
+- `species` : enum('chat', 'chien'), not null
+- `pet_name` : varchar(255) — nullable (trouvé = pas de nom)
 - `description` : text, not null — description physique détaillée
 - `breed` : varchar(100)
 - `color` : varchar(100)
@@ -249,7 +172,7 @@ miaou/
 
 **applications** — candidatures d'adoption
 - `id` : UUID (pk)
-- `cat_id` : UUID (fk → cats), not null
+- `pet_id` : UUID (fk → pets), not null
 - `user_id` : UUID (fk → users), not null
 - `status` : enum('envoyee', 'en_cours', 'acceptee', 'refusee', 'annulee')
 - `housing_type` : enum('appartement', 'maison', 'autre')
@@ -257,17 +180,38 @@ miaou/
 - `has_other_pets` : text — description des autres animaux
 - `has_children` : boolean
 - `children_ages` : text — âges des enfants
-- `experience` : text — expérience avec les chats
-- `motivation` : text, not null — pourquoi ce chat
+- `experience` : text — expérience avec les animaux
+- `motivation` : text, not null — pourquoi cet animal
 - `availability` : text — disponibilité pour visite/rencontre
 - `shelter_notes` : text — notes internes du refuge
 - `created_at`, `updated_at` : timestamp
 
-**favorites** — chats favoris d'un utilisateur
+**favorites** — animaux favoris d'un utilisateur
 - `user_id` : UUID (fk → users)
-- `cat_id` : UUID (fk → cats)
+- `pet_id` : UUID (fk → pets)
 - `created_at` : timestamp
-- PK composite : (user_id, cat_id)
+- PK composite : (user_id, pet_id)
+
+**pensions** — pensions professionnelles agréées (chats et/ou chiens)
+- `id` : UUID (pk)
+- `name` : varchar(255), not null
+- `slug` : varchar(255), unique
+- `description` : text
+- `siret` : varchar(14), not null — obligatoire, vérification manuelle
+- `agrement_number` : varchar(100) — certificat de capacité ou ICPE
+- `address`, `location` (PostGIS), `phone`, `email`, `website`
+- `accepts_cats`, `accepts_dogs` : boolean
+- `capacity_cats`, `capacity_dogs` : integer
+- `price_per_day_cat`, `price_per_day_dog` : decimal(6,2)
+- `services` : jsonb (medication, grooming, outdoorAccess, nightStaff, transport, senior)
+- `opening_hours` : text
+- `is_verified` : boolean — contrôlé manuellement par un platform_admin ; seules les fiches vérifiées apparaissent dans l'annuaire public
+- `created_at`, `updated_at` : timestamp
+
+**pension_photos** — galerie d'une pension
+- `id` : UUID (pk), `pension_id` : UUID (fk → pensions), `url`, `is_primary`, `order`, `created_at`
+
+Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un user peut créer une pension et devient `pension_admin` ; la fiche reste `is_verified=false` jusqu'à validation par un admin plateforme.
 
 **shelters** — refuges et associations partenaires
 - `id` : UUID (pk)
@@ -337,8 +281,8 @@ miaou/
 - `created_at`, `updated_at` : timestamp
 
 ### Relations clés
-- Un refuge a plusieurs chats et un ou plusieurs admins (users avec role shelter_admin).
-- Un chat a plusieurs photos (cat_photos) et peut recevoir plusieurs candidatures (applications).
+- Un refuge a plusieurs animaux et un ou plusieurs admins (users avec role shelter_admin).
+- Un animal a plusieurs photos (pet_photos) et peut recevoir plusieurs candidatures (applications).
 - Un utilisateur peut avoir plusieurs signalements (reports), plusieurs candidatures, et plusieurs favoris.
 - Un signalement a plusieurs photos (report_photos) et peut être mis en correspondance avec d'autres signalements (report_matches).
 - Une correspondance lie toujours un signalement "perdu" à un signalement "trouvé".
@@ -347,8 +291,8 @@ miaou/
 - `reports.location` : index GIST (requêtes spatiales, matching)
 - `shelters.location` : index GIST
 - `users.location` : index GIST (notifications proximité)
-- `cats.shelter_id` : index B-tree
-- `cats.status` : index B-tree (filtrage sur "disponible")
+- `pets.shelter_id` : index B-tree
+- `pets.status` : index B-tree (filtrage sur "disponible")
 - `reports.type` + `reports.status` : index composite
 - `reports.date_event` : index B-tree (tri chronologique)
 - `report_matches.lost_report_id` : index B-tree
@@ -376,7 +320,7 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - TypeScript strict (`"strict": true`, `"noUncheckedIndexedAccess": true`)
 - ESLint + Prettier, config Next.js par défaut étendue
 - Imports absolus via `@/` mappé sur `src/`
-- Nommage fichiers : kebab-case (`cat-card.tsx`, pas `CatCard.tsx`)
+- Nommage fichiers : kebab-case (`pet-card.tsx`, pas `CatCard.tsx`)
 - Nommage composants : PascalCase à l'export
 - Un composant par fichier
 
@@ -393,14 +337,14 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - Utiliser les requêtes préparées Drizzle pour les requêtes fréquentes
 - Requêtes PostGIS : toujours passer par les helpers dans `lib/geo.ts`
 - Ne jamais faire de requête DB dans un composant client
-- Pagination obligatoire sur les listings (cats, reports) : cursor-based de préférence
+- Pagination obligatoire sur les listings (pets, reports) : cursor-based de préférence
 
 ### Composants
 - Server Components par défaut, `"use client"` uniquement quand nécessaire (interactivité, hooks)
 - Props typées avec interface dédiée, pas de `any`
 - Les formulaires utilisent `useActionState` (React 19) + Server Actions
-- Composants de formulaire dans le même dossier que leur domaine (`components/cats/cat-form.tsx`)
-- Les cartes (cat-card, report-card) doivent être optimisées : `next/image` pour les photos, lazy loading
+- Composants de formulaire dans le même dossier que leur domaine (`components/adoption/pet-form.tsx`)
+- Les cartes (pet-card, report-card) doivent être optimisées : `next/image` pour les photos, lazy loading
 
 ### Style
 - Tailwind CSS v4 uniquement : configuration via `@theme` dans le CSS (pas de `tailwind.config.js`)
@@ -421,42 +365,42 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 ### Notifications
 - Web Push via l'API Push du navigateur + service worker
 - Fallback email (Resend ou Brevo) si push non supporté
-- Déclencheurs : nouveau signalement "trouvé" dans le rayon d'un signalement "perdu" actif, mise à jour candidature, nouveau chat dans un refuge suivi
+- Déclencheurs : nouveau signalement "trouvé" dans le rayon d'un signalement "perdu" actif, mise à jour candidature, nouvel animal dans un refuge suivi
 - Notifications persistées en base (table `notifications`) pour le centre de notifications in-app
 
 ## Commandes
 
 ```bash
 # Dev
-pnpm dev                    # Next.js dev server (Turbopack)
-pnpm db:push                # Push schema Drizzle → PostgreSQL
-pnpm db:generate            # Générer migration
-pnpm db:migrate             # Appliquer migrations
-pnpm db:studio              # Drizzle Studio (UI admin DB)
-pnpm db:seed                # Seed données de test (refuges, chats, signalements)
+bun dev                     # Next.js dev server (Turbopack)
+bun db:push                 # Push schema Drizzle → PostgreSQL
+bun db:generate             # Générer migration
+bun db:migrate              # Appliquer migrations
+bun db:studio               # Drizzle Studio (UI admin DB)
+bun db:seed                 # Seed données de test (refuges, animaux, signalements)
 docker compose up -d        # PostgreSQL + PostGIS + MinIO
 
 # Tests
-pnpm test                   # Vitest unit tests
-pnpm test:e2e               # Playwright e2e
+bun test                    # Vitest unit tests
+bun test:e2e                # Playwright e2e
 
 # Build
-pnpm build                  # Build production
-pnpm lint                   # ESLint
-pnpm typecheck              # tsc --noEmit
+bun run build               # Build production
+bun lint                    # ESLint
+bun typecheck               # tsc --noEmit
 ```
 
 ## Variables d'environnement
 
 ```env
-DATABASE_URL=postgresql://miaou:miaou@localhost:5432/miaou
+DATABASE_URL=postgresql://dorloter:dorloter@localhost:5432/dorloter
 BETTER_AUTH_SECRET=... # généré (openssl rand -base64 32)
 BETTER_AUTH_URL=http://localhost:3000
 S3_ENDPOINT=http://localhost:9000
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
-S3_BUCKET=miaou-photos
-S3_PUBLIC_URL=http://localhost:9000/miaou-photos
+S3_BUCKET=dorloter-photos
+S3_PUBLIC_URL=http://localhost:9000/dorloter-photos
 NEXT_PUBLIC_MAPTILER_KEY=... # ou autre provider de tuiles
 VAPID_PUBLIC_KEY=... # Web Push (généré avec web-push generate-vapid-keys)
 VAPID_PRIVATE_KEY=...
@@ -470,9 +414,9 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 - [ ] Auth (Better Auth : inscription, connexion, rôles user/shelter_admin)
 - [ ] Proxy Next.js 16 (protection routes /app et /shelter)
 - [ ] CRUD refuges + page publique refuge
-- [ ] CRUD chats à adopter (formulaire multi-photos, tous les champs)
+- [ ] CRUD animaux à adopter (formulaire multi-photos, tous les champs)
 - [ ] Catalogue public : grille de cards, filtres (race, âge, sexe, compatibilité), pagination
-- [ ] Fiche détaillée chat avec galerie photos
+- [ ] Fiche détaillée animal avec galerie photos
 - [ ] Système de favoris (coeur sur les cards)
 - [ ] Upload images vers S3 + optimisation (sharp ou next/image)
 
@@ -495,7 +439,7 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 
 ### Phase 4 — Polish + lancement (3-4 semaines)
 - [ ] Landing page publique attractive
-- [ ] SEO (metadata, sitemap, structured data pour les chats)
+- [ ] SEO (metadata, sitemap, structured data pour les animaux)
 - [ ] PWA (manifest, service worker, install prompt)
 - [ ] Responsive final pass sur tous les écrans
 - [ ] Seed script avec données réalistes pour démo
@@ -505,11 +449,11 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 
 - Ce projet est un MVP solo — privilégier la simplicité et la vitesse de livraison à l'architecture parfaite.
 - Ne pas sur-engineer : pas de microservices, pas de message queue, pas de cache Redis pour le MVP.
-- L'app est destinée au grand public (adoptants, propriétaires de chats perdus) : l'UX doit être simple, chaleureuse, et mobile-first.
+- L'app est destinée au grand public (adoptants, propriétaires d) : l'UX doit être simple, chaleureuse, et mobile-first.
 - L'espace refuge est un back-office secondaire : fonctionnel mais pas besoin d'être aussi léché que la partie publique.
 - PostGIS est essentiel pour le matching géographique — ne pas proposer d'alternative NoSQL ou de calcul géo côté client.
 - Le projet vise la souveraineté numérique européenne : pas d'AWS, pas de services Google/Microsoft en infra. Hetzner, Scaleway, OVH uniquement.
 - Les pages publiques (catalogue adoption, signalements) doivent être accessibles sans compte. L'auth est requise uniquement pour : signaler, candidater, gérer un refuge, favoris.
 - Le matching perdu/trouvé est le différenciateur technique du projet. L'algo doit être simple mais efficace, et les résultats affichés clairement avec le score et la distance.
 - Toujours proposer le code en français pour les commentaires et messages utilisateur, en anglais pour le code technique (noms de variables, fonctions, etc.).
-- L'app doit donner envie d'adopter : belles photos de chats, fiches détaillées, ton bienveillant. Ce n'est pas un outil admin, c'est une vitrine pour sauver des chats.
+- L'app doit donner envie d'adopter : belles photos d&apos;animaux, fiches détaillées, ton bienveillant. Ce n&apos;est pas un outil admin, c&apos;est une vitrine pour aider à trouver des foyers.

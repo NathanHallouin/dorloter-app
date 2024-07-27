@@ -1,43 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/server/auth/auth";
+import { getSessionCookie } from "better-auth/cookies";
 
-// Routes nécessitant une authentification
+// Routes nécessitant une authentification (session valide)
 const protectedRoutes = [
+  "/admin",
   "/dashboard",
   "/signaler",
+  "/candidater",
   "/candidatures",
+  "/favoris",
+  "/invitation",
   "/mes-signalements",
   "/notifications",
   "/profil",
 ];
 
-// Routes nécessitant le rôle shelter_admin
-const shelterRoutes = ["/shelter-chats", "/shelter-candidatures", "/shelter-stats"];
+// Routes nécessitant en plus le rôle shelter_admin (vérifié dans le layout)
+const shelterRoutes = [
+  "/shelter-animaux",
+  "/shelter-candidatures",
+  "/shelter-stats",
+  "/shelter-profil",
+];
 
-export async function proxy(request: NextRequest) {
+// Routes nécessitant le rôle pension_admin (vérifié dans le layout)
+const pensionRoutes = ["/pension-profil"];
+
+// Création d'une pension : toute session authentifiée y a accès ; la promotion
+// en pension_admin se fait dans l'action côté serveur.
+const pensionSelfRegRoutes = ["/pensions/nouvelle"];
+
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-  const isShelter = shelterRoutes.some((route) => pathname.startsWith(route));
+  const needsAuth =
+    protectedRoutes.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`)
+    ) ||
+    shelterRoutes.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`)
+    ) ||
+    pensionRoutes.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`)
+    ) ||
+    pensionSelfRegRoutes.some((route) => pathname === route);
 
-  if (!isProtected && !isShelter) {
-    return NextResponse.next();
-  }
+  if (!needsAuth) return NextResponse.next();
 
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
+  // Vérification optimiste de la présence du cookie de session (sans hit DB).
+  // La validation complète et le contrôle de rôle se font dans les layouts
+  // via requireAuth() / requireShelter() / requirePension().
+  const sessionCookie = getSessionCookie(request);
 
-  if (!session) {
+  if (!sessionCookie) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  if (isShelter && session.user.role !== "shelter_admin") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
@@ -45,14 +63,21 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/admin/:path*",
     "/dashboard/:path*",
     "/signaler/:path*",
+    "/candidater/:path*",
     "/candidatures/:path*",
+    "/favoris/:path*",
+    "/invitation/:path*",
     "/mes-signalements/:path*",
     "/notifications/:path*",
     "/profil/:path*",
-    "/shelter-chats/:path*",
+    "/shelter-animaux/:path*",
     "/shelter-candidatures/:path*",
     "/shelter-stats/:path*",
+    "/shelter-profil/:path*",
+    "/pension-profil/:path*",
+    "/pensions/nouvelle",
   ],
 };

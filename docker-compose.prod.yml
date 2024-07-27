@@ -1,0 +1,139 @@
+# Nom du projet : vient de COMPOSE_PROJECT_NAME (défini dans les scripts
+# package.json) ; s'il n'est pas défini, Docker utilise le nom du répertoire.
+
+services:
+  # ─── Base de données ──────────────────────────────────────────────────────
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-miaou}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD in .env.production}
+      POSTGRES_DB: miaou
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER:-miaou} -d miaou"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  # ─── Object storage (images) ──────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY in .env.production}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?set S3_SECRET_KEY in .env.production}
+      # Avertit MinIO du domaine public pour les en-têtes CORS et les URLs signées.
+      MINIO_SERVER_URL: https://cdn.${DOMAIN:?set DOMAIN in .env.production}
+      MINIO_BROWSER_REDIRECT_URL: https://console.${DOMAIN}
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${S3_ACCESS_KEY} ${S3_SECRET_KEY};
+      mc mb --ignore-existing local/${S3_BUCKET:-miaou-photos};
+      mc anonymous set download local/${S3_BUCKET:-miaou-photos};
+      "
+    restart: "no"
+    networks: [internal]
+
+  # ─── App Next.js ──────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Variables NEXT_PUBLIC_* : doivent être présentes au build
+        # (inlinées dans le bundle client).
+        S3_PUBLIC_URL: https://cdn.${DOMAIN}/${S3_BUCKET:-miaou-photos}
+        NEXT_PUBLIC_APP_URL: https://${DOMAIN}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}
+        NEXT_PUBLIC_MAPTILER_KEY: ${NEXT_PUBLIC_MAPTILER_KEY:-}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+    restart: unless-stopped
+    environment:
+      # DB — rôles à privilèges restreints (voir scripts/init-db-roles.sql)
+      DATABASE_URL: postgresql://miaou_app:${MIAOU_APP_PASSWORD:?set MIAOU_APP_PASSWORD}@postgres:5432/miaou
+      DATABASE_URL_ADMIN: postgresql://miaou_admin:${MIAOU_ADMIN_PASSWORD:?set MIAOU_ADMIN_PASSWORD}@postgres:5432/miaou
+      DATABASE_URL_MIGRATIONS: postgresql://${POSTGRES_SUPERUSER:-miaou}:${POSTGRES_SUPERUSER_PASSWORD}@postgres:5432/miaou
+
+      # Better Auth
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: https://${DOMAIN}
+      NEXT_PUBLIC_APP_URL: https://${DOMAIN}
+
+      # S3 — endpoint interne (réseau docker) pour le serveur,
+      # URL publique pour les navigateurs.
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-miaou-photos}
+      S3_PUBLIC_URL: https://cdn.${DOMAIN}/${S3_BUCKET:-miaou-photos}
+
+      # Web Push
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:noreply@${DOMAIN}}
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}
+
+      # Emails transactionnels
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-Dorloter <noreply@${DOMAIN}>}
+
+      # Cartographie
+      NEXT_PUBLIC_MAPTILER_KEY: ${NEXT_PUBLIC_MAPTILER_KEY:-}
+
+      # Captcha (Cloudflare Turnstile)
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks: [internal]
+
+  # ─── Reverse proxy + HTTPS auto (Let's Encrypt) ───────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - minio
+    networks: [internal]
+
+volumes:
+  pgdata:
+  miniodata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge

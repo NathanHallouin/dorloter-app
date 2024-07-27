@@ -1,346 +1,136 @@
-import { sql } from "drizzle-orm";
-import {
-  boolean,
-  date,
-  decimal,
-  index,
-  integer,
-  jsonb,
-  pgEnum,
-  pgTable,
-  primaryKey,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
-import { geometry } from "drizzle-orm/pg-core/columns/postgis_extension/geometry";
+// Barrel global du schéma DB : re-exporte toutes les tables des domaines.
+//
+// Drizzle-kit a besoin d'une vue unique pour générer les migrations ; les
+// server actions/queries l'utilisent pour importer n'importe quelle table
+// sans se soucier du domaine propriétaire.
+//
+// Ce fichier n'a plus aucune déclaration locale — chaque table vit dans
+// son domaine (voir src/domains/<name>/schema.ts). Les enums transverses
+// (sexEnum) vivent dans src/infrastructure/db/enums.ts.
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const userRoleEnum = pgEnum("user_role", [
-  "user",
-  "shelter_admin",
-  "platform_admin",
-]);
+// Enum userRoleEnum extrait vers `src/domains/identity/schema.ts`.
+export { userRoleEnum } from "@/domains/identity/schema";
 
-export const sexEnum = pgEnum("sex", ["male", "femelle", "inconnu"]);
+// sexEnum vit dans `infrastructure/db/enums.ts` parce qu'il est utilisé
+// par adoption ET lost-found de façon eager (`sex: sexEnum()` au moment
+// du `pgTable({...})`). Si on le gardait ici, les domaines le trouveraient
+// en TDZ au chargement de leur schema.
+export { sexEnum } from "@infra/db/enums";
 
-export const ageCategoryEnum = pgEnum("age_category", [
-  "chaton",
-  "jeune",
-  "adulte",
-  "senior",
-]);
+// Enums adoption extraits vers `src/domains/adoption/schema.ts`.
+export {
+  speciesEnum,
+  ageCategoryEnum,
+  fivFelvEnum,
+  compatibilityEnum,
+  petStatusEnum,
+  applicationStatusEnum,
+  housingTypeEnum,
+} from "@/domains/adoption/schema";
 
-export const fivFelvEnum = pgEnum("fiv_felv", [
-  "negatif",
-  "fiv_positif",
-  "felv_positif",
-  "fiv_felv_positif",
-  "non_teste",
-]);
+// Enums lost-found extraits vers `src/domains/lost-found/schema.ts`.
+export {
+  reportTypeEnum,
+  reportStatusEnum,
+  matchStatusEnum,
+} from "@/domains/lost-found/schema";
 
-export const compatibilityEnum = pgEnum("compatibility", [
-  "oui",
-  "non",
-  "inconnu",
-]);
+// Enums moderation extraits vers `src/domains/moderation/schema.ts` (Phase 2).
+export {
+  reportedContentTypeEnum,
+  moderationStatusEnum,
+} from "@/domains/moderation/schema";
 
-export const catStatusEnum = pgEnum("cat_status", [
-  "disponible",
-  "reserve",
-  "adopte",
-  "retire",
-]);
+// Enum notificationTypeEnum extrait vers `src/domains/notifications/schema.ts`.
+export { notificationTypeEnum } from "@/domains/notifications/schema";
 
-export const reportTypeEnum = pgEnum("report_type", ["perdu", "trouve"]);
-
-export const reportStatusEnum = pgEnum("report_status", [
-  "actif",
-  "resolu",
-  "expire",
-]);
-
-export const matchStatusEnum = pgEnum("match_status", [
-  "suggere",
-  "confirme",
-  "rejete",
-]);
-
-export const applicationStatusEnum = pgEnum("application_status", [
-  "envoyee",
-  "en_cours",
-  "acceptee",
-  "refusee",
-  "annulee",
-]);
-
-export const housingTypeEnum = pgEnum("housing_type", [
-  "appartement",
-  "maison",
-  "autre",
-]);
-
-export const notificationTypeEnum = pgEnum("notification_type", [
-  "match_found",
-  "application_update",
-  "new_cat_nearby",
-  "report_nearby",
-]);
-
-// ─── Tables auth (Better Auth) ──────────────────────────────────────────────
-
-export const users = pgTable(
-  "users",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    email: varchar({ length: 255 }).notNull(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
-    name: varchar({ length: 255 }).notNull(),
-    image: text(),
-    role: userRoleEnum().default("user").notNull(),
-    shelterId: uuid("shelter_id"),
-    location: geometry({ type: "point", srid: 4326, mode: "xy" }),
-    notificationRadiusKm: integer("notification_radius_km").default(10),
-    pushSubscription: jsonb("push_subscription"),
-    phone: varchar({ length: 20 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("users_email_idx").on(table.email),
-  ]
-);
-
-export const sessions = pgTable("sessions", {
-  id: varchar({ length: 255 }).primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  token: varchar({ length: 255 }).notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const accounts = pgTable("accounts", {
-  id: varchar({ length: 255 }).primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  accountId: varchar("account_id", { length: 255 }).notNull(),
-  providerId: varchar("provider_id", { length: 255 }).notNull(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  expiresAt: timestamp("expires_at"),
-  password: text(),
-});
-
-export const verifications = pgTable("verifications", {
-  id: varchar({ length: 255 }).primaryKey(),
-  identifier: varchar({ length: 255 }).notNull(),
-  value: varchar({ length: 255 }).notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// ─── Tables identity (users + Better Auth) ─────────────────────────────────
+// Extraites vers `src/domains/identity/schema.ts`. Import+réexport car
+// `users` est référencé par quasi toutes les autres tables.
+import {
+  users,
+  sessions,
+  accounts,
+  verifications,
+} from "@/domains/identity/schema";
+export { users, sessions, accounts, verifications };
 
 // ─── Tables métier ──────────────────────────────────────────────────────────
 
-export const shelters = pgTable("shelters", {
-  id: uuid().primaryKey().defaultRandom(),
-  name: varchar({ length: 255 }).notNull(),
-  slug: varchar({ length: 255 }).unique().notNull(),
-  description: text(),
-  siret: varchar({ length: 14 }),
-  address: text(),
-  location: geometry({ type: "point", srid: 4326, mode: "xy" }),
-  phone: varchar({ length: 20 }),
-  email: varchar({ length: 255 }),
-  website: text(),
-  logoUrl: text("logo_url"),
-  coverUrl: text("cover_url"),
-  isVerified: boolean("is_verified").default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+// Tables shelters, shelterFollows, shelterInvitations extraites vers
+// `src/domains/shelters/schema.ts`. On import+réexporte (plutôt qu'un
+// `export { } from`) pour que les tables ci-après puissent référencer
+// `shelters` via `() => shelters.id` — callbacks lazy, le cycle est sûr.
+import {
+  shelters,
+  shelterFollows,
+  shelterInvitations,
+} from "@/domains/shelters/schema";
+export { shelters, shelterFollows, shelterInvitations };
 
-export const cats = pgTable(
-  "cats",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    shelterId: uuid("shelter_id")
-      .notNull()
-      .references(() => shelters.id, { onDelete: "cascade" }),
-    name: varchar({ length: 255 }).notNull(),
-    description: text(),
-    breed: varchar({ length: 100 }),
-    color: varchar({ length: 100 }),
-    sex: sexEnum().default("inconnu").notNull(),
-    ageCategory: ageCategoryEnum("age_category"),
-    estimatedBirth: date("estimated_birth"),
-    isSterilized: boolean("is_sterilized").default(false).notNull(),
-    isChipped: boolean("is_chipped").default(false).notNull(),
-    isVaccinated: boolean("is_vaccinated").default(false).notNull(),
-    fivFelv: fivFelvEnum("fiv_felv").default("non_teste").notNull(),
-    okWithCats: compatibilityEnum("ok_with_cats").default("inconnu").notNull(),
-    okWithDogs: compatibilityEnum("ok_with_dogs").default("inconnu").notNull(),
-    okWithChildren: compatibilityEnum("ok_with_children")
-      .default("inconnu")
-      .notNull(),
-    indoorOnly: boolean("indoor_only").default(false).notNull(),
-    specialNeeds: text("special_needs"),
-    status: catStatusEnum().default("disponible").notNull(),
-    adoptionFee: decimal("adoption_fee", { precision: 8, scale: 2 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("cats_shelter_id_idx").on(table.shelterId),
-    index("cats_status_idx").on(table.status),
-  ]
-);
+// Tables pensions + pension_photos extraites vers `src/domains/pensions/schema.ts`.
+export {
+  pensions,
+  pensionPhotos,
+  pensionContactEvents,
+  pensionReviews,
+  pensionContactActionEnum,
+} from "@/domains/pensions/schema";
 
-export const catPhotos = pgTable("cat_photos", {
-  id: uuid().primaryKey().defaultRandom(),
-  catId: uuid("cat_id")
-    .notNull()
-    .references(() => cats.id, { onDelete: "cascade" }),
-  url: text().notNull(),
-  isPrimary: boolean("is_primary").default(false).notNull(),
-  order: integer().default(0).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+// Tables pets, petPhotos extraites vers `src/domains/adoption/schema.ts`.
+import {
+  pets,
+  petPhotos,
+} from "@/domains/adoption/schema";
+export { pets, petPhotos };
 
-export const reports = pgTable(
-  "reports",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    type: reportTypeEnum().notNull(),
-    status: reportStatusEnum().default("actif").notNull(),
-    catName: varchar("cat_name", { length: 255 }),
-    description: text().notNull(),
-    breed: varchar({ length: 100 }),
-    color: varchar({ length: 100 }),
-    sex: sexEnum().default("inconnu").notNull(),
-    isChipped: boolean("is_chipped").default(false).notNull(),
-    chipNumber: varchar("chip_number", { length: 50 }),
-    distinctiveSigns: text("distinctive_signs"),
-    location: geometry({ type: "point", srid: 4326, mode: "xy" }).notNull(),
-    address: text(),
-    dateEvent: date("date_event").notNull(),
-    contactPhone: varchar("contact_phone", { length: 20 }),
-    contactEmail: varchar("contact_email", { length: 255 }),
-    notes: text(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("reports_type_status_idx").on(table.type, table.status),
-    index("reports_date_event_idx").on(table.dateEvent),
-  ]
-);
+// Tables reports, reportPhotos, reportMatches extraites vers
+// `src/domains/lost-found/schema.ts`. Import+réexport pour que les tables
+// en aval (applications, resolution_credits) puissent y référer.
+import {
+  reports,
+  reportPhotos,
+  reportMatches,
+} from "@/domains/lost-found/schema";
+export { reports, reportPhotos, reportMatches };
 
-export const reportPhotos = pgTable("report_photos", {
-  id: uuid().primaryKey().defaultRandom(),
-  reportId: uuid("report_id")
-    .notNull()
-    .references(() => reports.id, { onDelete: "cascade" }),
-  url: text().notNull(),
-  isPrimary: boolean("is_primary").default(false).notNull(),
-  order: integer().default(0).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+// Tables applications, favorites extraites vers `src/domains/adoption/schema.ts`.
+export {
+  applications,
+  favorites,
+} from "@/domains/adoption/schema";
 
-export const reportMatches = pgTable(
-  "report_matches",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    lostReportId: uuid("lost_report_id")
-      .notNull()
-      .references(() => reports.id, { onDelete: "cascade" }),
-    foundReportId: uuid("found_report_id")
-      .notNull()
-      .references(() => reports.id, { onDelete: "cascade" }),
-    score: decimal({ precision: 5, scale: 2 }).notNull(),
-    distanceMeters: integer("distance_meters"),
-    status: matchStatusEnum().default("suggere").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("report_matches_lost_idx").on(table.lostReportId),
-    index("report_matches_found_idx").on(table.foundReportId),
-  ]
-);
+// Table contentReports extraite vers `src/domains/moderation/schema.ts`.
+export { contentReports } from "@/domains/moderation/schema";
 
-export const applications = pgTable(
-  "applications",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    catId: uuid("cat_id")
-      .notNull()
-      .references(() => cats.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    status: applicationStatusEnum().default("envoyee").notNull(),
-    housingType: housingTypeEnum("housing_type"),
-    hasOutdoorAccess: boolean("has_outdoor_access").default(false),
-    hasOtherPets: text("has_other_pets"),
-    hasChildren: boolean("has_children").default(false),
-    childrenAges: text("children_ages"),
-    experience: text(),
-    motivation: text().notNull(),
-    availability: text(),
-    shelterNotes: text("shelter_notes"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("applications_cat_status_idx").on(table.catId, table.status),
-  ]
-);
+/**
+ * Gamification : credits attribués à un user quand un signalement se résout.
+ * Un user peut recevoir un crédit par rôle par signalement :
+ *   - 'author' : auteur du signalement résolu
+ *   - 'matcher' : auteur du signalement opposé dans une correspondance confirmée
+ * La contrainte unique (report_id, user_id, role) empêche le double-comptage.
+ */
+// Table resolutionCredits extraite vers `src/domains/gamification/schema.ts`.
+export { resolutionCredits } from "@/domains/gamification/schema";
 
-export const favorites = pgTable(
-  "favorites",
-  {
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    catId: uuid("cat_id")
-      .notNull()
-      .references(() => cats.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.userId, table.catId] }),
-    index("favorites_user_id_idx").on(table.userId),
-  ]
-);
+// shelterInvitations déplacée vers `src/domains/shelters/schema.ts` (ci-dessus).
 
-export const notifications = pgTable(
-  "notifications",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    type: notificationTypeEnum().notNull(),
-    title: varchar({ length: 255 }).notNull(),
-    body: text(),
-    data: jsonb(),
-    isRead: boolean("is_read").default(false).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("notifications_user_read_idx").on(table.userId, table.isRead),
-  ]
-);
+// Table testimonials extraite vers `src/domains/adoption/schema.ts`.
+export { testimonials } from "@/domains/adoption/schema";
+
+// ─── Messagerie temps réel ──────────────────────────────────────────────────
+// Tables extraites vers `src/domains/messaging/schema.ts` (Phase 2 du
+// refactor modulaire). Re-export ici pour que le barrel global reste
+// exhaustif — drizzle-kit a besoin d'une vue unique des tables pour
+// générer les migrations.
+export {
+  conversations,
+  messages,
+  messageReactions,
+} from "@/domains/messaging/schema";
+
+// Table notifications extraite vers `src/domains/notifications/schema.ts`.
+export { notifications } from "@/domains/notifications/schema";
 

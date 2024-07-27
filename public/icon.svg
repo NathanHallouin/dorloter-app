@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#e8634d"/>
+  <g fill="#ffffff">
+    <!-- Coussinet central -->
+    <path d="M 256 352 C 212 352 180 320 180 280 C 180 248 212 216 256 216 C 300 216 332 248 332 280 C 332 320 300 352 256 352 Z"/>
+    <!-- Orteils : 4 ovales au-dessus du coussinet -->
+    <ellipse cx="175" cy="230" rx="28" ry="38" transform="rotate(-20 175 230)"/>
+    <ellipse cx="220" cy="172" rx="26" ry="40"/>
+    <ellipse cx="292" cy="172" rx="26" ry="40"/>
+    <ellipse cx="337" cy="230" rx="28" ry="38" transform="rotate(20 337 230)"/>
+  </g>
+</svg>

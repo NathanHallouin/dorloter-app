@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PawPrint } from "lucide-react";
+import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = {
   title: "Inscription",
@@ -7,17 +9,36 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="rounded-xl bg-white p-8 shadow-sm">
-      <h1 className="mb-6 text-2xl font-bold text-earth-900">Inscription</h1>
-      <p className="text-earth-600">
-        Formulaire d&apos;inscription à venir.
+    <>
+      {/* Logo mobile uniquement */}
+      <Link
+        href="/"
+        className="mb-8 flex items-center gap-1 text-lg font-extrabold text-foreground lg:hidden"
+      >
+        <PawPrint className="h-5 w-5 text-coral-500" />
+        miaou
+      </Link>
+
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        On y va
+      </h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Trois champs, trente secondes.
       </p>
-      <p className="mt-4 text-sm text-earth-500">
+
+      <div className="mt-8">
+        <RegisterForm />
+      </div>
+
+      <p className="mt-8 text-center text-sm text-muted-foreground">
         Déjà un compte ?{" "}
-        <Link href="/login" className="text-teal-600 hover:underline">
+        <Link
+          href="/login"
+          className="font-medium text-coral-500 hover:text-coral-600"
+        >
           Se connecter
         </Link>
       </p>
-    </div>
+    </>
   );
 }

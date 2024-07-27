@@ -1,0 +1,79 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Caddy — reverse proxy + HTTPS automatique.
+#
+# Pour un domaine public (ex. miaou.fr) : Let's Encrypt via ACME HTTP-01.
+# Pour un domaine .localhost : Caddy utilise son CA interne (cert auto-signé,
+# à accepter une fois dans le navigateur). Le comportement dépend juste de
+# la variable d'env DOMAIN — pas de config à toucher pour switch dev ↔ prod.
+#
+# Pré-requis côté DNS (OVH → zone DNS du domaine) :
+#   miaou.fr       A     <IP publique du VPS>
+#   cdn.miaou.fr   A     <IP publique du VPS>
+#
+# Ajoutez dans /etc/hosts pour tester en local (optionnel, si DOMAIN=miaou.localhost) :
+#   127.0.0.1  miaou.localhost cdn.miaou.localhost
+# ─────────────────────────────────────────────────────────────────────────────
+
+{
+	# Email pour Let's Encrypt. Ignoré pour .localhost.
+	email {$ACME_EMAIL:admin@miaou.cat}
+}
+
+# ─── App Next.js ─────────────────────────────────────────────────────────────
+{$DOMAIN} {
+	# SSE messaging : désactive buffering + encode, stream direct client
+	@sse path /api/messages/stream
+	handle @sse {
+		reverse_proxy app:3000 {
+			flush_interval -1
+			transport http {
+				read_timeout 3600s
+				write_timeout 3600s
+			}
+		}
+	}
+
+	encode zstd gzip
+
+	# Timeouts généreux pour les Server Actions qui uploadent des photos
+	# ou envoient des emails en synchrone.
+	reverse_proxy app:3000 {
+		transport http {
+			read_timeout 120s
+			write_timeout 120s
+		}
+	}
+
+	# Headers de sécurité (defense-in-depth)
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), geolocation=(self), microphone=()"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+# ─── CDN images (MinIO public bucket) ────────────────────────────────────────
+cdn.{$DOMAIN} {
+	encode zstd gzip
+
+	reverse_proxy minio:9000 {
+		# Retire les en-têtes de la console MinIO qui fuient l'IP interne.
+		header_down -Server
+	}
+
+	header {
+		# Cache agressif côté client : les URLs de photos sont immuables
+		# (chaque upload a un nom unique).
+		Cache-Control "public, max-age=31536000, immutable"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+}

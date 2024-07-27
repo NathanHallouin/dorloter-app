@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
+import { ReportForm } from "@lost-found/public";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata: Metadata = {
-  title: "Signaler un chat",
+  title: "Signaler un animal",
 };
 
 export default function SignalerPage() {
   return (
-    <div>
-      <h1 className="mb-8 text-3xl font-bold text-earth-900">
-        Signaler un chat perdu ou trouvé
-      </h1>
-      {/* TODO: Formulaire signalement avec carte */}
-      <p className="text-earth-600">
-        Le formulaire de signalement sera affiché ici.
-      </p>
-    </div>
+    <PageContainer variant="narrow">
+      <PageHeader
+        title="Un signalement"
+        description="Prenez deux minutes : plus les détails sont précis, plus vite on peut faire le lien avec une annonce en face."
+      />
+      <ReportForm />
+    </PageContainer>
   );
 }
