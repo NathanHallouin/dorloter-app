@@ -1,0 +1,52 @@
+name: Lighthouse
+
+# Audit Lighthouse contre la production (ou une URL custom). N'est pas
+# bloquant pour les PR — l'objectif est de suivre les scores dans le temps
+# et alerter en cas de régression.
+#
+# - Cron quotidien (3h UTC) sur https://dorloter.fr
+# - Déclenchement manuel possible avec une URL de base custom
+# - Déclenché automatiquement après chaque déploiement réussi sur main
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL de base à auditer (sans trailing slash)"
+        required: false
+        default: "https://dorloter.fr"
+  workflow_run:
+    workflows: ["Deploy"]
+    types: [completed]
+  schedule:
+    - cron: "0 3 * * *"
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'failure' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute base URL
+        id: base
+        run: |
+          BASE="${{ github.event.inputs.base_url }}"
+          if [ -z "$BASE" ]; then BASE="https://dorloter.fr"; fi
+          echo "url=$BASE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2
+
+      - name: Run Lighthouse CI
+        env:
+          LHCI_BASE_URL: ${{ steps.base.outputs.url }}
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: bunx --bun @lhci/cli@0.14.x autorun --config=lighthouserc.json

@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permet de relancer à la main depuis l'UI GitHub
+
+concurrency:
+  # Un seul deploy à la fois — évite les races sur le VPS
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          # timeout sur la commande (15 min max)
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            cd /opt/miaou
+            echo "📥 git pull..."
+            git fetch --prune
+            git checkout main
+            git reset --hard origin/main
+            echo "🚀 ./scripts/deploy.sh"
+            ./scripts/deploy.sh

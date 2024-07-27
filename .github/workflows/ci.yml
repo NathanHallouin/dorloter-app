@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun typecheck
+
+      - name: Lint
+        run: bun lint
+
+      - name: Architecture boundaries
+        run: bun boundaries
+
+      # bun audit n'est pas bloquant — on signale les vulns sans empêcher le merge
+      # tant qu'on n'a pas trié les faux positifs. `|| true` en attendant.
+      - name: Audit dependencies
+        continue-on-error: true
+        run: bun audit --prod
+
+      # Tests (quand ils existeront — pour l'instant no-op silencieux)
+      - name: Run tests
+        if: ${{ hashFiles('tests/**/*.test.ts') != '' }}
+        run: bun test
+
+  # Valide que le Dockerfile build proprement sans pousser d'image nulle part.
+  # Filet de sécurité : on ne merge pas sur main une version qui ne build pas.
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            S3_PUBLIC_URL=https://cdn.example.com/miaou-photos
+            NEXT_PUBLIC_APP_URL=https://example.com
