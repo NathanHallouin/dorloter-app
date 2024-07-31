@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fond plein pour zone safe area maskable (80% centrée) -->
+  <rect width="512" height="512" fill="#e8634d"/>
+  <g fill="#ffffff">
+    <!-- Patte légèrement plus compacte pour la zone safe maskable -->
+    <path d="M 256 340 C 216 340 188 312 188 276 C 188 248 216 220 256 220 C 296 220 324 248 324 276 C 324 312 296 340 256 340 Z"/>
+    <ellipse cx="188" cy="234" rx="25" ry="34" transform="rotate(-20 188 234)"/>
+    <ellipse cx="225" cy="184" rx="23" ry="36"/>
+    <ellipse cx="287" cy="184" rx="23" ry="36"/>
+    <ellipse cx="324" cy="234" rx="25" ry="34" transform="rotate(20 324 234)"/>
+  </g>
+</svg>
