@@ -17,8 +17,11 @@ docker-compose.yml
 docker-compose.prod.yml
 Caddyfile
 backups
+apps/web/tests/e2e/playwright-report
+apps/web/tests/e2e/test-results
 tests/e2e/playwright-report
 tests/e2e/test-results
+**/Dockerfile
 coverage
 *.md
 .DS_Store

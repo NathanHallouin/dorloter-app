@@ -56,8 +56,9 @@ services:
   # ─── App Next.js ──────────────────────────────────────────────────────────
   app:
     build:
+      # Build context = racine du monorepo (apps/web + packages/api-client + bun.lock)
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/web/Dockerfile
       args:
         # Variables NEXT_PUBLIC_* : doivent être présentes au build
         # (inlinées dans le bundle client).
