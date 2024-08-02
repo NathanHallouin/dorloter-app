@@ -1,0 +1,224 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Palette Dorloter : couleurs statiques, classes utilitaires générées */
+@theme {
+  /* Coral - couleur principale, chaleureuse et accueillante */
+  --color-coral-50: #fff5f2;
+  --color-coral-100: #ffe8e1;
+  --color-coral-200: #ffd0c3;
+  --color-coral-300: #ffab96;
+  --color-coral-400: #ff8066;
+  --color-coral-500: #e8634d;
+  --color-coral-600: #c94a35;
+  --color-coral-700: #a53a2a;
+  --color-coral-800: #7d2e23;
+  --color-coral-900: #5c241e;
+
+  /* Lavande - accent doux, mystère félin */
+  --color-lavande-50: #f6f4fb;
+  --color-lavande-100: #eae5f6;
+  --color-lavande-200: #d5cbee;
+  --color-lavande-300: #b9a9e0;
+  --color-lavande-400: #9d87d1;
+  --color-lavande-500: #8b72c2;
+  --color-lavande-600: #7359ac;
+  --color-lavande-700: #5d4690;
+  --color-lavande-800: #473672;
+  --color-lavande-900: #352a55;
+
+  /* Sable - neutres chauds, doux comme un pelage */
+  --color-sable-50: #faf9f6;
+  --color-sable-100: #f3f0ea;
+  --color-sable-200: #e6e0d5;
+  --color-sable-300: #d4cab9;
+  --color-sable-400: #bfb19c;
+  --color-sable-500: #a4937b;
+  --color-sable-600: #867662;
+  --color-sable-700: #6b5e4f;
+  --color-sable-800: #52483e;
+  --color-sable-900: #3d362f;
+
+  /* Prune - profondeur, élégance nocturne */
+  --color-prune-50: #f9f5f8;
+  --color-prune-100: #f0e7ee;
+  --color-prune-200: #e0cddc;
+  --color-prune-300: #c9a8c2;
+  --color-prune-400: #a87a9f;
+  --color-prune-500: #8c5c82;
+  --color-prune-600: #714769;
+  --color-prune-700: #5a3854;
+  --color-prune-800: #432b40;
+  --color-prune-900: #312030;
+}
+
+/* Mappings shadcn + tokens sémantiques */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+}
+
+/* Dorloter light : fond sable, primary coral, accent lavande */
+:root {
+  --background: #faf9f6;
+  --foreground: #3d362f;
+  --card: #ffffff;
+  --card-foreground: #3d362f;
+  --popover: #ffffff;
+  --popover-foreground: #3d362f;
+  --primary: #e8634d;
+  --primary-foreground: #ffffff;
+  --secondary: #eae5f6;
+  --secondary-foreground: #5d4690;
+  --muted: #f3f0ea;
+  --muted-foreground: #867662;
+  --accent: #f6f4fb;
+  --accent-foreground: #5d4690;
+  --destructive: #dc2626;
+  --border: #e6e0d5;
+  --input: #e6e0d5;
+  --ring: #e8634d;
+  --chart-1: #e8634d;
+  --chart-2: #8b72c2;
+  --chart-3: #c94a35;
+  --chart-4: #7359ac;
+  --chart-5: #867662;
+  --radius: 0.625rem;
+  --sidebar: #f3f0ea;
+  --sidebar-foreground: #3d362f;
+  --sidebar-primary: #e8634d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eae5f6;
+  --sidebar-accent-foreground: #3d362f;
+  --sidebar-border: #e6e0d5;
+  --sidebar-ring: #e8634d;
+}
+
+/* Dorloter dark : fond prune profond */
+.dark {
+  --background: #1e1a1d;
+  --foreground: #f3f0ea;
+  --card: #2a2328;
+  --card-foreground: #f3f0ea;
+  --popover: #2a2328;
+  --popover-foreground: #f3f0ea;
+  --primary: #ff8066;
+  --primary-foreground: #5c241e;
+  --secondary: #352a55;
+  --secondary-foreground: #d5cbee;
+  --muted: #3d362f;
+  --muted-foreground: #bfb19c;
+  --accent: #352a55;
+  --accent-foreground: #d5cbee;
+  --destructive: #ef4444;
+  --border: #52483e;
+  --input: #52483e;
+  --ring: #ff8066;
+  --chart-1: #ff8066;
+  --chart-2: #b9a9e0;
+  --chart-3: #e8634d;
+  --chart-4: #9d87d1;
+  --chart-5: #bfb19c;
+  --sidebar: #2a2328;
+  --sidebar-foreground: #f3f0ea;
+  --sidebar-primary: #ff8066;
+  --sidebar-primary-foreground: #5c241e;
+  --sidebar-accent: #3d362f;
+  --sidebar-accent-foreground: #f3f0ea;
+  --sidebar-border: #52483e;
+  --sidebar-ring: #ff8066;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Préférences système — accessibilité
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Mouvement réduit : on neutralise transitions et animations CSS pour les
+   utilisateurs qui en ont fait la demande système. Les animations React
+   (motion/react) restent à gérer côté composant si elles posent problème
+   (gérées via le hook useReducedMotion là où c'est utile). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Contraste élevé : on durcit les bordures et les couleurs muted pour
+   améliorer la lisibilité quand l'OS le réclame (Windows High Contrast,
+   "Increase contrast" sur macOS, etc.). Subtil — on évite le contraste
+   maximal type "noir et blanc pur" qui casse le ton chaleureux. */
+@media (prefers-contrast: more) {
+  :root {
+    --border: #000000;
+    --muted-foreground: #1a1a1a;
+    --foreground: #000000;
+  }
+  .dark {
+    --border: #ffffff;
+    --muted-foreground: #ededed;
+    --foreground: #ffffff;
+  }
+}
