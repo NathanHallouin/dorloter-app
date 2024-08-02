@@ -22,7 +22,8 @@ import {
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
-import { setAuthToken } from "@/lib/auth";
+import { setAuthToken, setDeviceTokenId } from "@/lib/auth";
+import { registerForPushNotifications } from "@/lib/notifications";
 
 interface BetterAuthSignInResponse {
   token: string;
@@ -63,6 +64,17 @@ export default function LoginScreen() {
         throw new Error("Réponse inattendue du serveur (token manquant).");
       }
       await setAuthToken(data.token);
+      // Demander la permission push + enregistrer le device. Non bloquant :
+      // si l'user refuse ou si on est en simu, on continue avec l'app sans
+      // push (juste la pastille in-app tient lieu de signal).
+      try {
+        const reg = await registerForPushNotifications();
+        if (reg) {
+          await setDeviceTokenId(reg.deviceTokenId);
+        }
+      } catch (regErr) {
+        console.warn("[login] push registration failed", regErr);
+      }
       // Forcer Compte à reprendre les queries `auth/token` et `me`.
       await queryClient.invalidateQueries({ queryKey: ["auth"] });
       await queryClient.invalidateQueries({ queryKey: ["me"] });

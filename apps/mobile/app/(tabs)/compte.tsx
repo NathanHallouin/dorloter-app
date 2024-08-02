@@ -13,7 +13,24 @@ import { Pressable, StyleSheet, Text, View, ActivityIndicator } from "react-nati
 import { Link } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { clearAuthToken, getAuthToken } from "@/lib/auth";
+import {
+  clearAuthToken,
+  clearDeviceTokenId,
+  getAuthToken,
+  getDeviceTokenId,
+} from "@/lib/auth";
+import { unregisterPushDevice } from "@/lib/notifications";
+
+async function logout() {
+  // Désenregistrer le device avant de perdre l'auth — sinon le DELETE
+  // côté serveur n'a plus de bearer pour s'authentifier.
+  const deviceTokenId = await getDeviceTokenId();
+  if (deviceTokenId) {
+    await unregisterPushDevice(deviceTokenId);
+    await clearDeviceTokenId();
+  }
+  await clearAuthToken();
+}
 
 export default function CompteScreen() {
   const tokenQuery = useQuery({
@@ -71,7 +88,7 @@ export default function CompteScreen() {
         <Pressable
           style={styles.cta}
           onPress={async () => {
-            await clearAuthToken();
+            await logout();
             tokenQuery.refetch();
           }}
         >
