@@ -1,9 +1,9 @@
 /**
  * Génère les types TypeScript du client API depuis le document OpenAPI.
  *
- * Usage : bun api:types
+ * Usage (depuis la racine du monorepo) : bun api:types
  *
- * Sortie : `src/shared/api-client/types.gen.ts` (committé en repo).
+ * Sortie : `packages/api-client/src/types.gen.ts` (committé en repo).
  *
  * Cette tâche tourne hors du serveur Next : on importe `buildOpenApiDocument`
  * directement et on lance `openapi-typescript` sur le document en mémoire.
@@ -16,13 +16,13 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import openapiTS, { astToString } from "openapi-typescript";
-import { buildOpenApiDocument } from "../src/infrastructure/api/openapi";
+import { buildOpenApiDocument } from "../apps/web/src/infrastructure/api/openapi";
 
 const HEADER = `/**
  * Types TypeScript du client API Dorloter — GÉNÉRÉS AUTOMATIQUEMENT.
  * Ne pas éditer à la main. Régénérer via : \`bun api:types\`.
  *
- * Source : src/infrastructure/api/openapi.ts → buildOpenApiDocument()
+ * Source : apps/web/src/infrastructure/api/openapi.ts → buildOpenApiDocument()
  */
 
 `;
@@ -34,7 +34,7 @@ async function main(): Promise<void> {
   const contents = HEADER + astToString(ast);
 
   const here = dirname(fileURLToPath(import.meta.url));
-  const outPath = resolve(here, "../src/shared/api-client/types.gen.ts");
+  const outPath = resolve(here, "../packages/api-client/src/types.gen.ts");
   await writeFile(outPath, contents, "utf8");
 
   // eslint-disable-next-line no-console
