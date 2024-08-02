@@ -93,6 +93,11 @@ export function buildOpenApiDocument(siteUrl: string) {
         name: "notifications",
         description: "Inbox et notifications utilisateur.",
       },
+      {
+        name: "devices",
+        description:
+          "Push tokens mobile (Expo Push). Enregistrés au login, supprimés au logout.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -687,6 +692,42 @@ export function buildOpenApiDocument(siteUrl: string) {
           properties: {
             phone: { type: "string", nullable: true },
             email: { type: "string", format: "email", nullable: true },
+          },
+        },
+        DeviceRegistration: {
+          type: "object",
+          required: ["expoPushToken", "platform"],
+          properties: {
+            expoPushToken: {
+              type: "string",
+              minLength: 20,
+              maxLength: 200,
+              pattern: "^Expo(?:nentP)?ushToken\\[[^\\]]+\\]$",
+              description:
+                "Token retourné par `Notifications.getExpoPushTokenAsync()` côté Expo. Format `ExponentPushToken[xxx]` ou `ExpoPushToken[xxx]`.",
+            },
+            platform: {
+              type: "string",
+              enum: ["ios", "android"],
+            },
+            deviceName: {
+              type: "string",
+              maxLength: 255,
+              nullable: true,
+              description:
+                "Nom lisible du device (ex. `iPhone de Marc`). Utile pour la gestion future des devices côté profil.",
+            },
+          },
+        },
+        DeviceToken: {
+          type: "object",
+          required: ["id", "platform", "lastSeenAt", "createdAt"],
+          properties: {
+            id: { type: "string", format: "uuid" },
+            platform: { type: "string", enum: ["ios", "android"] },
+            deviceName: { type: "string", nullable: true },
+            lastSeenAt: { type: "string", format: "date-time" },
+            createdAt: { type: "string", format: "date-time" },
           },
         },
         ApplicationCreate: {
@@ -1564,6 +1605,66 @@ export function buildOpenApiDocument(siteUrl: string) {
           responses: {
             "204": { description: "Toutes les notifications marquées." },
             "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
+      },
+      "/devices/register": {
+        post: {
+          tags: ["devices"],
+          summary: "Enregistre un Expo push token",
+          description:
+            "Idempotent — ré-appel avec le même `(userId, expoPushToken)` rafraîchit `lastSeenAt`. " +
+            "À appeler après login mobile et à chaque démarrage si le token a changé (Expo en redonne parfois un nouveau).",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/DeviceRegistration" },
+              },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Device enregistré (ou rafraîchi).",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: { $ref: "#/components/schemas/DeviceToken" },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "429": { $ref: "#/components/responses/RateLimited" },
+          },
+        },
+      },
+      "/devices/{id}": {
+        delete: {
+          tags: ["devices"],
+          summary: "Retire un device token enregistré",
+          description:
+            "Appelé typiquement à la déconnexion mobile pour ne plus recevoir de push.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "204": { description: "Device retiré." },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
           },
         },
       },

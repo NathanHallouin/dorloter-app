@@ -671,6 +671,96 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/devices/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enregistre un Expo push token
+         * @description Idempotent — ré-appel avec le même `(userId, expoPushToken)` rafraîchit `lastSeenAt`. À appeler après login mobile et à chaque démarrage si le token a changé (Expo en redonne parfois un nouveau).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeviceRegistration"];
+                };
+            };
+            responses: {
+                /** @description Device enregistré (ou rafraîchi). */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["DeviceToken"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                429: components["responses"]["RateLimited"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Retire un device token enregistré
+         * @description Appelé typiquement à la déconnexion mobile pour ne plus recevoir de push.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Device retiré. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports/{id}/reveal-contact": {
         parameters: {
             query?: never;
@@ -1186,6 +1276,25 @@ export interface components {
             phone: string | null;
             /** Format: email */
             email: string | null;
+        };
+        DeviceRegistration: {
+            /** @description Token retourné par `Notifications.getExpoPushTokenAsync()` côté Expo. Format `ExponentPushToken[xxx]` ou `ExpoPushToken[xxx]`. */
+            expoPushToken: string;
+            /** @enum {string} */
+            platform: "ios" | "android";
+            /** @description Nom lisible du device (ex. `iPhone de Marc`). Utile pour la gestion future des devices côté profil. */
+            deviceName?: string | null;
+        };
+        DeviceToken: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            platform: "ios" | "android";
+            deviceName?: string | null;
+            /** Format: date-time */
+            lastSeenAt: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         ApplicationCreate: {
             /** Format: uuid */

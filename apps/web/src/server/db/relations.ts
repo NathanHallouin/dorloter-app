@@ -11,6 +11,7 @@ export const relations = defineRelations(schema, (r) => ({
     applications: r.many.applications(),
     favorites: r.many.favorites(),
     notifications: r.many.notifications(),
+    deviceTokens: r.many.deviceTokens(),
     sessions: r.many.sessions(),
     accounts: r.many.accounts(),
   },
@@ -88,6 +89,13 @@ export const relations = defineRelations(schema, (r) => ({
   notifications: {
     user: r.one.users({
       from: r.notifications.userId,
+      to: r.users.id,
+    }),
+  },
+
+  deviceTokens: {
+    user: r.one.users({
+      from: r.deviceTokens.userId,
       to: r.users.id,
     }),
   },

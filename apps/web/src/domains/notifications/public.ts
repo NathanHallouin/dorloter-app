@@ -31,6 +31,15 @@ export {
   type NotificationListFilters,
   type NotificationListResult,
 } from "./services/notifications.service";
+export {
+  registerDevice as registerDeviceService,
+  unregisterDevice as unregisterDeviceService,
+  getActiveTokensForUser as getActiveDeviceTokensService,
+  deleteTokensByValue as deleteDeviceTokensByValueService,
+  type DeviceToken,
+  type DevicePlatform,
+  type RegisterDeviceInput,
+} from "./services/devices.service";
 
 // ─── Queries ────────────────────────────────────────────────────────────────
 export { getUserNotifications, getUnreadCount } from "./queries";

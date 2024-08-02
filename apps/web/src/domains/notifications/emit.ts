@@ -9,7 +9,12 @@ import {
   newMessageEmailTemplate,
 } from "@infra/email";
 import { sendPush, type PushSubscriptionJSON } from "@infra/push/web-push";
+import { sendExpoPush } from "@infra/push/expo";
 import { mergeWithDefaults } from "./preferences";
+import {
+  getActiveTokensForUser,
+  deleteTokensByValue,
+} from "./services/devices.service";
 
 type NotifType =
   | "match_found"
@@ -112,6 +117,40 @@ export async function emitNotification(opts: EmitOptions) {
       }
     } catch (err) {
       console.error("emitNotification: envoi push échoué", err);
+    }
+  }
+
+  // ─── Fanout natif (Expo Push) ─────────────────────────────────────────────
+  // Indépendant du Web Push : un user peut avoir l'app mobile sans avoir
+  // jamais ouvert le site. On envoie aussi le push sur tous ses devices
+  // mobiles enregistrés.
+  if (shouldPush) {
+    try {
+      const tokens = await getActiveTokensForUser(opts.userId);
+      if (tokens.length > 0) {
+        const url = buildClickUrl(opts);
+        const result = await sendExpoPush(
+          tokens.map((t) => ({
+            to: t.expoPushToken,
+            title: opts.title,
+            body: opts.body ?? undefined,
+            sound: "default",
+            data: {
+              ...(opts.data ?? {}),
+              url,
+              type: opts.type,
+            },
+            priority: "high",
+            channelId: opts.type, // Android : un channel par type pour
+                                  // que l'user puisse couper finement.
+          }))
+        );
+        if (result.invalidTokens.length > 0) {
+          await deleteTokensByValue(result.invalidTokens);
+        }
+      }
+    } catch (err) {
+      console.error("emitNotification: envoi Expo push échoué", err);
     }
   }
 }

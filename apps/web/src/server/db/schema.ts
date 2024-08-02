@@ -44,7 +44,10 @@ export {
 } from "@/domains/moderation/schema";
 
 // Enum notificationTypeEnum extrait vers `src/domains/notifications/schema.ts`.
-export { notificationTypeEnum } from "@/domains/notifications/schema";
+export {
+  notificationTypeEnum,
+  devicePlatformEnum,
+} from "@/domains/notifications/schema";
 
 // ─── Tables identity (users + Better Auth) ─────────────────────────────────
 // Extraites vers `src/domains/identity/schema.ts`. Import+réexport car
@@ -132,5 +135,5 @@ export {
 } from "@/domains/messaging/schema";
 
 // Table notifications extraite vers `src/domains/notifications/schema.ts`.
-export { notifications } from "@/domains/notifications/schema";
+export { notifications, deviceTokens } from "@/domains/notifications/schema";
 
