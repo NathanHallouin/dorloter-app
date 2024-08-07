@@ -98,6 +98,11 @@ export function buildOpenApiDocument(siteUrl: string) {
         description:
           "Push tokens mobile (Expo Push). Enregistrés au login, supprimés au logout.",
       },
+      {
+        name: "uploads",
+        description:
+          "Présigning S3 — le client upload directement vers le bucket, sans proxy par notre API.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -728,6 +733,46 @@ export function buildOpenApiDocument(siteUrl: string) {
             deviceName: { type: "string", nullable: true },
             lastSeenAt: { type: "string", format: "date-time" },
             createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        UploadPresignRequest: {
+          type: "object",
+          required: ["contentType", "kind"],
+          properties: {
+            contentType: {
+              type: "string",
+              enum: ["image/jpeg", "image/png", "image/webp"],
+            },
+            kind: {
+              type: "string",
+              enum: ["report", "pet", "shelter", "pension"],
+              description:
+                "Préfixe S3 utilisé pour ranger les uploads : `reports/<userId>/...`, `pets/...`, etc.",
+            },
+          },
+        },
+        UploadPresignResponse: {
+          type: "object",
+          required: ["uploadUrl", "publicUrl", "key", "expiresInSec"],
+          properties: {
+            uploadUrl: {
+              type: "string",
+              format: "uri",
+              description:
+                "URL signée — PUT le body fichier dessus avec le même `Content-Type` que celui demandé.",
+            },
+            publicUrl: {
+              type: "string",
+              format: "uri",
+              description:
+                "URL finale de l'asset une fois uploadé. À inclure dans le payload de création (POST /reports, etc.).",
+            },
+            key: {
+              type: "string",
+              description:
+                "Clé S3 — utile pour DELETE ultérieur ou pour debug. Pas requise dans les payloads de création.",
+            },
+            expiresInSec: { type: "integer", minimum: 60 },
           },
         },
         ApplicationCreate: {
@@ -1665,6 +1710,48 @@ export function buildOpenApiDocument(siteUrl: string) {
             "400": { $ref: "#/components/responses/ValidationError" },
             "401": { $ref: "#/components/responses/Unauthorized" },
             "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+      },
+      "/uploads/presign": {
+        post: {
+          tags: ["uploads"],
+          summary: "Génère une URL S3 signée pour un upload direct",
+          description:
+            "Le client (mobile) envoie ensuite le body du fichier via " +
+            "`PUT uploadUrl`, puis utilise `publicUrl` dans le payload " +
+            "de la ressource (POST /reports, /pets, …).\n\n" +
+            "L'URL signée expire après 5 minutes — assez pour uploader, " +
+            "court pour limiter le risque d'interception.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/UploadPresignRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "URL signée prête à l'emploi.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/UploadPresignResponse",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "429": { $ref: "#/components/responses/RateLimited" },
           },
         },
       },
