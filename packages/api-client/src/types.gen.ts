@@ -761,6 +761,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/uploads/presign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Génère une URL S3 signée pour un upload direct
+         * @description Le client (mobile) envoie ensuite le body du fichier via `PUT uploadUrl`, puis utilise `publicUrl` dans le payload de la ressource (POST /reports, /pets, …).
+         *
+         *     L'URL signée expire après 5 minutes — assez pour uploader, court pour limiter le risque d'interception.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UploadPresignRequest"];
+                };
+            };
+            responses: {
+                /** @description URL signée prête à l'emploi. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["UploadPresignResponse"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                429: components["responses"]["RateLimited"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports/{id}/reveal-contact": {
         parameters: {
             query?: never;
@@ -1295,6 +1345,30 @@ export interface components {
             lastSeenAt: string;
             /** Format: date-time */
             createdAt: string;
+        };
+        UploadPresignRequest: {
+            /** @enum {string} */
+            contentType: "image/jpeg" | "image/png" | "image/webp";
+            /**
+             * @description Préfixe S3 utilisé pour ranger les uploads : `reports/<userId>/...`, `pets/...`, etc.
+             * @enum {string}
+             */
+            kind: "report" | "pet" | "shelter" | "pension";
+        };
+        UploadPresignResponse: {
+            /**
+             * Format: uri
+             * @description URL signée — PUT le body fichier dessus avec le même `Content-Type` que celui demandé.
+             */
+            uploadUrl: string;
+            /**
+             * Format: uri
+             * @description URL finale de l'asset une fois uploadé. À inclure dans le payload de création (POST /reports, etc.).
+             */
+            publicUrl: string;
+            /** @description Clé S3 — utile pour DELETE ultérieur ou pour debug. Pas requise dans les payloads de création. */
+            key: string;
+            expiresInSec: number;
         };
         ApplicationCreate: {
             /** Format: uuid */
