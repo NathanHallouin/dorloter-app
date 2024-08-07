@@ -28,6 +28,10 @@ export type ApiSchemas = components["schemas"];
 export type ApiError = ApiSchemas["ApiError"]["error"];
 export type ErrorCode = ApiError["code"];
 
+// Re-export bruts des types OpenAPI pour les consommateurs qui veulent
+// piocher manuellement (`components["schemas"]["ReportSummary"]`).
+export type { components, paths } from "./types.gen";
+
 export interface ApiClientOptions {
   /**
    * URL de base de l'API (sans trailing slash). Ex. en prod :

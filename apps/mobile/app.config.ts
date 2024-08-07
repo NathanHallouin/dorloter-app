@@ -15,6 +15,14 @@ import type { ExpoConfig } from "expo/config";
 const apiBaseUrl =
   process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api/v1";
 
+// Style de tuiles vectorielles. OpenFreeMap = 100% open-source, hébergé
+// en Europe, gratuit jusqu'à 50k req/jour. À surcharger via
+// EXPO_PUBLIC_MAP_STYLE_URL pour passer sur MapTiler/Protomaps si besoin
+// (ex. CDN dédié en prod).
+const mapStyleUrl =
+  process.env.EXPO_PUBLIC_MAP_STYLE_URL ??
+  "https://tiles.openfreemap.org/styles/liberty";
+
 const config: ExpoConfig = {
   name: "Dorloter",
   slug: "dorloter",
@@ -30,6 +38,8 @@ const config: ExpoConfig = {
     supportsTablet: false,
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
+      NSLocationWhenInUseUsageDescription:
+        "Dorloter utilise votre position pour afficher les signalements perdus / trouvés autour de vous.",
     },
   },
   android: {
@@ -44,6 +54,15 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-secure-store",
     [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission:
+          "Dorloter utilise votre position pour afficher les signalements perdus / trouvés autour de vous.",
+        isAndroidBackgroundLocationEnabled: false,
+      },
+    ],
+    "@maplibre/maplibre-react-native",
+    [
       "expo-splash-screen",
       {
         backgroundColor: "#fff5f1",
@@ -57,6 +76,7 @@ const config: ExpoConfig = {
   },
   extra: {
     apiBaseUrl,
+    mapStyleUrl,
     // À renseigner après `eas init` la première fois.
     eas: {
       projectId: "REPLACE_WITH_EAS_PROJECT_ID",
