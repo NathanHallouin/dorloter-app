@@ -1,9 +1,14 @@
 /**
- * Bottom tabs : 3 onglets pour le MVP read-only.
+ * Bottom tabs : 4 onglets.
  *
  *   1. Adopter        — catalogue d'animaux à adopter
  *   2. Signalements   — perdus/trouvés autour de l'utilisateur
- *   3. Compte         — profil, login/logout, paramètres
+ *   3. Signaler       — créer un signalement (auth requise)
+ *   4. Compte         — profil, login/logout, paramètres
+ *
+ * "Signaler" est centré en 3e position pour rappeler le pattern
+ * iOS/Android où l'action principale est mise en avant. Pas d'icône
+ * spéciale — typage texte uniquement pour l'instant.
  */
 
 import { Tabs } from "expo-router";
@@ -28,6 +33,13 @@ export default function TabsLayout() {
         options={{
           title: "Perdus / trouvés",
           tabBarLabel: "Signalements",
+        }}
+      />
+      <Tabs.Screen
+        name="signaler"
+        options={{
+          title: "Signaler",
+          tabBarLabel: "Signaler",
         }}
       />
       <Tabs.Screen
