@@ -21,11 +21,9 @@ const config: ExpoConfig = {
   scheme: "dorloter",
   version: "0.1.0",
   orientation: "portrait",
-  // icon: "./assets/icon.png", — à brancher quand le design d'icône arrive
+  icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
-  // splash: configuré via le plugin expo-splash-screen ci-dessous (image
-  // nullable tant qu'on n'a pas l'asset)
   assetBundlePatterns: ["**/*"],
   ios: {
     bundleIdentifier: "fr.dorloter.app",
@@ -37,6 +35,10 @@ const config: ExpoConfig = {
   android: {
     package: "fr.dorloter.app",
     edgeToEdgeEnabled: true,
+    adaptiveIcon: {
+      foregroundImage: "./assets/adaptive-icon.png",
+      backgroundColor: "#e8634d",
+    },
   },
   plugins: [
     "expo-router",
@@ -45,7 +47,8 @@ const config: ExpoConfig = {
       "expo-splash-screen",
       {
         backgroundColor: "#fff5f1",
-        // image: à brancher avec le splash design (PNG 200x200 transparent)
+        image: "./assets/splash.png",
+        imageWidth: 200,
       },
     ],
   ],
