@@ -61,6 +61,15 @@ const config: ExpoConfig = {
         isAndroidBackgroundLocationEnabled: false,
       },
     ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Dorloter accède à vos photos pour vous permettre d'illustrer vos signalements perdus / trouvés.",
+        cameraPermission:
+          "Dorloter peut prendre une photo pour illustrer un signalement perdu / trouvé.",
+      },
+    ],
     "@maplibre/maplibre-react-native",
     [
       "expo-splash-screen",
