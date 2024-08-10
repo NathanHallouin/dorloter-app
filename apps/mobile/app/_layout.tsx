@@ -3,18 +3,19 @@
  *   - monte le QueryClient TanStack pour tout l'arbre
  *   - rend SafeAreaProvider pour que les écrans respectent les notches
  *   - délègue à Expo Router pour le routing fichier-based
+ *   - gère le cold-start push refresh + le tap sur notification
  *
- * `app/(tabs)/` contient les onglets bottom-tabs (Adopter, Signalements,
- * Compte). `app/login.tsx` est en dehors des tabs (pas d'auth → pas de
- * navigation principale).
+ * `app/(tabs)/` contient les onglets bottom-tabs. `app/login.tsx` est
+ * en dehors des tabs (modal au-dessus des tabs).
  */
 
 import { useEffect } from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as SplashScreen from "expo-splash-screen";
+import * as Notifications from "expo-notifications";
 import { getAuthToken, setDeviceTokenId } from "@/lib/auth";
 import { registerForPushNotifications } from "@/lib/notifications";
 
@@ -45,11 +46,51 @@ async function refreshPushTokenIfAuthed() {
   }
 }
 
+/**
+ * Mappe le payload `data` d'une notification Expo Push vers une route
+ * mobile. Le serveur émet `data: { reportId? petId? type url }` selon
+ * le type de notification — on choisit la route en fonction du premier
+ * id non-null trouvé.
+ *
+ * Retourne `null` si on ne sait pas où router (ex. type `new_message`
+ * tant qu'on n'a pas la page Messages mobile). L'appelant doit
+ * fallback sur la home dans ce cas.
+ */
+function notificationDataToRoute(
+  data: Record<string, unknown> | null | undefined
+):
+  | { pathname: "/report/[id]"; params: { id: string } }
+  | { pathname: "/pet/[id]"; params: { id: string } }
+  | null {
+  if (!data) return null;
+  const reportId = typeof data.reportId === "string" ? data.reportId : null;
+  const petId = typeof data.petId === "string" ? data.petId : null;
+  if (reportId) return { pathname: "/report/[id]", params: { id: reportId } };
+  if (petId) return { pathname: "/pet/[id]", params: { id: petId } };
+  return null;
+}
+
 export default function RootLayout() {
+  const router = useRouter();
+  // useLastNotificationResponse fire à chaque tap (foreground OU
+  // cold-start). Sur cold-start, un re-render du layout déclenche
+  // l'effet ci-dessous avec le response du tap qui a lancé l'app.
+  const lastResponse = Notifications.useLastNotificationResponse();
+
   useEffect(() => {
     SplashScreen.hideAsync().catch(() => {});
     refreshPushTokenIfAuthed();
   }, []);
+
+  useEffect(() => {
+    if (!lastResponse) return;
+    const data = lastResponse.notification.request.content.data as
+      | Record<string, unknown>
+      | null
+      | undefined;
+    const route = notificationDataToRoute(data);
+    if (route) router.push(route);
+  }, [lastResponse, router]);
 
   return (
     <QueryClientProvider client={queryClient}>
