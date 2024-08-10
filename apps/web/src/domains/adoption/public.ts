@@ -44,6 +44,7 @@ export {
 } from "./services/applications.service";
 export {
   toggleFavorite as toggleFavoriteService,
+  listFavoritePetIds as listFavoritePetIdsService,
   type ToggleFavoriteResult,
 } from "./services/favorites.service";
 

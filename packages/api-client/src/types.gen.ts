@@ -502,6 +502,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/favorites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liste des favoris (petId) de l'utilisateur courant
+         * @description Réponse compacte : juste les UUIDs. Le client en fait un Set pour piloter le rendu des cœurs côté mobile. Pas de pagination — un user typique en a < 100, et le client veut la liste complète.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description IDs des pets favorisés, du plus récent au plus ancien. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                petIds: string[];
+                            };
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications": {
         parameters: {
             query?: never;

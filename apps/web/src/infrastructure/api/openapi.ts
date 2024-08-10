@@ -1534,6 +1534,43 @@ export function buildOpenApiDocument(siteUrl: string) {
           },
         },
       },
+      "/me/favorites": {
+        get: {
+          tags: ["me"],
+          summary: "Liste des favoris (petId) de l'utilisateur courant",
+          description:
+            "Réponse compacte : juste les UUIDs. Le client en fait un Set " +
+            "pour piloter le rendu des cœurs côté mobile. Pas de pagination — " +
+            "un user typique en a < 100, et le client veut la liste complète.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          responses: {
+            "200": {
+              description: "IDs des pets favorisés, du plus récent au plus ancien.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "object",
+                        required: ["petIds"],
+                        properties: {
+                          petIds: {
+                            type: "array",
+                            items: { type: "string", format: "uuid" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
+      },
       "/notifications": {
         get: {
           tags: ["notifications"],

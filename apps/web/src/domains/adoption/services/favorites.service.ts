@@ -5,7 +5,7 @@
  * doivent traiter `isFavorite` comme la nouvelle vérité.
  */
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@infra/db";
 import { notFound, validationFailed } from "@infra/api/errors";
 import { favorites, pets } from "@/server/db/schema";
@@ -64,4 +64,18 @@ export async function toggleFavorite(
     petName: pet.name,
     applicationsCount,
   };
+}
+
+/**
+ * Liste des `petId` favorisés par l'utilisateur, ordonnés par date d'ajout
+ * la plus récente. Pas de pagination — un user typique en a < 100, et
+ * le mobile veut un Set complet pour piloter le rendu des hearts.
+ */
+export async function listFavoritePetIds(userId: string): Promise<string[]> {
+  const rows = await db
+    .select({ petId: favorites.petId, createdAt: favorites.createdAt })
+    .from(favorites)
+    .where(eq(favorites.userId, userId))
+    .orderBy(desc(favorites.createdAt));
+  return rows.map((r) => r.petId);
 }

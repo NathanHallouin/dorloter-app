@@ -1,18 +1,25 @@
 /**
  * Onglet Adopter — catalogue d'animaux à adopter.
  *
- * Affiche une grille de cards avec photo principale (expo-image), nom,
- * espèce, sexe, âge. Chaque card utilise le LQIP base64 fourni par l'API
- * (`primaryPhoto.blurDataUrl`) comme placeholder pour un fade-in immédiat.
- *
- * Les filtres (espèce, sexe, compatibilité), le swipe deck et le détail
- * arrivent en session 3+.
+ * Cards avec photo (expo-image + LQIP), nom, espèce, sexe, âge, refuge.
+ * Bouton cœur en overlay pour favoriser : optimistic update via
+ * TanStack Query (rollback en cas d'erreur réseau). L'icône est masquée
+ * pour les users non connectés — clic invite à se logger.
  */
 
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Image } from "expo-image";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { getAuthToken } from "@/lib/auth";
 
 const SPECIES_LABEL: Record<"chat" | "chien", string> = {
   chat: "Chat",
@@ -25,8 +32,23 @@ const SEX_LABEL: Record<"male" | "femelle" | "inconnu", string> = {
   inconnu: "?",
 };
 
+const FAVORITES_KEY = ["me", "favorites"] as const;
+
+interface FavoritesPayload {
+  petIds: string[];
+}
+
 export default function AdopterScreen() {
-  const { data, isPending, isError, error } = useQuery({
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const tokenQuery = useQuery({
+    queryKey: ["auth", "token"],
+    queryFn: getAuthToken,
+  });
+  const isAuthed = !!tokenQuery.data;
+
+  const petsQuery = useQuery({
     queryKey: ["pets", { limit: 20 }],
     queryFn: async () => {
       const { data, error } = await api.GET("/pets", {
@@ -37,7 +59,59 @@ export default function AdopterScreen() {
     },
   });
 
-  if (isPending) {
+  const favoritesQuery = useQuery({
+    enabled: isAuthed,
+    queryKey: FAVORITES_KEY,
+    queryFn: async () => {
+      const { data, error } = await api.GET("/me/favorites");
+      if (error) throw new Error(error.error.message);
+      return data.data;
+    },
+  });
+
+  const favoriteSet = new Set(favoritesQuery.data?.petIds ?? []);
+
+  const toggleFavoriteMut = useMutation({
+    mutationFn: async (petId: string) => {
+      const { data, error } = await api.POST("/favorites", {
+        body: { petId },
+      });
+      if (error) throw new Error(error.error.message);
+      return data.data;
+    },
+    onMutate: async (petId) => {
+      await queryClient.cancelQueries({ queryKey: FAVORITES_KEY });
+      const previous = queryClient.getQueryData<FavoritesPayload>(FAVORITES_KEY);
+      const isFav = previous?.petIds.includes(petId) ?? false;
+      queryClient.setQueryData<FavoritesPayload>(FAVORITES_KEY, (old) => {
+        if (!old) return { petIds: isFav ? [] : [petId] };
+        return {
+          petIds: isFav
+            ? old.petIds.filter((id) => id !== petId)
+            : [petId, ...old.petIds],
+        };
+      });
+      return { previous };
+    },
+    onError: (_err, _petId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(FAVORITES_KEY, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: FAVORITES_KEY });
+    },
+  });
+
+  function handleToggleFavorite(petId: string) {
+    if (!isAuthed) {
+      router.push("/login");
+      return;
+    }
+    toggleFavoriteMut.mutate(petId);
+  }
+
+  if (petsQuery.isPending) {
     return (
       <View style={styles.center}>
         <ActivityIndicator />
@@ -45,18 +119,18 @@ export default function AdopterScreen() {
     );
   }
 
-  if (isError) {
+  if (petsQuery.isError) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorTitle}>Impossible de charger le catalogue</Text>
-        <Text style={styles.errorBody}>{error.message}</Text>
+        <Text style={styles.errorBody}>{petsQuery.error.message}</Text>
       </View>
     );
   }
 
   return (
     <FlatList
-      data={data.data}
+      data={petsQuery.data.data}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.list}
       ListEmptyComponent={
@@ -64,18 +138,33 @@ export default function AdopterScreen() {
       }
       renderItem={({ item }) => (
         <View style={styles.card}>
-          <Image
-            source={item.primaryPhoto?.url ? { uri: item.primaryPhoto.url } : undefined}
-            placeholder={
-              item.primaryPhoto?.blurDataUrl
-                ? { uri: item.primaryPhoto.blurDataUrl }
-                : undefined
-            }
-            placeholderContentFit="cover"
-            contentFit="cover"
-            transition={250}
-            style={styles.photo}
-          />
+          <View>
+            <Image
+              source={
+                item.primaryPhoto?.url
+                  ? { uri: item.primaryPhoto.url }
+                  : undefined
+              }
+              placeholder={
+                item.primaryPhoto?.blurDataUrl
+                  ? { uri: item.primaryPhoto.blurDataUrl }
+                  : undefined
+              }
+              placeholderContentFit="cover"
+              contentFit="cover"
+              transition={250}
+              style={styles.photo}
+            />
+            <Pressable
+              style={styles.heart}
+              onPress={() => handleToggleFavorite(item.id)}
+              hitSlop={10}
+            >
+              <Text style={styles.heartIcon}>
+                {favoriteSet.has(item.id) ? "❤️" : "🤍"}
+              </Text>
+            </Pressable>
+          </View>
           <View style={styles.body}>
             <View style={styles.titleRow}>
               <Text style={styles.name} numberOfLines={1}>
@@ -115,6 +204,23 @@ const styles = StyleSheet.create({
     aspectRatio: 4 / 3,
     backgroundColor: "#f5ece4",
   },
+  heart: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  heartIcon: { fontSize: 20 },
   body: { padding: 14, gap: 4 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   name: { fontSize: 18, fontWeight: "600", color: "#1f1414", flex: 1 },
