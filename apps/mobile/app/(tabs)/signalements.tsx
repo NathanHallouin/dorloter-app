@@ -18,12 +18,14 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import {
@@ -104,7 +106,7 @@ function ModeToggle({ mode, onChange, disableMap }: ModeToggleProps) {
 // ─── Liste (mode par défaut) ────────────────────────────────────────────────
 
 function ListView() {
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ["reports", "list", { status: "actif", limit: 20 }],
     queryFn: async () => {
       const { data, error } = await api.GET("/reports", {
@@ -142,7 +144,20 @@ function ListView() {
       ListEmptyComponent={
         <Text style={styles.empty}>Aucun signalement actif dans la zone.</Text>
       }
-      renderItem={({ item }) => <ReportRow report={item} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={refetch}
+          tintColor="#e8634d"
+        />
+      }
+      renderItem={({ item }) => (
+        <Link href={`/report/${item.id}`} asChild>
+          <Pressable>
+            <ReportRow report={item} />
+          </Pressable>
+        </Link>
+      )}
     />
   );
 }
@@ -264,7 +279,11 @@ function MapView() {
       ) : null}
       {selected ? (
         <View style={styles.bottomCard}>
-          <ReportRow report={selected} />
+          <Link href={`/report/${selected.id}`} asChild>
+            <Pressable>
+              <ReportRow report={selected} />
+            </Pressable>
+          </Link>
           <Pressable
             style={styles.closeBtn}
             onPress={() => setSelectedId(null)}

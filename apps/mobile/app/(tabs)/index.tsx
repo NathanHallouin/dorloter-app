@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -135,6 +136,13 @@ export default function AdopterScreen() {
       contentContainerStyle={styles.list}
       ListEmptyComponent={
         <Text style={styles.empty}>Aucun animal disponible pour le moment.</Text>
+      }
+      refreshControl={
+        <RefreshControl
+          refreshing={petsQuery.isRefetching}
+          onRefresh={petsQuery.refetch}
+          tintColor="#e8634d"
+        />
       }
       renderItem={({ item }) => (
         <Link href={`/pet/${item.id}`} asChild>
