@@ -7,7 +7,7 @@
  * pour les users non connectés — clic invite à se logger.
  */
 
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -137,53 +137,55 @@ export default function AdopterScreen() {
         <Text style={styles.empty}>Aucun animal disponible pour le moment.</Text>
       }
       renderItem={({ item }) => (
-        <View style={styles.card}>
-          <View>
-            <Image
-              source={
-                item.primaryPhoto?.url
-                  ? { uri: item.primaryPhoto.url }
-                  : undefined
-              }
-              placeholder={
-                item.primaryPhoto?.blurDataUrl
-                  ? { uri: item.primaryPhoto.blurDataUrl }
-                  : undefined
-              }
-              placeholderContentFit="cover"
-              contentFit="cover"
-              transition={250}
-              style={styles.photo}
-            />
-            <Pressable
-              style={styles.heart}
-              onPress={() => handleToggleFavorite(item.id)}
-              hitSlop={10}
-            >
-              <Text style={styles.heartIcon}>
-                {favoriteSet.has(item.id) ? "❤️" : "🤍"}
-              </Text>
-            </Pressable>
-          </View>
-          <View style={styles.body}>
-            <View style={styles.titleRow}>
-              <Text style={styles.name} numberOfLines={1}>
-                {item.name}
-              </Text>
-              <Text style={styles.sex}>{SEX_LABEL[item.sex]}</Text>
+        <Link href={`/pet/${item.id}`} asChild>
+          <Pressable style={styles.card}>
+            <View>
+              <Image
+                source={
+                  item.primaryPhoto?.url
+                    ? { uri: item.primaryPhoto.url }
+                    : undefined
+                }
+                placeholder={
+                  item.primaryPhoto?.blurDataUrl
+                    ? { uri: item.primaryPhoto.blurDataUrl }
+                    : undefined
+                }
+                placeholderContentFit="cover"
+                contentFit="cover"
+                transition={250}
+                style={styles.photo}
+              />
+              <Pressable
+                style={styles.heart}
+                onPress={() => handleToggleFavorite(item.id)}
+                hitSlop={10}
+              >
+                <Text style={styles.heartIcon}>
+                  {favoriteSet.has(item.id) ? "❤️" : "🤍"}
+                </Text>
+              </Pressable>
             </View>
-            <Text style={styles.meta} numberOfLines={1}>
-              {SPECIES_LABEL[item.species]}
-              {item.breed ? ` · ${item.breed}` : ""}
-              {item.ageCategory ? ` · ${item.ageCategory}` : ""}
-            </Text>
-            {item.shelter ? (
-              <Text style={styles.shelter} numberOfLines={1}>
-                {item.shelter.name}
+            <View style={styles.body}>
+              <View style={styles.titleRow}>
+                <Text style={styles.name} numberOfLines={1}>
+                  {item.name}
+                </Text>
+                <Text style={styles.sex}>{SEX_LABEL[item.sex]}</Text>
+              </View>
+              <Text style={styles.meta} numberOfLines={1}>
+                {SPECIES_LABEL[item.species]}
+                {item.breed ? ` · ${item.breed}` : ""}
+                {item.ageCategory ? ` · ${item.ageCategory}` : ""}
               </Text>
-            ) : null}
-          </View>
-        </View>
+              {item.shelter ? (
+                <Text style={styles.shelter} numberOfLines={1}>
+                  {item.shelter.name}
+                </Text>
+              ) : null}
+            </View>
+          </Pressable>
+        </Link>
       )}
     />
   );
