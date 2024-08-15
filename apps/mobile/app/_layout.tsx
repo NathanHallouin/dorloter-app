@@ -18,6 +18,12 @@ import * as SplashScreen from "expo-splash-screen";
 import * as Notifications from "expo-notifications";
 import { getAuthToken, setDeviceTokenId } from "@/lib/auth";
 import { registerForPushNotifications } from "@/lib/notifications";
+import { notificationDataToRoute } from "@/lib/deep-link";
+import { initObservability } from "@/lib/observability";
+
+// Init Sentry au tout premier import du module — avant que React monte
+// quoi que ce soit, pour capturer aussi les crashes de bootstrap.
+initObservability();
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Si l'API n'est pas dispo (ex. snapshot test), on ignore.
@@ -44,30 +50,6 @@ async function refreshPushTokenIfAuthed() {
   } catch (err) {
     console.warn("[layout] cold-start push refresh failed", err);
   }
-}
-
-/**
- * Mappe le payload `data` d'une notification Expo Push vers une route
- * mobile. Le serveur émet `data: { reportId? petId? type url }` selon
- * le type de notification — on choisit la route en fonction du premier
- * id non-null trouvé.
- *
- * Retourne `null` si on ne sait pas où router (ex. type `new_message`
- * tant qu'on n'a pas la page Messages mobile). L'appelant doit
- * fallback sur la home dans ce cas.
- */
-function notificationDataToRoute(
-  data: Record<string, unknown> | null | undefined
-):
-  | { pathname: "/report/[id]"; params: { id: string } }
-  | { pathname: "/pet/[id]"; params: { id: string } }
-  | null {
-  if (!data) return null;
-  const reportId = typeof data.reportId === "string" ? data.reportId : null;
-  const petId = typeof data.petId === "string" ? data.petId : null;
-  if (reportId) return { pathname: "/report/[id]", params: { id: reportId } };
-  if (petId) return { pathname: "/pet/[id]", params: { id: petId } };
-  return null;
 }
 
 export default function RootLayout() {

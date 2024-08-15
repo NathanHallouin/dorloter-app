@@ -259,6 +259,7 @@ export default function SignalerScreen() {
 
       <Field label="Nom (si connu)" optional>
         <TextInput
+          testID="signaler-petname-input"
           style={styles.input}
           placeholder="Mimi, Rex…"
           value={petName}
@@ -269,6 +270,7 @@ export default function SignalerScreen() {
 
       <Field label={`Description (${MIN_DESCRIPTION} caractères mini)`}>
         <TextInput
+          testID="signaler-description-input"
           style={[styles.input, styles.textarea]}
           placeholder="Couleur du pelage, taille, signes distinctifs, contexte…"
           value={description}
@@ -335,6 +337,7 @@ export default function SignalerScreen() {
       </View>
 
       <Pressable
+        testID="signaler-submit"
         style={[styles.submit, !canSubmit && styles.submitDisabled]}
         onPress={handleSubmit}
         disabled={!canSubmit}

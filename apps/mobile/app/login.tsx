@@ -254,6 +254,7 @@ export default function LoginScreen() {
           ) : null}
           <Field label="Email">
             <TextInput
+              testID="auth-email-input"
               style={styles.input}
               autoCapitalize="none"
               autoComplete="email"
@@ -273,6 +274,7 @@ export default function LoginScreen() {
             }
           >
             <TextInput
+              testID="auth-password-input"
               style={styles.input}
               autoCapitalize="none"
               autoComplete={
@@ -286,6 +288,7 @@ export default function LoginScreen() {
             />
           </Field>
           <Pressable
+            testID="auth-submit"
             style={[styles.cta, submitting && styles.ctaDisabled]}
             onPress={mode === "signin" ? handleSignin : handleSignup}
             disabled={submitting}

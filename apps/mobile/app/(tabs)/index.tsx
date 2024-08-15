@@ -165,6 +165,11 @@ export default function AdopterScreen() {
                 style={styles.photo}
               />
               <Pressable
+                testID={
+                  favoriteSet.has(item.id)
+                    ? "pet-card-heart-active"
+                    : "pet-card-heart"
+                }
                 style={styles.heart}
                 onPress={() => handleToggleFavorite(item.id)}
                 hitSlop={10}

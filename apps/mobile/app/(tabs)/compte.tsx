@@ -64,7 +64,7 @@ export default function CompteScreen() {
           Connecte-toi pour suivre tes candidatures, signalements et favoris.
         </Text>
         <Link href="/login" asChild>
-          <Pressable style={styles.cta}>
+          <Pressable style={styles.cta} testID="compte-cta-signin">
             <Text style={styles.ctaLabel}>Se connecter</Text>
           </Pressable>
         </Link>
@@ -102,7 +102,9 @@ export default function CompteScreen() {
 
   return (
     <View style={styles.profile}>
-      <Text style={styles.title}>{me.name}</Text>
+      <Text style={styles.title} testID="compte-name">
+        {me.name}
+      </Text>
       <Text style={styles.subtitle}>{me.email}</Text>
       <View style={{ height: 24 }} />
       <Pressable
