@@ -24,7 +24,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://staging.dorloter.fr/api/v1"
+        "EXPO_PUBLIC_API_BASE_URL": "https://staging.dorloter.fr/api/v1",
+        "EXPO_PUBLIC_SENTRY_DSN": "$STAGING_SENTRY_DSN"
       }
     },
     "production": {
@@ -33,7 +34,8 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://dorloter.fr/api/v1"
+        "EXPO_PUBLIC_API_BASE_URL": "https://dorloter.fr/api/v1",
+        "EXPO_PUBLIC_SENTRY_DSN": "$PRODUCTION_SENTRY_DSN"
       }
     }
   },

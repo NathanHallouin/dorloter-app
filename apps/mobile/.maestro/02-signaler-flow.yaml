@@ -1,0 +1,59 @@
+# Flow 2 : création d'un signalement perdu/trouvé depuis le mobile.
+#
+# Préconditions :
+#   - même que flow 01 (user signé)
+#   - permission géoloc accordée au moins une fois (sinon le bouton
+#     submit reste désactivé)
+#   - le S3 (MinIO en dev) tourne pour que l'upload presigned passe
+#
+# Ce flow ne pousse PAS de photos (le picker système est piloté par
+# launchImageLibraryAsync — Maestro ne peut pas interagir avec).
+# Le flow couvre la création SANS photo, ce qui valide la pipeline
+# géoloc + form + POST /reports.
+
+appId: fr.dorloter.app
+---
+- launchApp
+
+# 1. Onglet Signaler — auth gate déjà passée par le flow 01
+- tapOn: "Signaler"
+- assertVisible: "Signaler un animal"
+
+# 2. Type "trouvé" (par défaut "perdu" est sélectionné)
+- tapOn:
+    text: "Trouvé"
+
+# 3. Espèce "chien"
+- tapOn:
+    text: "Chien"
+
+# 4. Nom (optionnel mais on le remplit)
+- tapOn:
+    id: "signaler-petname-input"
+- inputText: "Bobby"
+- hideKeyboard
+
+# 5. Description (>= 10 caractères requis)
+- tapOn:
+    id: "signaler-description-input"
+- inputText: "Chien trouvé errant rue de la Paix, collier rouge sans médaille."
+- hideKeyboard
+
+# 6. Wait for geoloc to resolve (le bouton submit s'active une fois
+#    coords ready)
+- assertVisible:
+    id: "signaler-submit"
+    timeout: 8000
+
+# 7. Submit
+- tapOn:
+    id: "signaler-submit"
+
+# 8. Alert "Signalement publié"
+- assertVisible:
+    text: "Signalement publié"
+    timeout: 8000
+- tapOn: "OK"
+
+# 9. On atterrit sur l'onglet Signalements
+- assertVisible: "Perdus / trouvés"

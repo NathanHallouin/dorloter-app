@@ -11,13 +11,16 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "doctor": "expo-doctor",
-    "prebuild": "expo prebuild --clean"
+    "prebuild": "expo prebuild --clean",
+    "test": "bun test src/",
+    "test:e2e": "maestro test .maestro/"
   },
   "dependencies": {
     "@dorloter/api-client": "workspace:*",
     "@maplibre/maplibre-react-native": "^11.0.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@sentry/react-native": "~6.14.0",
     "@tanstack/react-query": "^5.62.0",
     "expo": "~53.0.0",
     "expo-constants": "~17.1.8",
@@ -42,6 +45,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~19.0.0",
+    "bun-types": "^1.3.13",
     "expo-doctor": "^1.12.0",
     "typescript": "^6.0.3"
   },

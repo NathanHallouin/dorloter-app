@@ -1,0 +1,12 @@
+# Configuration Maestro globale.
+# https://maestro.mobile.dev/api-reference/configuration
+#
+# Le bundleId / appId est lu par chaque flow via `appId: fr.dorloter.app`.
+# Cette config définit le comportement par défaut de tous les flows.
+
+flows:
+  - "*.yaml"
+
+executionOrder:
+  - 01-signin-and-favorite.yaml
+  - 02-signaler-flow.yaml

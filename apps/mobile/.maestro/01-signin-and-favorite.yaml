@@ -1,0 +1,53 @@
+# Flow 1 : sign-in puis ajout d'un pet en favori avec optimistic UI.
+#
+# Préconditions :
+#   - app installée (Dev Client OU build EAS preview)
+#   - serveur dorloter accessible depuis le device (par défaut
+#     localhost:3000 — lance `bun --cwd apps/web run dev` avant)
+#   - un user de test existe (cf. apps/web/scripts/seed.ts)
+#
+# Lancer : `bun --cwd apps/mobile run test:e2e` ou
+#          `maestro test apps/mobile/.maestro/01-signin-and-favorite.yaml`
+
+appId: fr.dorloter.app
+---
+- launchApp:
+    clearState: true
+
+# 1. Onglet Compte → CTA "Se connecter" → modal login
+- tapOn: "Compte"
+- tapOn:
+    id: "compte-cta-signin"
+- assertVisible: "Connexion"
+
+# 2. Saisie credentials du seed (cf. apps/web/scripts/seed.ts)
+- tapOn:
+    id: "auth-email-input"
+- inputText: "test@dorloter.fr"
+- hideKeyboard
+- tapOn:
+    id: "auth-password-input"
+- inputText: "motdepasse12"
+- hideKeyboard
+
+# 3. Submit signin → fermeture modal + onglet Compte affiche le name
+- tapOn:
+    id: "auth-submit"
+- assertVisible:
+    id: "compte-name"
+    timeout: 10000
+
+# 4. Onglet Adopter → premier pet → tap heart → optimistic immediate
+- tapOn: "Adopter"
+- assertVisible:
+    id: "pet-card-heart"
+    timeout: 5000
+- tapOn:
+    id: "pet-card-heart"
+
+# 5. Reload app → favoris persistés via /me/favorites
+- launchApp
+- tapOn: "Adopter"
+- assertVisible:
+    id: "pet-card-heart-active"
+    timeout: 5000

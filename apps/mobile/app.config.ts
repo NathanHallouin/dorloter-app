@@ -23,6 +23,11 @@ const mapStyleUrl =
   process.env.EXPO_PUBLIC_MAP_STYLE_URL ??
   "https://tiles.openfreemap.org/styles/liberty";
 
+// DSN Sentry — laissé vide = Sentry init no-op (dev local). Valoriser
+// par profile EAS via `eas.json.build.<profile>.env.EXPO_PUBLIC_SENTRY_DSN`.
+// Alternative souveraine EU : GlitchTip (Sentry-compatible).
+const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN ?? "";
+
 const config: ExpoConfig = {
   name: "Dorloter",
   slug: "dorloter",
@@ -79,6 +84,7 @@ const config: ExpoConfig = {
         imageWidth: 200,
       },
     ],
+    "@sentry/react-native/expo",
   ],
   experiments: {
     typedRoutes: true,
@@ -86,6 +92,7 @@ const config: ExpoConfig = {
   extra: {
     apiBaseUrl,
     mapStyleUrl,
+    sentryDsn,
     // À renseigner après `eas init` la première fois.
     eas: {
       projectId: "REPLACE_WITH_EAS_PROJECT_ID",
