@@ -26,6 +26,7 @@ import {
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import {
@@ -53,7 +54,20 @@ export default function SignalementsScreen() {
     <View style={styles.container}>
       <ModeToggle mode={mode} onChange={setMode} disableMap={isExpoGo} />
       {mode === "list" ? <ListView /> : <MapView />}
+      <SignalerFab />
     </View>
+  );
+}
+
+// ─── Floating Action Button : nouveau signalement ──────────────────────────
+
+function SignalerFab() {
+  return (
+    <Link href="/signaler" asChild>
+      <Pressable style={styles.fab} testID="signaler-fab">
+        <MaterialCommunityIcons name="plus" size={28} color="white" />
+      </Pressable>
+    </Link>
   );
 }
 
@@ -180,9 +194,11 @@ function ReportRow({ report }: { report: Report }) {
         />
       ) : (
         <View style={[styles.photo, styles.photoFallback]}>
-          <Text style={styles.photoFallbackEmoji}>
-            {report.species === "chat" ? "🐱" : "🐶"}
-          </Text>
+          <MaterialCommunityIcons
+            name={report.species === "chat" ? "cat" : "dog"}
+            size={48}
+            color="#c4a89c"
+          />
         </View>
       )}
       <View style={styles.body}>
@@ -235,12 +251,15 @@ function MapView() {
     enabled: centerReady,
     queryKey: ["reports", "near", center.latitude, center.longitude],
     queryFn: async () => {
+      // 100 km plutôt que 10 km : ça couvre toute la métropole d'une
+      // grande ville et évite que la carte soit vide quand l'utilisateur
+      // se trouve dans une zone peu couverte par les signalements.
       const { data, error } = await api.GET("/reports", {
         params: {
           query: {
             lat: center.latitude,
             lng: center.longitude,
-            radiusKm: 10,
+            radiusKm: 100,
             status: "actif",
             limit: 100,
           },
@@ -289,7 +308,7 @@ function MapView() {
             onPress={() => setSelectedId(null)}
             hitSlop={12}
           >
-            <Text style={styles.closeBtnLabel}>×</Text>
+            <MaterialCommunityIcons name="close" size={20} color="#7a5f5f" />
           </Pressable>
         </View>
       ) : null}
@@ -332,7 +351,6 @@ const styles = StyleSheet.create({
   },
   photo: { width: 110, height: 110, backgroundColor: "#f5ece4" },
   photoFallback: { alignItems: "center", justifyContent: "center" },
-  photoFallbackEmoji: { fontSize: 40 },
   body: { flex: 1, padding: 12, gap: 4, justifyContent: "center" },
   tagRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   tag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 },
@@ -383,5 +401,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  closeBtnLabel: { fontSize: 24, color: "#7a5f5f", fontWeight: "300" },
+
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#e8634d",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 6,
+  },
 });

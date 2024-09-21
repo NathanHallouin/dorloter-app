@@ -26,7 +26,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Redirect, Stack, useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { api } from "@/lib/api";
@@ -104,19 +105,7 @@ export default function SignalerScreen() {
   }
 
   if (!tokenQuery.data) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.title}>Connecte-toi pour signaler</Text>
-        <Text style={styles.subtitle}>
-          Tes signalements sont attachés à ton compte (matching, suivi, contact).
-        </Text>
-        <Link href="/login" asChild>
-          <Pressable style={styles.cta}>
-            <Text style={styles.ctaLabel}>Se connecter</Text>
-          </Pressable>
-        </Link>
-      </View>
-    );
+    return <Redirect href="/login" />;
   }
 
   // ─── Photo picker ─────────────────────────────────────────────────────────
@@ -233,6 +222,7 @@ export default function SignalerScreen() {
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <ScrollView contentContainerStyle={styles.scroll}>
+      <Stack.Screen options={{ title: "Signaler un animal" }} />
       <Text style={styles.heading}>Signaler un animal</Text>
 
       <Field label="Type">
@@ -293,7 +283,11 @@ export default function SignalerScreen() {
               ) : null}
               {p.state === "error" ? (
                 <View style={styles.photoOverlay}>
-                  <Text style={styles.photoError}>!</Text>
+                  <MaterialCommunityIcons
+                    name="alert-circle"
+                    size={28}
+                    color="white"
+                  />
                 </View>
               ) : null}
               <Pressable
@@ -301,7 +295,7 @@ export default function SignalerScreen() {
                 onPress={() => handleRemovePhoto(p.uri)}
                 hitSlop={10}
               >
-                <Text style={styles.photoRemoveLabel}>×</Text>
+                <MaterialCommunityIcons name="close" size={14} color="white" />
               </Pressable>
             </View>
           ))}
@@ -311,7 +305,11 @@ export default function SignalerScreen() {
               onPress={handlePickPhoto}
               disabled={submitting}
             >
-              <Text style={styles.photoAddLabel}>+</Text>
+              <MaterialCommunityIcons
+                name="image-plus"
+                size={28}
+                color="#a08585"
+              />
             </Pressable>
           ) : null}
         </View>
@@ -470,7 +468,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  photoError: { color: "white", fontSize: 24, fontWeight: "700" },
   photoRemove: {
     position: "absolute",
     top: -6,
@@ -482,7 +479,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  photoRemoveLabel: { color: "white", fontSize: 16, lineHeight: 18 },
   photoAdd: {
     width: 80,
     height: 80,
@@ -493,7 +489,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  photoAddLabel: { fontSize: 32, color: "#a08585", lineHeight: 32 },
 
   locationCard: {
     backgroundColor: "#fff5f1",

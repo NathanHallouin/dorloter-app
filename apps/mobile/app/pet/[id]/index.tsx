@@ -26,12 +26,15 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+
+type MCIName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 import { api } from "@/lib/api";
 import { getAuthToken } from "@/lib/auth";
 
@@ -207,9 +210,11 @@ export default function PetDetailScreen() {
                 { width: SCREEN_WIDTH },
               ]}
             >
-              <Text style={styles.photoFallbackEmoji}>
-                {isCat ? "🐱" : "🐶"}
-              </Text>
+              <MaterialCommunityIcons
+                name={isCat ? "cat" : "dog"}
+                size={96}
+                color="#c4a89c"
+              />
             </View>
           )}
           <Pressable
@@ -217,7 +222,11 @@ export default function PetDetailScreen() {
             onPress={handleToggleFavorite}
             hitSlop={10}
           >
-            <Text style={styles.heartIcon}>{isFavorite ? "❤️" : "🤍"}</Text>
+            <MaterialCommunityIcons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={24}
+              color={isFavorite ? "#e8634d" : "#7a5f5f"}
+            />
           </Pressable>
         </View>
 
@@ -250,9 +259,13 @@ export default function PetDetailScreen() {
         {/* ─── Compatibilité ───────────────────────────────────────────── */}
         <Section title="Compatibilité">
           <View style={styles.badgeRow}>
-            <Badge label="🐱 chats" value={COMPAT_LABEL[pet.okWithCats]} />
-            <Badge label="🐶 chiens" value={COMPAT_LABEL[pet.okWithDogs]} />
-            <Badge label="👶 enfants" value={COMPAT_LABEL[pet.okWithChildren]} />
+            <Badge icon="cat" label="chats" value={COMPAT_LABEL[pet.okWithCats]} />
+            <Badge icon="dog" label="chiens" value={COMPAT_LABEL[pet.okWithDogs]} />
+            <Badge
+              icon="human-child"
+              label="enfants"
+              value={COMPAT_LABEL[pet.okWithChildren]}
+            />
           </View>
         </Section>
 
@@ -298,23 +311,54 @@ export default function PetDetailScreen() {
         ) : null}
 
         {/* ─── Refuge ──────────────────────────────────────────────────── */}
-        {/* TODO : route /shelters/[slug] mobile à venir — pour l'instant
-            on affiche juste les infos sans navigation. */}
         {pet.shelter ? (
           <Section title="Refuge">
-            <View style={styles.shelterCard}>
+            <Pressable
+              style={styles.shelterCard}
+              onPress={() =>
+                pet.shelter && router.push(`/shelter/${pet.shelter.slug}`)
+              }
+            >
               <View style={styles.shelterTextCol}>
-                <Text style={styles.shelterName}>
-                  {pet.shelter.name}
-                  {pet.shelter.isVerified ? " · ✓" : ""}
-                </Text>
+                <View style={styles.shelterNameRow}>
+                  <Text style={styles.shelterName}>{pet.shelter.name}</Text>
+                  {pet.shelter.isVerified ? (
+                    <MaterialCommunityIcons
+                      name="check-decagram"
+                      size={16}
+                      color="#4a9d7a"
+                    />
+                  ) : null}
+                </View>
                 {pet.shelter.address ? (
                   <Text style={styles.shelterAddress}>
                     {pet.shelter.address}
                   </Text>
                 ) : null}
               </View>
-            </View>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={22}
+                color="#a08585"
+              />
+            </Pressable>
+            <Pressable
+              style={styles.contactBtn}
+              onPress={() => {
+                if (!isAuthed) {
+                  router.push("/login");
+                  return;
+                }
+                if (id) router.push(`/pet/${id}/contact`);
+              }}
+            >
+              <MaterialCommunityIcons
+                name="message-text-outline"
+                size={18}
+                color="#e8634d"
+              />
+              <Text style={styles.contactBtnLabel}>Contacter le refuge</Text>
+            </Pressable>
           </Section>
         ) : null}
 
@@ -356,10 +400,23 @@ function Section({
   );
 }
 
-function Badge({ label, value }: { label: string; value: string }) {
+function Badge({
+  icon,
+  label,
+  value,
+}: {
+  icon?: MCIName;
+  label: string;
+  value: string;
+}) {
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeLabel}>{label}</Text>
+      <View style={styles.badgeLabelRow}>
+        {icon ? (
+          <MaterialCommunityIcons name={icon} size={13} color="#7a5f5f" />
+        ) : null}
+        <Text style={styles.badgeLabel}>{label}</Text>
+      </View>
       <Text style={styles.badgeValue}>{value}</Text>
     </View>
   );
@@ -374,7 +431,6 @@ const styles = StyleSheet.create({
 
   photo: { height: PHOTO_HEIGHT, backgroundColor: "#f5ece4" },
   photoFallback: { alignItems: "center", justifyContent: "center" },
-  photoFallbackEmoji: { fontSize: 96 },
 
   heart: {
     position: "absolute",
@@ -392,7 +448,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  heartIcon: { fontSize: 22 },
 
   header: { padding: 20, gap: 6, backgroundColor: "white" },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 10 },
@@ -421,6 +476,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f0e4dc",
   },
+  badgeLabelRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   badgeLabel: { fontSize: 11, color: "#7a5f5f", fontWeight: "600" },
   badgeValue: { fontSize: 14, color: "#1f1414", fontWeight: "600" },
 
@@ -434,9 +490,24 @@ const styles = StyleSheet.create({
     borderColor: "#f0e4dc",
   },
   shelterTextCol: { flex: 1, gap: 2 },
+  shelterNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   shelterName: { fontSize: 15, fontWeight: "600", color: "#1f1414" },
   shelterAddress: { fontSize: 13, color: "#7a5f5f" },
-  shelterChevron: { fontSize: 28, color: "#a08585", marginLeft: 12 },
+
+  contactBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#e8634d",
+    backgroundColor: "white",
+  },
+  contactBtnLabel: { color: "#e8634d", fontWeight: "600", fontSize: 14 },
 
   ctaBar: {
     position: "absolute",

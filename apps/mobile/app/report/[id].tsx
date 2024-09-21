@@ -30,6 +30,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -159,9 +160,11 @@ export default function ReportDetailScreen() {
         <View
           style={[styles.photo, styles.photoFallback, { width: SCREEN_WIDTH }]}
         >
-          <Text style={styles.photoFallbackEmoji}>
-            {r.species === "chat" ? "🐱" : "🐶"}
-          </Text>
+          <MaterialCommunityIcons
+            name={r.species === "chat" ? "cat" : "dog"}
+            size={96}
+            color="#c4a89c"
+          />
         </View>
       )}
 
@@ -309,7 +312,6 @@ const styles = StyleSheet.create({
 
   photo: { height: PHOTO_HEIGHT, backgroundColor: "#f5ece4" },
   photoFallback: { alignItems: "center", justifyContent: "center" },
-  photoFallbackEmoji: { fontSize: 96 },
 
   header: { padding: 20, gap: 8, backgroundColor: "white" },
   tagRow: { flexDirection: "row", alignItems: "center", gap: 8 },
