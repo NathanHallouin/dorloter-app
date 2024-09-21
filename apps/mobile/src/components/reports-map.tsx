@@ -3,23 +3,29 @@
  *
  * - Style vectoriel via OpenFreeMap (pas de clé API en MVP, voir
  *   `extra.mapStyleUrl` dans app.config.ts pour surcharger).
- * - Un MarkerView par signalement, couleur selon le type.
- * - Tap sur un marker → onSelect, charge à la parent component d'afficher
- *   un bottom card.
+ * - Un `PointAnnotation` par signalement, couleur selon le type.
+ * - Tap sur un marker → onSelect (callback parent qui affiche un bottom card).
  *
  * Note dev : MapLibre RN est un module natif → ne fonctionne pas dans
- * Expo Go. Lance via Dev Client (`bun expo prebuild` puis EAS build, ou
- * Xcode/Android Studio en local).
+ * Expo Go. Lance via Dev Client (`bun mobile:build` puis install l'APK).
+ *
+ * API @maplibre/maplibre-react-native v10 :
+ *   - `MapView` (et non `Map`)
+ *   - `Camera` avec `defaultSettings={{ centerCoordinate, zoomLevel }}`
+ *   - `PointAnnotation` avec `coordinate: [lng, lat]` (singulier) +
+ *     `onSelected` callback ; rend les `children` comme View native
+ *     au-dessus de la carte. `Annotation` (sans Point) est une data source
+ *     pour des Layers, pas adapté à un marker custom.
  */
 
 import { useMemo } from "react";
 import Constants from "expo-constants";
 import {
   Camera,
-  Map,
-  ViewAnnotation,
+  MapView,
+  PointAnnotation,
 } from "@maplibre/maplibre-react-native";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import type { components } from "@dorloter/api-client";
 
 type Report = components["schemas"]["ReportSummary"];
@@ -45,42 +51,47 @@ export function ReportsMap({
     (Constants.expoConfig?.extra?.mapStyleUrl as string | undefined) ??
     DEFAULT_STYLE_URL;
 
-  // Centre initial : seule la première render compte (Camera est un
-  // composant non-controlled — pour suivre l'user qui bouge, utiliser
-  // setCamera depuis un ref). On évite les re-renders intempestifs via
-  // useMemo.
-  const initialCoords: [number, number] = useMemo(
+  // Centre initial via `defaultSettings` (non-controlled — pour suivre
+  // l'user qui bouge, utiliser un ref + setCamera).
+  const defaultCenter: [number, number] = useMemo(
     () => [center.longitude, center.latitude],
     [center.longitude, center.latitude]
   );
 
   return (
     <View style={styles.container}>
-      <Map style={StyleSheet.absoluteFill} mapStyle={styleUrl}>
+      <MapView style={StyleSheet.absoluteFill} mapStyle={styleUrl}>
         <Camera
-          initialViewState={{
-            center: initialCoords,
-            zoom: 12,
+          defaultSettings={{
+            centerCoordinate: defaultCenter,
+            zoomLevel: 12,
           }}
         />
-        {reports.map((report) => (
-          <ViewAnnotation
-            key={report.id}
-            lngLat={[report.location.longitude, report.location.latitude]}
-            anchor="center"
-          >
-            <Pressable
-              onPress={() => onSelect(report.id)}
-              hitSlop={8}
-              style={[
-                styles.marker,
-                report.type === "perdu" ? styles.markerPerdu : styles.markerTrouve,
-                selectedId === report.id && styles.markerSelected,
+        {reports.map((report) => {
+          const isSelected = selectedId === report.id;
+          return (
+            <PointAnnotation
+              key={report.id}
+              id={`report-${report.id}`}
+              coordinate={[
+                report.location.longitude,
+                report.location.latitude,
               ]}
-            />
-          </ViewAnnotation>
-        ))}
-      </Map>
+              onSelected={() => onSelect(report.id)}
+            >
+              <View
+                style={[
+                  styles.marker,
+                  report.type === "perdu"
+                    ? styles.markerPerdu
+                    : styles.markerTrouve,
+                  isSelected && styles.markerSelected,
+                ]}
+              />
+            </PointAnnotation>
+          );
+        })}
+      </MapView>
     </View>
   );
 }

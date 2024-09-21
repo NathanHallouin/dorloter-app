@@ -63,6 +63,30 @@ const DOG_IMG = {
   border: "https://images.unsplash.com/photo-1568393691622-c7ba131d63b4?w=800&q=80",
 } as const;
 
+// Visuels refuges (cover = bannière large ; logo = vignette carrée)
+const SHELTER_IMG = {
+  parisCover: "https://images.unsplash.com/photo-1568572933382-74d440642117?w=1200&q=80",
+  parisLogo: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=400&q=80",
+  lyonCover: "https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=1200&q=80",
+  lyonLogo: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&q=80",
+  marseilleCover: "https://images.unsplash.com/photo-1494256997604-768d1f608cac?w=1200&q=80",
+  marseilleLogo: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&q=80",
+  toulouseCover: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&q=80",
+  toulouseLogo: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&q=80",
+  bordeauxCover: "https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?w=1200&q=80",
+  bordeauxLogo: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=400&q=80",
+} as const;
+
+// Visuels pensions (insérés dans pension_photos)
+const PENSION_IMG = {
+  luberon1: "https://images.unsplash.com/photo-1611003229186-80e40cd54966?w=1200&q=80",
+  luberon2: "https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?w=1200&q=80",
+  grandesFoulees1: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&q=80",
+  grandesFoulees2: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=80",
+  arche1: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&q=80",
+  arche2: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=1200&q=80",
+} as const;
+
 // Petit offset aléatoire en degrés (± ~2 km) autour d'un point
 function jitter(coord: number, radiusDeg = 0.02): number {
   return coord + (Math.random() - 0.5) * 2 * radiusDeg;
@@ -140,6 +164,8 @@ async function main() {
       phone: "01 42 00 00 00",
       email: "contact@chatslibres-paris.fr",
       website: "https://chatslibres-paris.fr",
+      logoUrl: SHELTER_IMG.parisLogo,
+      coverUrl: SHELTER_IMG.parisCover,
       isVerified: true,
     })
     .returning();
@@ -161,6 +187,8 @@ async function main() {
       location: point(CITIES.lyon.lng, CITIES.lyon.lat),
       phone: "04 78 00 00 00",
       email: "adoption@refuge-rhone.fr",
+      logoUrl: SHELTER_IMG.lyonLogo,
+      coverUrl: SHELTER_IMG.lyonCover,
       isVerified: true,
     })
     .returning();
@@ -182,6 +210,8 @@ async function main() {
       location: point(CITIES.marseille.lng, CITIES.marseille.lat),
       phone: "04 91 00 00 00",
       email: "contact@les9vies.org",
+      logoUrl: SHELTER_IMG.marseilleLogo,
+      coverUrl: SHELTER_IMG.marseilleCover,
       isVerified: false,
     })
     .returning();
@@ -202,6 +232,8 @@ async function main() {
       address: "12 avenue des Minimes, 31200 Toulouse",
       location: point(CITIES.toulouse.lng, CITIES.toulouse.lat),
       phone: "05 61 00 00 00",
+      logoUrl: SHELTER_IMG.toulouseLogo,
+      coverUrl: SHELTER_IMG.toulouseCover,
       isVerified: true,
     })
     .returning();
@@ -223,6 +255,8 @@ async function main() {
       location: point(CITIES.bordeaux.lng, CITIES.bordeaux.lat),
       phone: "05 56 00 00 00",
       email: "adoption@matou-bordeaux.fr",
+      logoUrl: SHELTER_IMG.bordeauxLogo,
+      coverUrl: SHELTER_IMG.bordeauxCover,
       isVerified: true,
     })
     .returning();
@@ -904,7 +938,7 @@ async function main() {
 
   // ─── Pensions ────────────────────────────────────────────────────────────
   console.log("🏡 Pensions...");
-  await db.insert(pensions).values([
+  const insertedPensions = await db.insert(pensions).values([
     {
       name: "Pension féline du Luberon",
       slug: "pension-feline-luberon",
@@ -987,8 +1021,30 @@ async function main() {
       openingHours: "Tous les jours 8h-10h et 17h-19h",
       isVerified: true,
     },
-  ]);
-  console.log("   3 pensions créées");
+  ]).returning({ id: pensions.id, slug: pensions.slug });
+
+  // Galerie pour chaque pension (1 cover + 1 photo additionnelle)
+  const pensionPhotosBySlug: Record<string, string[]> = {
+    "pension-feline-luberon": [PENSION_IMG.luberon1, PENSION_IMG.luberon2],
+    "les-grandes-foulees": [
+      PENSION_IMG.grandesFoulees1,
+      PENSION_IMG.grandesFoulees2,
+    ],
+    "arche-des-moustaches": [PENSION_IMG.arche1, PENSION_IMG.arche2],
+  };
+  for (const p of insertedPensions) {
+    const urls = pensionPhotosBySlug[p.slug] ?? [];
+    if (urls.length === 0) continue;
+    await db.insert(pensionPhotos).values(
+      urls.map((url, i) => ({
+        pensionId: p.id,
+        url,
+        isPrimary: i === 0,
+        order: i,
+      }))
+    );
+  }
+  console.log("   3 pensions créées (avec galerie)");
 
   // ─── Matching ────────────────────────────────────────────────────────────
   console.log("🧩 Calcul des correspondances...");

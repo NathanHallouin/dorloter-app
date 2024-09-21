@@ -15,14 +15,21 @@
  */
 
 import { api } from "@/lib/api";
+import { getAuthToken } from "@/lib/auth";
 
-type ContentType = "image/jpeg" | "image/png" | "image/webp";
+type ImageContentType = "image/jpeg" | "image/png" | "image/webp";
+type AudioContentType =
+  | "audio/mp4"
+  | "audio/mpeg"
+  | "audio/aac"
+  | "audio/webm";
+type ContentType = ImageContentType | AudioContentType;
 
 interface UploadInput {
-  /** URI local du fichier — fourni par expo-image-picker. */
+  /** URI local du fichier — fourni par expo-image-picker ou expo-av. */
   fileUri: string;
   contentType: ContentType;
-  kind: "report" | "pet" | "shelter" | "pension";
+  kind: "report" | "pet" | "shelter" | "pension" | "voice";
 }
 
 interface UploadResult {
@@ -32,6 +39,9 @@ interface UploadResult {
   key: string;
 }
 
+/** Taille max par fichier — doit matcher MAX_BYTES_BY_KIND côté serveur. */
+const MAX_BYTES = 5 * 1024 * 1024;
+
 /**
  * Étape combinée : presign + PUT vers S3.
  *
@@ -39,14 +49,29 @@ interface UploadResult {
  *   - le presign échoue (401, 429, 500…)
  *   - le PUT S3 échoue (network, signature expirée, etc.)
  */
-export async function uploadPhoto({
+export async function uploadFile({
   fileUri,
   contentType,
   kind,
 }: UploadInput): Promise<UploadResult> {
-  // 1. Demander une URL signée
+  // 1. Lire le fichier d'abord — on a besoin de sa taille pour la signer.
+  const fileBlob = await uriToBlob(fileUri);
+  const contentLength = fileBlob.size;
+
+  if (contentLength === 0) {
+    throw new Error("Fichier vide ou illisible.");
+  }
+  if (contentLength > MAX_BYTES) {
+    const maxMb = Math.round(MAX_BYTES / (1024 * 1024));
+    const sizeMb = (contentLength / (1024 * 1024)).toFixed(1);
+    throw new Error(
+      `Fichier trop volumineux (${sizeMb} Mo, max ${maxMb} Mo). Compressez l'image avant d'envoyer.`
+    );
+  }
+
+  // 2. Demander une URL signée — la taille fait partie de la signature.
   const { data, error } = await api.POST("/uploads/presign", {
-    body: { contentType, kind },
+    body: { contentType, kind, contentLength },
   });
   if (error || !data) {
     throw new Error(
@@ -55,15 +80,14 @@ export async function uploadPhoto({
   }
   const { uploadUrl, publicUrl, key } = data.data;
 
-  // 2. Upload direct vers S3.
-  // RN supporte fetch(file://...) en lecture, on lit le binaire et on
-  // l'envoie en PUT. ContentType doit matcher EXACTEMENT celui qu'on a
-  // signé sinon la signature S3 est rejetée.
-  const fileBlob = await uriToBlob(fileUri);
-
+  // 3. Upload direct vers S3. ContentType ET Content-Length doivent
+  // matcher EXACTEMENT ce qu'on a signé sinon S3 rejette le PUT.
   const putResponse = await fetch(uploadUrl, {
     method: "PUT",
-    headers: { "Content-Type": contentType },
+    headers: {
+      "Content-Type": contentType,
+      "Content-Length": String(contentLength),
+    },
     body: fileBlob,
   });
 
@@ -83,4 +107,81 @@ export async function uploadPhoto({
 async function uriToBlob(uri: string): Promise<Blob> {
   const res = await fetch(uri);
   return res.blob();
+}
+
+/**
+ * Alias historique — ne supporte que les content types image. Conservé
+ * pour ne pas casser les callers existants (signaler.tsx).
+ */
+export async function uploadPhoto(input: {
+  fileUri: string;
+  contentType: ImageContentType;
+  kind: "report" | "pet" | "shelter" | "pension";
+}): Promise<UploadResult> {
+  return uploadFile(input);
+}
+
+/**
+ * Upload spécifique pour les messages vocaux — ne passe PAS par un
+ * presign + PUT S3 direct, mais par un endpoint Next.js qui reçoit le
+ * fichier en multipart et l'upload côté serveur.
+ *
+ * Pourquoi : en dev local, le bucket MinIO tourne sur `localhost:9000`,
+ * pas joignable depuis un device distant. En passant par le serveur
+ * (déjà accessible via cloudflared/Metro tunnel), on évite la friction.
+ *
+ * Retourne `url` qui peut être absolue (S3 public en prod) ou relative
+ * (route Next.js qui stream l'audio depuis le bucket). Le composant
+ * player préfixe les URL relatives avec l'API base URL.
+ */
+import Constants from "expo-constants";
+
+export interface VoiceUploadResult {
+  url: string;
+  key: string;
+}
+
+export async function uploadVoice({
+  fileUri,
+  contentType,
+}: {
+  fileUri: string;
+  contentType: AudioContentType;
+}): Promise<VoiceUploadResult> {
+  const apiBaseUrl =
+    (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
+    "http://localhost:3000/api/v1";
+
+  const form = new FormData();
+  // RN supporte FormData avec un descripteur { uri, name, type }.
+  form.append("file", {
+    // @ts-expect-error — RN FormData accepte ce shape, pas le type DOM File
+    uri: fileUri,
+    name: `voice.${contentType.split("/")[1] ?? "m4a"}`,
+    type: contentType,
+  });
+
+  const token = await getAuthToken();
+  const res = await fetch(`${apiBaseUrl}/uploads/voice`, {
+    method: "POST",
+    headers: {
+      // Pas de Content-Type explicite — fetch RN ajoute le boundary
+      // multipart tout seul si on le laisse vide.
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Origin: "dorloter://",
+    },
+    body: form,
+  });
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as
+      | { error?: { message?: string } }
+      | null;
+    throw new Error(
+      body?.error?.message ?? `Upload audio échoué (HTTP ${res.status}).`
+    );
+  }
+
+  const json = (await res.json()) as { data: { url: string; key: string } };
+  return json.data;
 }
