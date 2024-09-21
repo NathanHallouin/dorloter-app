@@ -36,7 +36,7 @@ const config: ExpoConfig = {
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
+  newArchEnabled: false,
   assetBundlePatterns: ["**/*"],
   ios: {
     bundleIdentifier: "fr.dorloter.app",
@@ -75,6 +75,13 @@ const config: ExpoConfig = {
           "Dorloter peut prendre une photo pour illustrer un signalement perdu / trouvé.",
       },
     ],
+    [
+      "expo-av",
+      {
+        microphonePermission:
+          "Dorloter accède au micro pour enregistrer vos messages vocaux dans les conversations avec les refuges.",
+      },
+    ],
     "@maplibre/maplibre-react-native",
     [
       "expo-splash-screen",
@@ -93,9 +100,8 @@ const config: ExpoConfig = {
     apiBaseUrl,
     mapStyleUrl,
     sentryDsn,
-    // À renseigner après `eas init` la première fois.
     eas: {
-      projectId: "REPLACE_WITH_EAS_PROJECT_ID",
+      projectId: "9cb21605-5994-465a-980a-6e62fbde1d6c",
     },
   },
 };

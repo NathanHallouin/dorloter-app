@@ -1,18 +1,17 @@
 /**
  * Metro bundler — configuration monorepo-aware.
  *
- * Trois ajustements indispensables pour qu'Expo résolve correctement les
- * workspaces bun :
+ * En mode hoisted (bunfig.toml `linker = "hoisted"`), tous les packages
+ * sont symlinkés dans `<root>/node_modules`, donc la résolution Node
+ * standard remonte la chaîne et trouve tout. On a juste besoin de :
  *
- *   1. `watchFolders` inclut la racine du monorepo pour que Metro
- *      reconstruise quand `packages/*` changent.
- *   2. `resolver.nodeModulesPaths` liste les deux `node_modules`
- *      possibles (apps/mobile et root) — Metro ne fait pas le hoist tout
- *      seul.
- *   3. `disableHierarchicalLookup` empêche Metro de remonter au-dessus
- *      du monorepo (sinon il trouve des copies parasites quand on
- *      travaille dans un répertoire utilisateur déjà parent d'autres
- *      projets Node).
+ *   1. AJOUTER `workspaceRoot` aux `watchFolders` existants — Metro
+ *      reconstruit quand `packages/*` ou la racine changent.
+ *   2. AJOUTER les deux `nodeModulesPaths` (apps/mobile + root) sans
+ *      remplacer les defaults Expo.
+ *
+ * On ne désactive plus `disableHierarchicalLookup` (= false par défaut)
+ * pour rester aligné avec ce qu'expo-doctor attend.
  */
 
 const { getDefaultConfig } = require("expo/metro-config");
@@ -23,11 +22,11 @@ const workspaceRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-config.watchFolders = [workspaceRoot];
+config.watchFolders = [...(config.watchFolders ?? []), workspaceRoot];
 config.resolver.nodeModulesPaths = [
+  ...(config.resolver.nodeModulesPaths ?? []),
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
-config.resolver.disableHierarchicalLookup = true;
 
 module.exports = config;
