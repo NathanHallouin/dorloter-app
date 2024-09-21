@@ -13,19 +13,20 @@ export interface SendEmailParams {
 }
 
 /**
- * Envoie un email via Resend. En dev sans RESEND_API_KEY, log l'email
- * dans la console au lieu de planter — pratique pour tester les flows
- * (reset password, vérification d'email) sans setup externe.
+ * Envoie un email via Resend. Sans clé API, log un warning et continue
+ * (return success) au lieu de planter — l'inscription, le reset password
+ * et les notifs continuent de fonctionner côté UI, juste sans email.
+ *
+ * Pour activer l'envoi réel, set `RESEND_API_KEY` dans l'environnement.
+ * Sur Vercel : Project Settings → Environment Variables.
  */
 export async function sendEmail({ to, subject, html, text }: SendEmailParams) {
   if (!resend) {
-    console.log("\n──── 📧 Email (dev mode, RESEND_API_KEY manquante) ────");
-    console.log(`To:      ${to}`);
-    console.log(`From:    ${fromEmail}`);
-    console.log(`Subject: ${subject}`);
-    if (text) console.log(`Text:\n${text}`);
-    else console.log(`HTML:\n${html}`);
-    console.log("─────────────────────────────────────────────────\n");
+    console.warn(
+      `[email] RESEND_API_KEY absente — email "${subject}" pour <${to}> non envoyé. ` +
+        `Texte loggué uniquement.`
+    );
+    if (text) console.log(text);
     return { success: true };
   }
 

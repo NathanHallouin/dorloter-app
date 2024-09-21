@@ -19,7 +19,7 @@
  * Voir docs/SERVICES-API.md pour la convention complète.
  */
 
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@infra/db";
 import { notFound } from "@infra/api/errors";
 import { decodeCursor, encodeCursor } from "@infra/api/cursor";
@@ -64,6 +64,10 @@ export interface PetListFilters {
   okWithChildren?: boolean;
   shelterId?: string;
   search?: string;
+  /** Restreint la liste à ces ids. Quand fourni, désactive le filtre
+   *  `status='disponible'` (utile pour "mes favoris" qui peuvent contenir
+   *  des animaux déjà réservés/adoptés). */
+  petIds?: string[];
 }
 
 export interface PetListResult {
@@ -139,7 +143,17 @@ export async function listPets(input: {
   const filters = input.filters ?? {};
   const limit = Math.min(Math.max(input.limit ?? 20, 1), 100);
 
-  const conditions = [eq(pets.status, "disponible")];
+  // `status='disponible'` est le défaut, mais on l'omet quand le caller
+  // restreint par `petIds` (cas "mes favoris" — on veut voir l'état réel
+  // même si l'animal a été adopté entre-temps).
+  const conditions =
+    filters.petIds && filters.petIds.length > 0
+      ? []
+      : [eq(pets.status, "disponible")];
+
+  if (filters.petIds && filters.petIds.length > 0) {
+    conditions.push(inArray(pets.id, filters.petIds));
+  }
 
   if (filters.species) conditions.push(eq(pets.species, filters.species));
   if (filters.sex) conditions.push(eq(pets.sex, filters.sex));

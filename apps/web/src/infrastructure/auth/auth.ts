@@ -21,12 +21,34 @@ const captchaPlugin = turnstileSecret
     })
   : null;
 
+// Origines acceptées par Better Auth — sans match, il rejette avec
+// "Missing or null Origin". Par défaut on accepte le scheme mobile pour
+// que l'app Dorloter Dev/prod puisse appeler /api/auth/* sans header
+// Origin (RN fetch ne l'envoie pas).
+//
+// Surcharge en dev via `BETTER_AUTH_TRUSTED_ORIGINS` (comma-separated)
+// pour ajouter ngrok/cloudflared/etc. quand le mobile passe par un
+// tunnel.
+const extraTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const trustedOrigins = [
+  "dorloter://",
+  "exp://",
+  "http://localhost:3000",
+  "http://10.0.2.2:3000",
+  ...extraTrustedOrigins,
+];
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
     usePlural: true,
   }),
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // pas bloquant pour le MVP
@@ -36,7 +58,12 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    // Émission désactivée tant qu'aucun provider email n'est configuré.
+    // À repasser à `true` quand `BREVO_API_KEY` / `RESEND_API_KEY` est en place,
+    // pour que les nouveaux utilisateurs reçoivent un mail de bienvenue.
+    sendOnSignUp: Boolean(
+      process.env.RESEND_API_KEY || process.env.BREVO_API_KEY
+    ),
     autoSignInAfterVerification: true,
     expiresIn: 60 * 60, // 1 heure
     sendVerificationEmail: async ({ user, url }) => {

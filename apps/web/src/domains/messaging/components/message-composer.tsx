@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { FileImage, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@shared/ui/button";
 import { sendMessage, setTyping } from "@messaging/actions";
+import { GifPickerTrigger, type SelectedGif } from "./gif-picker";
+import { VoiceRecorder, type VoiceUpload } from "./voice-recorder";
 
 /**
  * Compositeur de message : textarea auto-resize, send via Ctrl+Entrée,
@@ -67,6 +69,47 @@ export function MessageComposer({
     }
   }
 
+  async function handleGifSelected(gif: SelectedGif) {
+    setSending(true);
+    const res = await sendMessage({
+      conversationId,
+      attachment: {
+        type: "gif",
+        url: gif.url,
+        meta: {
+          type: "gif",
+          provider: "tenor",
+          externalId: gif.externalId,
+          width: gif.width,
+          height: gif.height,
+          previewUrl: gif.previewUrl,
+        },
+      },
+    });
+    setSending(false);
+    if (!res.success) {
+      toast.error(res.error ?? "Impossible d'envoyer le GIF.");
+    }
+  }
+
+  async function handleVoiceUploaded(voice: VoiceUpload) {
+    const res = await sendMessage({
+      conversationId,
+      attachment: {
+        type: "voice",
+        url: voice.url,
+        meta: {
+          type: "voice",
+          durationMs: voice.durationMs,
+          mimeType: voice.mimeType,
+        },
+      },
+    });
+    if (!res.success) {
+      toast.error(res.error ?? "Impossible d'envoyer le message vocal.");
+    }
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
@@ -89,6 +132,21 @@ export function MessageComposer({
         style={{ position: "absolute", left: "-9999px", width: 0, height: 0 }}
       />
       <div className="flex items-end gap-2">
+        <GifPickerTrigger onSelect={handleGifSelected}>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            disabled={sending}
+            aria-label="Choisir un GIF"
+          >
+            <FileImage className="h-4 w-4 text-coral-500" />
+          </Button>
+        </GifPickerTrigger>
+        <VoiceRecorder
+          disabled={sending}
+          onUploaded={handleVoiceUploaded}
+        />
         <textarea
           ref={textareaRef}
           value={value}

@@ -8,7 +8,61 @@ import {
   shelters,
   pets,
 } from "@/server/db/schema";
-import type { MessageDTO, ReactionAgg } from "@messaging/bus";
+import type {
+  MessageAttachment,
+  MessageDTO,
+  ReactionAgg,
+} from "@messaging/bus";
+import type { MessageAttachmentMeta } from "../schema";
+
+/**
+ * Mappe une row Drizzle de `messages` vers le DTO. Concentre la logique
+ * de reconstruction de l'attachment ici pour ne pas la dupliquer dans les
+ * trois fonctions de lecture.
+ */
+type MessageRow = {
+  id: string;
+  conversationId: string;
+  senderType: string;
+  senderId: string | null;
+  content: string | null;
+  attachmentType: string | null;
+  attachmentUrl: string | null;
+  attachmentMeta: MessageAttachmentMeta | null;
+  readAt: Date | null;
+  editedAt: Date | null;
+  createdAt: Date;
+};
+
+function rowToMessageDTO(
+  row: MessageRow,
+  reactions: ReactionAgg[]
+): MessageDTO {
+  let attachment: MessageAttachment | null = null;
+  if (
+    (row.attachmentType === "gif" || row.attachmentType === "voice") &&
+    row.attachmentUrl &&
+    row.attachmentMeta
+  ) {
+    attachment = {
+      type: row.attachmentType,
+      url: row.attachmentUrl,
+      meta: row.attachmentMeta,
+    };
+  }
+  return {
+    id: row.id,
+    conversationId: row.conversationId,
+    senderType: row.senderType as "user" | "shelter",
+    senderId: row.senderId,
+    content: row.content,
+    attachment,
+    readAt: row.readAt,
+    editedAt: row.editedAt,
+    createdAt: row.createdAt,
+    reactions,
+  };
+}
 
 /**
  * Récupère l'identifiant de l'autre camp dans une conversation, utile pour
@@ -76,18 +130,7 @@ export async function getMessageDTO(messageId: string): Promise<MessageDTO | nul
   if (!msg) return null;
 
   const reactions = await getReactionsForMessages([msg.id]);
-
-  return {
-    id: msg.id,
-    conversationId: msg.conversationId,
-    senderType: msg.senderType as "user" | "shelter",
-    senderId: msg.senderId,
-    content: msg.content,
-    readAt: msg.readAt,
-    editedAt: msg.editedAt,
-    createdAt: msg.createdAt,
-    reactions: reactions.get(msg.id) ?? [],
-  };
+  return rowToMessageDTO(msg, reactions.get(msg.id) ?? []);
 }
 
 /**
@@ -141,17 +184,7 @@ export async function getMessagesForConversation(
     .limit(limit);
 
   const reactions = await getReactionsForMessages(rows.map((r) => r.id));
-  return rows.map((r) => ({
-    id: r.id,
-    conversationId: r.conversationId,
-    senderType: r.senderType as "user" | "shelter",
-    senderId: r.senderId,
-    content: r.content,
-    readAt: r.readAt,
-    editedAt: r.editedAt,
-    createdAt: r.createdAt,
-    reactions: reactions.get(r.id) ?? [],
-  }));
+  return rows.map((r) => rowToMessageDTO(r, reactions.get(r.id) ?? []));
 }
 
 /**
@@ -173,17 +206,7 @@ export async function getMessagesSince(
     .orderBy(messages.createdAt);
 
   const reactions = await getReactionsForMessages(rows.map((r) => r.id));
-  return rows.map((r) => ({
-    id: r.id,
-    conversationId: r.conversationId,
-    senderType: r.senderType as "user" | "shelter",
-    senderId: r.senderId,
-    content: r.content,
-    readAt: r.readAt,
-    editedAt: r.editedAt,
-    createdAt: r.createdAt,
-    reactions: reactions.get(r.id) ?? [],
-  }));
+  return rows.map((r) => rowToMessageDTO(r, reactions.get(r.id) ?? []));
 }
 
 /**
@@ -260,6 +283,7 @@ export async function getConversationContext(conversationId: string) {
       userName: users.name,
       userImage: users.image,
       shelterId: conversations.shelterId,
+      shelterSlug: shelters.slug,
       shelterName: shelters.name,
       shelterLogoUrl: shelters.logoUrl,
       petId: conversations.petId,

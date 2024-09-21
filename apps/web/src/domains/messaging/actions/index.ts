@@ -17,6 +17,7 @@ import { consumeRateLimit } from "@infra/rate-limit";
 import { logEvent } from "@infra/logger";
 import { isAllowedEmoji } from "@messaging/emojis";
 import { messagingBus } from "@messaging/bus";
+import { setTypingService } from "../services/messaging.service";
 import {
   canAccessConversation,
   getMessageDTO,
@@ -60,9 +61,17 @@ async function requireConversationAccess(conversationId: string) {
   };
 }
 
-function previewOf(content: string): string {
-  const trimmed = content.replace(/\s+/g, " ").trim();
-  return trimmed.length > 180 ? trimmed.slice(0, 177) + "…" : trimmed;
+function previewOf(
+  content: string | null,
+  attachment?: { type: "gif" | "voice" } | null
+): string {
+  if (content) {
+    const trimmed = content.replace(/\s+/g, " ").trim();
+    if (trimmed) return trimmed.length > 180 ? trimmed.slice(0, 177) + "…" : trimmed;
+  }
+  if (attachment?.type === "gif") return "🎞️ GIF";
+  if (attachment?.type === "voice") return "🎙️ Message vocal";
+  return "";
 }
 
 // ─── openConversation ──────────────────────────────────────────────────────
@@ -154,10 +163,45 @@ export async function openConversation(
 
 // ─── sendMessage ───────────────────────────────────────────────────────────
 
-const sendSchema = z.object({
-  conversationId: z.string().uuid(),
-  content: z.string().min(MIN_CONTENT).max(MAX_CONTENT),
+const gifMetaSchema = z.object({
+  type: z.literal("gif"),
+  provider: z.literal("tenor"),
+  externalId: z.string(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  previewUrl: z.string().url(),
 });
+
+const voiceMetaSchema = z.object({
+  type: z.literal("voice"),
+  durationMs: z.number().int().min(200).max(5 * 60 * 1000),
+  mimeType: z.string().max(120),
+});
+
+const attachmentSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("gif"),
+    url: z.string().url().max(2048),
+    meta: gifMetaSchema,
+  }),
+  z.object({
+    type: z.literal("voice"),
+    url: z.string().url().max(2048),
+    meta: voiceMetaSchema,
+  }),
+]);
+
+const sendSchema = z
+  .object({
+    conversationId: z.string().uuid(),
+    content: z.string().max(MAX_CONTENT).optional(),
+    attachment: attachmentSchema.optional(),
+  })
+  .refine((v) => (v.content && v.content.trim().length > 0) || v.attachment, {
+    message: "Message vide.",
+  });
+
+type SendAttachment = z.infer<typeof attachmentSchema>;
 
 export async function sendMessage(
   input: z.infer<typeof sendSchema>
@@ -187,7 +231,8 @@ export async function sendMessage(
     conversationId: access.conversation.id,
     senderId: session.user.id,
     senderType: access.asSide,
-    content: parsed.data.content,
+    content: parsed.data.content ?? null,
+    attachment: parsed.data.attachment ?? null,
   });
 }
 
@@ -195,11 +240,13 @@ async function insertMessage(args: {
   conversationId: string;
   senderId: string;
   senderType: "user" | "shelter";
-  content: string;
+  content: string | null;
+  attachment?: SendAttachment | null;
   isFirstMessage?: boolean;
 }): Promise<ActionResponse<{ messageId: string }>> {
-  const content = args.content.trim();
-  const preview = previewOf(content);
+  const content = args.content ? args.content.trim() : null;
+  const attachment = args.attachment ?? null;
+  const preview = previewOf(content, attachment);
 
   const [row] = await db
     .insert(messages)
@@ -208,6 +255,9 @@ async function insertMessage(args: {
       senderType: args.senderType,
       senderId: args.senderId,
       content,
+      attachmentType: attachment?.type ?? null,
+      attachmentUrl: attachment?.url ?? null,
+      attachmentMeta: attachment?.meta ?? null,
     })
     .returning({ id: messages.id });
   const messageId = row!.id;
@@ -264,7 +314,8 @@ async function insertMessage(args: {
       conversationId: args.conversationId,
       messageId,
       senderType: args.senderType,
-      contentLength: content.length,
+      contentLength: content?.length ?? 0,
+      attachmentType: attachment?.type ?? null,
     },
     { userId: args.senderId }
   );
@@ -465,12 +516,19 @@ export async function setTyping(
   });
   if (!rate.ok) return { success: true }; // silencieux : ce n'est pas critique
 
-  messagingBus.publish({
-    type: "typing.changed",
+  // Délègue au service partagé : il maintient le `typingMap` (lu par le
+  // polling mobile via `GET /api/v1/conversations/{id}/typing`) ET
+  // publie l'event sur le bus (consommé par les SSE web). Sans cet
+  // appel, le typing serait invisible côté mobile.
+  await setTypingService(
+    {
+      userId: session.user.id,
+      userRole: session.user.role,
+      userShelterId: session.user.shelterId ?? null,
+    },
     conversationId,
-    userId: session.user.id,
-    isTyping,
-  });
+    isTyping
+  );
   return { success: true };
 }
 

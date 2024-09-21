@@ -103,6 +103,16 @@ export function buildOpenApiDocument(siteUrl: string) {
         description:
           "Présigning S3 — le client upload directement vers le bucket, sans proxy par notre API.",
       },
+      {
+        name: "messaging",
+        description:
+          "Conversations 1-à-1 entre particuliers et refuges (autour d'un animal, d'une adoption ou d'un signalement). Polling via `?since=ISO` côté mobile.",
+      },
+      {
+        name: "gifs",
+        description:
+          "Recherche de GIFs via le proxy Tenor v2 (clé serveur). Utilisé par le picker GIF des messages.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -656,6 +666,79 @@ export function buildOpenApiDocument(siteUrl: string) {
             updatedAt: { type: "string", format: "date-time" },
           },
         },
+        ProfilePatchRequest: {
+          type: "object",
+          description:
+            "Édition partielle du profil utilisateur. Tous les champs sont optionnels. Envoyer `latitude` ET `longitude` ensemble pour modifier la position.",
+          properties: {
+            name: { type: "string", minLength: 1, maxLength: 255 },
+            phone: { type: "string", maxLength: 20, nullable: true },
+            latitude: { type: "number", minimum: -90, maximum: 90 },
+            longitude: { type: "number", minimum: -180, maximum: 180 },
+            notificationRadiusKm: {
+              type: "integer",
+              minimum: 1,
+              maximum: 50,
+            },
+          },
+        },
+        MyApplication: {
+          type: "object",
+          description: "Candidature d'adoption du point de vue de l'adoptant.",
+          required: [
+            "id",
+            "status",
+            "motivation",
+            "createdAt",
+            "updatedAt",
+            "pet",
+          ],
+          properties: {
+            id: { type: "string", format: "uuid" },
+            status: {
+              type: "string",
+              enum: ["envoyee", "en_cours", "acceptee", "refusee", "annulee"],
+            },
+            motivation: { type: "string" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+            pet: {
+              type: "object",
+              required: [
+                "id",
+                "name",
+                "species",
+                "sex",
+                "status",
+                "primaryPhotoUrl",
+              ],
+              properties: {
+                id: { type: "string", format: "uuid" },
+                name: { type: "string" },
+                species: { type: "string", enum: ["chat", "chien"] },
+                breed: { type: "string", nullable: true },
+                ageCategory: {
+                  type: "string",
+                  enum: ["chaton", "jeune", "adulte", "senior"],
+                  nullable: true,
+                },
+                sex: {
+                  type: "string",
+                  enum: ["male", "femelle", "inconnu"],
+                },
+                status: {
+                  type: "string",
+                  enum: ["disponible", "reserve", "adopte", "retire"],
+                },
+                primaryPhotoUrl: {
+                  type: "string",
+                  format: "uri",
+                  nullable: true,
+                },
+              },
+            },
+          },
+        },
         NotificationType: {
           type: "string",
           enum: [
@@ -735,31 +818,356 @@ export function buildOpenApiDocument(siteUrl: string) {
             createdAt: { type: "string", format: "date-time" },
           },
         },
+        ReactionAgg: {
+          type: "object",
+          required: ["emoji", "count", "userIds"],
+          properties: {
+            emoji: { type: "string", minLength: 1, maxLength: 10 },
+            count: { type: "integer", minimum: 1 },
+            userIds: {
+              type: "array",
+              items: { type: "string", format: "uuid" },
+              description: "IDs des participants ayant réagi avec cet emoji.",
+            },
+          },
+        },
+        MessageAttachmentGifMeta: {
+          type: "object",
+          required: ["type", "provider", "externalId", "width", "height", "previewUrl"],
+          properties: {
+            type: { type: "string", enum: ["gif"] },
+            provider: { type: "string", enum: ["tenor"] },
+            externalId: { type: "string" },
+            width: { type: "integer", minimum: 1 },
+            height: { type: "integer", minimum: 1 },
+            previewUrl: { type: "string", format: "uri" },
+          },
+        },
+        MessageAttachmentVoiceMeta: {
+          type: "object",
+          required: ["type", "durationMs", "mimeType"],
+          properties: {
+            type: { type: "string", enum: ["voice"] },
+            durationMs: { type: "integer", minimum: 200, maximum: 300000 },
+            mimeType: { type: "string", maxLength: 120 },
+          },
+        },
+        MessageAttachment: {
+          type: "object",
+          required: ["type", "url", "meta"],
+          properties: {
+            type: { type: "string", enum: ["gif", "voice"] },
+            url: { type: "string", format: "uri", maxLength: 2048 },
+            meta: {
+              oneOf: [
+                { $ref: "#/components/schemas/MessageAttachmentGifMeta" },
+                { $ref: "#/components/schemas/MessageAttachmentVoiceMeta" },
+              ],
+            },
+          },
+        },
+        Message: {
+          type: "object",
+          required: [
+            "id",
+            "conversationId",
+            "senderType",
+            "senderId",
+            "content",
+            "attachment",
+            "readAt",
+            "editedAt",
+            "createdAt",
+            "reactions",
+          ],
+          properties: {
+            id: { type: "string", format: "uuid" },
+            conversationId: { type: "string", format: "uuid" },
+            senderType: { type: "string", enum: ["user", "shelter"] },
+            senderId: {
+              type: "string",
+              format: "uuid",
+              nullable: true,
+              description:
+                "ID utilisateur de l'émetteur. `null` si le compte a été supprimé entre-temps.",
+            },
+            content: {
+              type: "string",
+              maxLength: 2000,
+              nullable: true,
+              description:
+                "Texte du message — `null` si le message est purement GIF ou vocal.",
+            },
+            attachment: {
+              nullable: true,
+              oneOf: [
+                { $ref: "#/components/schemas/MessageAttachment" },
+                { type: "null" },
+              ],
+            },
+            readAt: { type: "string", format: "date-time", nullable: true },
+            editedAt: { type: "string", format: "date-time", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+            reactions: {
+              type: "array",
+              items: { $ref: "#/components/schemas/ReactionAgg" },
+            },
+          },
+        },
+        EditMessageRequest: {
+          type: "object",
+          required: ["content"],
+          properties: {
+            content: { type: "string", minLength: 1, maxLength: 2000 },
+          },
+        },
+        ReactionToggleRequest: {
+          type: "object",
+          required: ["emoji"],
+          properties: {
+            emoji: {
+              type: "string",
+              minLength: 1,
+              maxLength: 10,
+              description:
+                "Emoji parmi la whitelist serveur (cf. domains/messaging/emojis.ts).",
+            },
+          },
+        },
+        ReactionToggleResult: {
+          type: "object",
+          required: ["added", "reactions"],
+          properties: {
+            added: {
+              type: "boolean",
+              description:
+                "`true` si la réaction a été ajoutée, `false` si retirée.",
+            },
+            reactions: {
+              type: "array",
+              items: { $ref: "#/components/schemas/ReactionAgg" },
+              description: "Agrégation fraîche du message après le toggle.",
+            },
+          },
+        },
+        ArchiveConversationResult: {
+          type: "object",
+          required: ["archived"],
+          properties: {
+            archived: { type: "boolean" },
+          },
+        },
+        InboxItem: {
+          type: "object",
+          required: [
+            "id",
+            "subject",
+            "lastMessageAt",
+            "lastMessagePreview",
+            "lastSenderType",
+            "unreadCount",
+            "petId",
+            "petName",
+            "peerId",
+            "peerName",
+            "peerImageUrl",
+          ],
+          properties: {
+            id: { type: "string", format: "uuid" },
+            subject: { type: "string", nullable: true },
+            lastMessageAt: { type: "string", format: "date-time" },
+            lastMessagePreview: { type: "string", nullable: true },
+            lastSenderType: {
+              type: "string",
+              enum: ["user", "shelter"],
+              nullable: true,
+            },
+            unreadCount: { type: "integer", minimum: 0 },
+            petId: { type: "string", format: "uuid", nullable: true },
+            petName: { type: "string", nullable: true },
+            peerId: {
+              type: "string",
+              format: "uuid",
+              description:
+                "ID de l'interlocuteur : refuge (côté user) ou particulier (côté shelter).",
+            },
+            peerName: { type: "string" },
+            peerImageUrl: { type: "string", format: "uri", nullable: true },
+          },
+        },
+        ConversationContext: {
+          type: "object",
+          required: [
+            "id",
+            "asSide",
+            "subject",
+            "petId",
+            "petName",
+            "peerId",
+            "peerName",
+            "peerImageUrl",
+            "peerSlug",
+            "unreadCount",
+          ],
+          properties: {
+            id: { type: "string", format: "uuid" },
+            asSide: {
+              type: "string",
+              enum: ["user", "shelter"],
+              description:
+                "Côté représenté par l'appelant courant — détermine quel `peer*` est rendu.",
+            },
+            subject: { type: "string", nullable: true },
+            petId: { type: "string", format: "uuid", nullable: true },
+            petName: { type: "string", nullable: true },
+            peerId: { type: "string", format: "uuid" },
+            peerName: { type: "string" },
+            peerImageUrl: { type: "string", format: "uri", nullable: true },
+            peerSlug: {
+              type: "string",
+              nullable: true,
+              description:
+                "Slug du refuge si l'appelant est côté user. `null` côté shelter (le peer est un particulier — pas de page publique).",
+            },
+            unreadCount: { type: "integer", minimum: 0 },
+          },
+        },
+        OpenConversationRequest: {
+          type: "object",
+          required: ["shelterId", "firstMessage"],
+          properties: {
+            shelterId: { type: "string", format: "uuid" },
+            petId: {
+              type: "string",
+              format: "uuid",
+              description:
+                "Optionnel — attache la conversation à un animal précis (question avant adoption).",
+            },
+            firstMessage: { type: "string", minLength: 10, maxLength: 2000 },
+          },
+        },
+        OpenConversationResult: {
+          type: "object",
+          required: ["conversationId", "isNew"],
+          properties: {
+            conversationId: { type: "string", format: "uuid" },
+            isNew: {
+              type: "boolean",
+              description:
+                "`false` si une conversation existait déjà pour (user, shelter, pet) — le 1er message a été appendu à l'existante.",
+            },
+          },
+        },
+        SendMessageRequest: {
+          type: "object",
+          description:
+            "Au moins l'un de `content` ou `attachment` doit être fourni. " +
+            "Un message peut combiner les deux (légende sur un GIF par exemple).",
+          properties: {
+            content: { type: "string", maxLength: 2000 },
+            attachment: { $ref: "#/components/schemas/MessageAttachment" },
+          },
+        },
+        GifResult: {
+          type: "object",
+          required: ["id", "url", "previewUrl", "width", "height", "title"],
+          properties: {
+            id: { type: "string" },
+            url: {
+              type: "string",
+              format: "uri",
+              description:
+                "URL du GIF final (taille standard). À utiliser dans l'attachment.",
+            },
+            previewUrl: {
+              type: "string",
+              format: "uri",
+              description:
+                "Aperçu basse résolution pour le picker (chargement rapide).",
+            },
+            width: { type: "integer", minimum: 1 },
+            height: { type: "integer", minimum: 1 },
+            title: { type: "string", nullable: true },
+          },
+        },
+        GifSearchResponse: {
+          type: "object",
+          required: ["results"],
+          properties: {
+            results: {
+              type: "array",
+              items: { $ref: "#/components/schemas/GifResult" },
+            },
+          },
+        },
+        SendMessageResult: {
+          type: "object",
+          required: ["messageId"],
+          properties: {
+            messageId: { type: "string", format: "uuid" },
+          },
+        },
+        MarkReadResult: {
+          type: "object",
+          required: ["markedCount"],
+          properties: {
+            markedCount: {
+              type: "integer",
+              minimum: 0,
+              description:
+                "Nombre de messages effectivement marqués lus à cet appel.",
+            },
+          },
+        },
+        UnreadCount: {
+          type: "object",
+          required: ["asUser", "asShelter", "total"],
+          properties: {
+            asUser: { type: "integer", minimum: 0 },
+            asShelter: { type: "integer", minimum: 0 },
+            total: { type: "integer", minimum: 0 },
+          },
+        },
         UploadPresignRequest: {
           type: "object",
-          required: ["contentType", "kind"],
+          required: ["contentType", "kind", "contentLength"],
           properties: {
             contentType: {
               type: "string",
-              enum: ["image/jpeg", "image/png", "image/webp"],
+              enum: [
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "audio/mp4",
+                "audio/mpeg",
+                "audio/aac",
+                "audio/webm",
+              ],
             },
             kind: {
               type: "string",
-              enum: ["report", "pet", "shelter", "pension"],
+              enum: ["report", "pet", "shelter", "pension", "voice"],
               description:
-                "Préfixe S3 utilisé pour ranger les uploads : `reports/<userId>/...`, `pets/...`, etc.",
+                "Préfixe S3 utilisé pour ranger les uploads : `reports/<userId>/...`, `pets/...`, `messages/voice/<userId>/...`.",
+            },
+            contentLength: {
+              type: "integer",
+              minimum: 1,
+              maximum: 5242880,
+              description:
+                "Taille en octets. Max 5 Mo par fichier. Inclus dans la signature S3 — le PUT est refusé si le client envoie un fichier d'une autre taille.",
             },
           },
         },
         UploadPresignResponse: {
           type: "object",
-          required: ["uploadUrl", "publicUrl", "key", "expiresInSec"],
+          required: ["uploadUrl", "publicUrl", "key", "expiresInSec", "maxBytes"],
           properties: {
             uploadUrl: {
               type: "string",
               format: "uri",
               description:
-                "URL signée — PUT le body fichier dessus avec le même `Content-Type` que celui demandé.",
+                "URL signée — PUT le body fichier dessus avec les mêmes `Content-Type` et `Content-Length` que ceux demandés.",
             },
             publicUrl: {
               type: "string",
@@ -773,6 +1181,12 @@ export function buildOpenApiDocument(siteUrl: string) {
                 "Clé S3 — utile pour DELETE ultérieur ou pour debug. Pas requise dans les payloads de création.",
             },
             expiresInSec: { type: "integer", minimum: 60 },
+            maxBytes: {
+              type: "integer",
+              minimum: 1,
+              description:
+                "Taille max autorisée par le serveur pour ce kind d'upload. Informative — le client doit déjà respecter cette limite.",
+            },
           },
         },
         ApplicationCreate: {
@@ -1533,6 +1947,159 @@ export function buildOpenApiDocument(siteUrl: string) {
             "401": { $ref: "#/components/responses/Unauthorized" },
           },
         },
+        patch: {
+          tags: ["me"],
+          summary: "Édition partielle du profil",
+          description:
+            "Met à jour les champs fournis (nom, téléphone, position, rayon " +
+            "de notification). Retourne le profil complet à jour.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ProfilePatchRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Profil mis à jour.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: { $ref: "#/components/schemas/Me" },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
+      },
+      "/me/reports": {
+        get: {
+          tags: ["me"],
+          summary: "Mes signalements perdus / trouvés",
+          description:
+            "Liste paginée des signalements créés par l'utilisateur courant. " +
+            "Tous statuts confondus par défaut (actif + résolu + expiré) — " +
+            "passer `status` pour restreindre.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "status",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string",
+                enum: ["actif", "resolu", "expire"],
+              },
+            },
+            {
+              name: "cursor",
+              in: "query",
+              required: false,
+              schema: { type: "string", minLength: 1, maxLength: 500 },
+            },
+            {
+              name: "limit",
+              in: "query",
+              required: false,
+              schema: { type: "integer", minimum: 1, maximum: 100 },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Liste de mes signalements.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data", "pagination"],
+                    properties: {
+                      data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/ReportSummary" },
+                      },
+                      pagination: {
+                        $ref: "#/components/schemas/Pagination",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
+      },
+      "/me/applications": {
+        get: {
+          tags: ["me"],
+          summary: "Mes candidatures d'adoption",
+          description:
+            "Liste des candidatures de l'utilisateur courant, avec un résumé " +
+            "de l'animal concerné. Tri par date de création décroissante. " +
+            "Pas de pagination (un user en a typiquement < 20).",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          responses: {
+            "200": {
+              description: "Mes candidatures.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/MyApplication" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
+      },
+      "/me/favorites/pets": {
+        get: {
+          tags: ["me"],
+          summary: "Mes animaux favoris (détaillés)",
+          description:
+            "Renvoie les animaux favorisés sous forme `PetCard` (avec " +
+            "photo, refuge, statut courant). Inclut les animaux passés en " +
+            "`reserve` ou `adopte` pour que l'utilisateur suive leur sort.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          responses: {
+            "200": {
+              description: "Animaux favorisés, du plus récent au plus ancien.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/PetCard" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
       },
       "/me/favorites": {
         get: {
@@ -1788,7 +2355,15 @@ export function buildOpenApiDocument(siteUrl: string) {
             },
             "400": { $ref: "#/components/responses/ValidationError" },
             "401": { $ref: "#/components/responses/Unauthorized" },
-            "429": { $ref: "#/components/responses/RateLimited" },
+            "422": {
+              description:
+                "Fichier trop volumineux ou quota d'upload quotidien atteint (50 fichiers/jour/user).",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ApiError" },
+                },
+              },
+            },
           },
         },
       },
@@ -1973,6 +2548,589 @@ export function buildOpenApiDocument(siteUrl: string) {
               },
             },
             "400": { $ref: "#/components/responses/ValidationError" },
+            "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+      },
+      "/conversations": {
+        get: {
+          tags: ["messaging"],
+          summary: "Inbox de l'utilisateur courant",
+          description:
+            "Liste les conversations actives, triées du plus récent au plus " +
+            "ancien. Par défaut côté particulier (`side=user`). Les shelter_admin " +
+            "peuvent passer `?side=shelter` pour voir l'inbox de leur refuge.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "side",
+              in: "query",
+              required: false,
+              schema: { type: "string", enum: ["user", "shelter"] },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Liste des conversations.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/InboxItem" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "403": { $ref: "#/components/responses/Forbidden" },
+          },
+        },
+        post: {
+          tags: ["messaging"],
+          summary: "Ouvre une conversation avec un refuge",
+          description:
+            "Crée ou récupère une conversation entre l'utilisateur courant et " +
+            "le refuge cible (optionnellement attachée à un animal). Idempotent " +
+            "sur (user, shelter, pet) — un appel sur une conversation existante " +
+            "ajoute juste le `firstMessage` au fil.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/OpenConversationRequest",
+                },
+              },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Conversation ouverte (créée ou retrouvée).",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/OpenConversationResult",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+            "429": { $ref: "#/components/responses/RateLimited" },
+          },
+        },
+      },
+      "/conversations/unread-count": {
+        get: {
+          tags: ["messaging"],
+          summary: "Total des messages non lus",
+          description:
+            "Badge agrégé pour le tab Messages. `total = asUser + asShelter`. " +
+            "Peut être polling toutes les ~30s par le mobile.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          responses: {
+            "200": {
+              description: "Compteurs unread.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: { $ref: "#/components/schemas/UnreadCount" },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+          },
+        },
+      },
+      "/conversations/{id}": {
+        get: {
+          tags: ["messaging"],
+          summary: "Métadonnées d'une conversation",
+          description:
+            "Renvoie le contexte (interlocuteur, pet associé, sujet, unread) " +
+            "depuis le côté de l'appelant. 404 si l'utilisateur n'a pas accès.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Contexte de la conversation.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/ConversationContext",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+        delete: {
+          tags: ["messaging"],
+          summary: "Archive la conversation (côté appelant uniquement)",
+          description:
+            "Soft-archive : la conversation disparaît de l'inbox de " +
+            "l'appelant mais l'autre côté la voit toujours. Réapparaît " +
+            "automatiquement dès qu'un nouveau message arrive. Idempotent.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Conversation archivée.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/ArchiveConversationResult",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+      },
+      "/gifs/search": {
+        get: {
+          tags: ["gifs"],
+          summary: "Recherche de GIFs (proxy Tenor)",
+          description:
+            "Renvoie des GIFs depuis Tenor — soit par mot-clef via `?q=`, soit " +
+            "les tendances si `q` est omis. Filtre `contentfilter=high` " +
+            "appliqué côté Tenor (pas de NSFW). Rate-limité 60/min/user.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "q",
+              in: "query",
+              required: false,
+              schema: { type: "string", minLength: 1, maxLength: 80 },
+            },
+            {
+              name: "limit",
+              in: "query",
+              required: false,
+              schema: { type: "integer", minimum: 1, maximum: 50 },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "GIFs trouvés.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/GifSearchResponse",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "422": {
+              description:
+                "Clé Tenor non configurée côté serveur (`TENOR_API_KEY`).",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ApiError" },
+                },
+              },
+            },
+            "429": { $ref: "#/components/responses/RateLimited" },
+          },
+        },
+      },
+      "/conversations/{id}/typing": {
+        get: {
+          tags: ["messaging"],
+          summary: "Liste des participants qui tapent dans la conversation",
+          description:
+            "Renvoie les userIds qui ont signalé `typing=true` dans les 5 " +
+            "dernières secondes (TTL côté serveur). Ne contient jamais " +
+            "l'appelant. À poller toutes les 2s côté mobile.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Liste (potentiellement vide) des userIds qui tapent.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "object",
+                        required: ["userIds"],
+                        properties: {
+                          userIds: {
+                            type: "array",
+                            items: { type: "string", format: "uuid" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+        post: {
+          tags: ["messaging"],
+          summary: "Déclare que l'appelant tape (ou s'arrête)",
+          description:
+            "À envoyer en debounce ~3s tant que l'utilisateur tape, et avec " +
+            "`isTyping=false` quand il s'arrête. L'entrée expire à 5s côté " +
+            "serveur — si le client est déconnecté/crashe, l'indicateur " +
+            "disparaît tout seul.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["isTyping"],
+                  properties: { isTyping: { type: "boolean" } },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "OK.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "object",
+                        required: ["ok"],
+                        properties: { ok: { type: "boolean" } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+      },
+      "/conversations/{id}/messages/{messageId}": {
+        patch: {
+          tags: ["messaging"],
+          summary: "Édite un message envoyé",
+          description:
+            "Fenêtre stricte de 5 minutes après l'envoi. 403 si l'appelant " +
+            "n'est pas l'auteur. Publie `message.updated` sur le bus pour " +
+            "les clients connectés.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+            {
+              name: "messageId",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EditMessageRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Message édité.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: { $ref: "#/components/schemas/Message" },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "403": { $ref: "#/components/responses/Forbidden" },
+            "404": { $ref: "#/components/responses/NotFound" },
+            "422": {
+              description:
+                "Fenêtre d'édition dépassée (> 5 minutes après l'envoi).",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ApiError" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/conversations/{id}/messages/{messageId}/reactions": {
+        post: {
+          tags: ["messaging"],
+          summary: "Toggle une réaction emoji",
+          description:
+            "Ajoute la réaction si absente, retire-la sinon (idempotent). " +
+            "Whitelist d'emojis fixée serveur (~10 emojis bienveillants). " +
+            "Rate-limité 60/min/user.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+            {
+              name: "messageId",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ReactionToggleRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Réaction toggle effectuée.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/ReactionToggleResult",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+            "429": { $ref: "#/components/responses/RateLimited" },
+          },
+        },
+      },
+      "/conversations/{id}/messages": {
+        get: {
+          tags: ["messaging"],
+          summary: "Messages d'une conversation",
+          description:
+            "Renvoie les messages chronologiquement (max 200). Avec `?since=ISO`, " +
+            "renvoie uniquement les messages strictement postérieurs — pour le " +
+            "polling 5s du mobile.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+            {
+              name: "since",
+              in: "query",
+              required: false,
+              schema: { type: "string", format: "date-time" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Liste de messages.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/Message" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+          },
+        },
+        post: {
+          tags: ["messaging"],
+          summary: "Envoie un message",
+          description:
+            "Ajoute un message dans la conversation. Le sender est inféré du " +
+            "rôle de l'appelant (particulier vs admin refuge). Rate-limité.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/SendMessageRequest" },
+              },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Message envoyé.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: {
+                        $ref: "#/components/schemas/SendMessageResult",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "400": { $ref: "#/components/responses/ValidationError" },
+            "401": { $ref: "#/components/responses/Unauthorized" },
+            "404": { $ref: "#/components/responses/NotFound" },
+            "429": { $ref: "#/components/responses/RateLimited" },
+          },
+        },
+      },
+      "/conversations/{id}/read": {
+        patch: {
+          tags: ["messaging"],
+          summary: "Marque tous les messages reçus comme lus",
+          description:
+            "Idempotent. Met `read_at = NOW()` sur les messages dont le sender " +
+            "est l'autre côté, et reset le compteur unread du côté appelant. " +
+            "À appeler au focus de l'écran thread côté mobile.",
+          security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Marquage effectué.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["data"],
+                    properties: {
+                      data: { $ref: "#/components/schemas/MarkReadResult" },
+                    },
+                  },
+                },
+              },
+            },
+            "401": { $ref: "#/components/responses/Unauthorized" },
             "404": { $ref: "#/components/responses/NotFound" },
           },
         },

@@ -104,6 +104,8 @@ export interface ReportListFilters {
   };
   /** Si défini, ne retourne que les signalements créés depuis N jours. */
   sinceDays?: number;
+  /** Si défini, restreint aux signalements créés par cet utilisateur. */
+  userId?: string;
 }
 
 export interface ReportListResult {
@@ -192,7 +194,13 @@ export async function listReports(input: {
   if (filters.near) validateNear(filters.near);
 
   const conditions = [];
-  conditions.push(eq(reports.status, filters.status ?? "actif"));
+  // Default à "actif" sauf si on filtre par utilisateur (mes signalements
+  // doit montrer toutes les statuts par défaut — actif, résolu, expiré).
+  const defaultStatus = filters.userId ? undefined : "actif";
+  const effectiveStatus = filters.status ?? defaultStatus;
+  if (effectiveStatus) {
+    conditions.push(eq(reports.status, effectiveStatus));
+  }
   if (filters.type) conditions.push(eq(reports.type, filters.type));
   if (filters.species) conditions.push(eq(reports.species, filters.species));
 
@@ -220,6 +228,9 @@ export async function listReports(input: {
     conditions.push(
       sql`${reports.createdAt} > now() - (${filters.sinceDays}::int * interval '1 day')`
     );
+  }
+  if (filters.userId) {
+    conditions.push(eq(reports.userId, filters.userId));
   }
 
   // Cursor (uniquement en mode tri par date — `near` trie par distance et

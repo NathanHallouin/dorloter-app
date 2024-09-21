@@ -32,6 +32,27 @@ export {
   getUnreadCounts,
 } from "./queries";
 
+// ─── Services (auth-agnostic, callable from API routes) ────────────────────
+export {
+  openConversationService,
+  sendMessageService,
+  markConversationReadService,
+  listInboxService,
+  getMessagesService,
+  getConversationContextService,
+  getUnreadCountService,
+  editMessageService,
+  toggleReactionService,
+  archiveConversationService,
+  setTypingService,
+  getTypingService,
+} from "./services/messaging.service";
+export type { MessagingUserContext } from "./services/messaging.service";
+
+// ─── Constants (UI safe — émoji whitelist) ─────────────────────────────────
+export { ALLOWED_EMOJIS, isAllowedEmoji } from "./emojis";
+export type { AllowedEmoji } from "./emojis";
+
 // ─── Components ─────────────────────────────────────────────────────────────
 export { MessagesNavLink } from "./components/messages-nav-link";
 export { ContactShelterButton } from "./components/contact-shelter-button";

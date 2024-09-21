@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -46,13 +47,42 @@ export async function deleteFile(key: string) {
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
-  expiresIn = 3600
+  expiresIn = 3600,
+  contentLength?: number
 ) {
   const command = new PutObjectCommand({
     Bucket: BUCKET,
     Key: key,
     ContentType: contentType,
+    ContentLength: contentLength,
   });
 
   return getSignedUrl(s3, command, { expiresIn });
+}
+
+/**
+ * Télécharge un objet S3 et renvoie son contenu + Content-Type.
+ * Utilisé par les endpoints qui proxient le contenu côté serveur (ex.
+ * `/api/v1/uploads/voice/...`) pour exposer des assets sans présigner
+ * une URL S3 — pratique quand le bucket dev (MinIO) n'est pas joignable
+ * depuis le mobile.
+ */
+export async function downloadFile(key: string): Promise<{
+  body: Uint8Array;
+  contentType: string;
+}> {
+  const res = await s3.send(
+    new GetObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+    })
+  );
+  if (!res.Body) {
+    throw new Error("Objet introuvable.");
+  }
+  const bytes = await res.Body.transformToByteArray();
+  return {
+    body: bytes,
+    contentType: res.ContentType ?? "application/octet-stream",
+  };
 }

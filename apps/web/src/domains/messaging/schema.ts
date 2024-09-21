@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -11,6 +12,30 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { users, shelters, pets } from "@/server/db/schema";
+
+/**
+ * Métadonnées d'attachement message — forme dépend de `attachment_type`.
+ *
+ * - `gif`   : URL renvoyée par Tenor (proxy /api/v1/gifs/search). Le `previewUrl`
+ *             est la version "tinygif" affichée dans le picker ; `url` est la
+ *             version finale rendue dans la bulle.
+ * - `voice` : fichier audio uploadé sur S3 (presign), durée enregistrée à
+ *             l'enregistrement pour afficher le timer sans charger l'audio.
+ */
+export type MessageAttachmentMeta =
+  | {
+      type: "gif";
+      provider: "tenor";
+      externalId: string;
+      width: number;
+      height: number;
+      previewUrl: string;
+    }
+  | {
+      type: "voice";
+      durationMs: number;
+      mimeType: string;
+    };
 
 // ─── Messagerie temps réel ──────────────────────────────────────────────────
 // Voir docs/MESSAGING.md pour le design complet (SSE + event bus).
@@ -63,7 +88,13 @@ export const messages = pgTable(
     senderId: uuid("sender_id").references(() => users.id, {
       onDelete: "set null",
     }),
-    content: text().notNull(),
+    // Texte facultatif depuis l'ajout des attachments (GIF / vocal). Au
+    // moins un de `content` / `attachment_url` doit être renseigné — c'est
+    // garanti côté service (pas de check constraint DB pour rester simple).
+    content: text(),
+    attachmentType: varchar("attachment_type", { length: 20 }),
+    attachmentUrl: text("attachment_url"),
+    attachmentMeta: jsonb("attachment_meta").$type<MessageAttachmentMeta>(),
     readAt: timestamp("read_at"),
     editedAt: timestamp("edited_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

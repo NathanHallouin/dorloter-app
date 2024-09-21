@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Check, CheckCheck, SmilePlus } from "lucide-react";
 import { toast } from "sonner";
 import { toggleReaction } from "@messaging/actions";
 import { ALLOWED_EMOJIS } from "@messaging/emojis";
 import { cn } from "@shared/utils";
+import { VoicePlayerWeb } from "./voice-player";
 import type { MessageDTO } from "@messaging/bus";
 
 /**
@@ -57,27 +59,73 @@ export function MessageBubble({
             <SmilePlus className="h-3.5 w-3.5" />
           </button>
         )}
-        <div
-          className={cn(
-            "relative whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
-            mine
-              ? "rounded-br-sm bg-coral-500 text-white"
-              : "rounded-bl-sm bg-muted text-foreground"
-          )}
-        >
-          {message.content}
-          {message.editedAt && (
-            <span
-              className={cn(
-                "ml-1 text-[10px] italic",
-                mine ? "text-white/70" : "text-muted-foreground"
+        {message.attachment?.type === "voice" && message.attachment.meta.type === "voice" ? (
+          <VoicePlayerWeb
+            url={message.attachment.url}
+            durationMs={message.attachment.meta.durationMs}
+            mine={mine}
+          />
+        ) : message.attachment?.type === "gif" && message.attachment.meta.type === "gif" ? (
+          <div
+            className={cn(
+              "relative overflow-hidden rounded-2xl",
+              mine ? "rounded-br-sm" : "rounded-bl-sm"
+            )}
+          >
+            <Image
+              src={message.attachment.url}
+              alt={message.content ?? "GIF"}
+              width={Math.min(message.attachment.meta.width, 260)}
+              height={Math.round(
+                Math.min(message.attachment.meta.width, 260) *
+                  (message.attachment.meta.height /
+                    message.attachment.meta.width)
               )}
-              title="Message modifié"
-            >
-              modifié
-            </span>
-          )}
-        </div>
+              unoptimized
+              className="block h-auto max-w-full"
+            />
+            {message.content ? (
+              <p
+                className={cn(
+                  "whitespace-pre-wrap break-words px-3 py-2 text-sm",
+                  mine ? "bg-coral-500 text-white" : "bg-muted text-foreground"
+                )}
+              >
+                {message.content}
+              </p>
+            ) : null}
+            {message.editedAt && (
+              <span
+                className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] italic text-white"
+                title="Message modifié"
+              >
+                modifié
+              </span>
+            )}
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "relative whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
+              mine
+                ? "rounded-br-sm bg-coral-500 text-white"
+                : "rounded-bl-sm bg-muted text-foreground"
+            )}
+          >
+            {message.content}
+            {message.editedAt && (
+              <span
+                className={cn(
+                  "ml-1 text-[10px] italic",
+                  mine ? "text-white/70" : "text-muted-foreground"
+                )}
+                title="Message modifié"
+              >
+                modifié
+              </span>
+            )}
+          </div>
+        )}
         {mine && (
           <button
             type="button"

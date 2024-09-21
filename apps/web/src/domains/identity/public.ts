@@ -12,6 +12,10 @@ export {
   type MeProfile,
   type UserRole,
 } from "./services/me.service";
+export {
+  updateProfileService,
+  type UpdateProfileInput,
+} from "./services/profile.service";
 
 // ─── Queries ────────────────────────────────────────────────────────────────
 export {

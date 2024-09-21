@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:events";
+import type { MessageAttachmentMeta } from "./schema";
 
 /**
  * Event bus in-process pour la messagerie temps réel.
@@ -15,12 +16,20 @@ export type ReactionAgg = {
   userIds: string[];
 };
 
+export type MessageAttachment = {
+  type: "gif" | "voice";
+  url: string;
+  meta: MessageAttachmentMeta;
+};
+
 export type MessageDTO = {
   id: string;
   conversationId: string;
   senderType: "user" | "shelter";
   senderId: string | null;
-  content: string;
+  /** Texte du message — peut être null si le message est un GIF/vocal pur. */
+  content: string | null;
+  attachment: MessageAttachment | null;
   readAt: Date | null;
   editedAt: Date | null;
   createdAt: Date;
