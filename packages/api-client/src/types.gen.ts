@@ -499,6 +499,168 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /**
+         * Édition partielle du profil
+         * @description Met à jour les champs fournis (nom, téléphone, position, rayon de notification). Retourne le profil complet à jour.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ProfilePatchRequest"];
+                };
+            };
+            responses: {
+                /** @description Profil mis à jour. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Me"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        trace?: never;
+    };
+    "/me/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mes signalements perdus / trouvés
+         * @description Liste paginée des signalements créés par l'utilisateur courant. Tous statuts confondus par défaut (actif + résolu + expiré) — passer `status` pour restreindre.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "actif" | "resolu" | "expire";
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Liste de mes signalements. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ReportSummary"][];
+                            pagination: components["schemas"]["Pagination"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mes candidatures d'adoption
+         * @description Liste des candidatures de l'utilisateur courant, avec un résumé de l'animal concerné. Tri par date de création décroissante. Pas de pagination (un user en a typiquement < 20).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Mes candidatures. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["MyApplication"][];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/favorites/pets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mes animaux favoris (détaillés)
+         * @description Renvoie les animaux favorisés sous forme `PetCard` (avec photo, refuge, statut courant). Inclut les animaux passés en `reserve` ou `adopte` pour que l'utilisateur suive leur sort.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Animaux favorisés, du plus récent au plus ancien. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["PetCard"][];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -846,7 +1008,15 @@ export interface paths {
                 };
                 400: components["responses"]["ValidationError"];
                 401: components["responses"]["Unauthorized"];
-                429: components["responses"]["RateLimited"];
+                /** @description Fichier trop volumineux ou quota d'upload quotidien atteint (50 fichiers/jour/user). */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1074,6 +1244,580 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Inbox de l'utilisateur courant
+         * @description Liste les conversations actives, triées du plus récent au plus ancien. Par défaut côté particulier (`side=user`). Les shelter_admin peuvent passer `?side=shelter` pour voir l'inbox de leur refuge.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    side?: "user" | "shelter";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Liste des conversations. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["InboxItem"][];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+            };
+        };
+        put?: never;
+        /**
+         * Ouvre une conversation avec un refuge
+         * @description Crée ou récupère une conversation entre l'utilisateur courant et le refuge cible (optionnellement attachée à un animal). Idempotent sur (user, shelter, pet) — un appel sur une conversation existante ajoute juste le `firstMessage` au fil.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OpenConversationRequest"];
+                };
+            };
+            responses: {
+                /** @description Conversation ouverte (créée ou retrouvée). */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["OpenConversationResult"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                429: components["responses"]["RateLimited"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Total des messages non lus
+         * @description Badge agrégé pour le tab Messages. `total = asUser + asShelter`. Peut être polling toutes les ~30s par le mobile.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Compteurs unread. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["UnreadCount"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Métadonnées d'une conversation
+         * @description Renvoie le contexte (interlocuteur, pet associé, sujet, unread) depuis le côté de l'appelant. 404 si l'utilisateur n'a pas accès.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Contexte de la conversation. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ConversationContext"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Archive la conversation (côté appelant uniquement)
+         * @description Soft-archive : la conversation disparaît de l'inbox de l'appelant mais l'autre côté la voit toujours. Réapparaît automatiquement dès qu'un nouveau message arrive. Idempotent.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Conversation archivée. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ArchiveConversationResult"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/gifs/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recherche de GIFs (proxy Tenor)
+         * @description Renvoie des GIFs depuis Tenor — soit par mot-clef via `?q=`, soit les tendances si `q` est omis. Filtre `contentfilter=high` appliqué côté Tenor (pas de NSFW). Rate-limité 60/min/user.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description GIFs trouvés. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["GifSearchResponse"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description Clé Tenor non configurée côté serveur (`TENOR_API_KEY`). */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                429: components["responses"]["RateLimited"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/typing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liste des participants qui tapent dans la conversation
+         * @description Renvoie les userIds qui ont signalé `typing=true` dans les 5 dernières secondes (TTL côté serveur). Ne contient jamais l'appelant. À poller toutes les 2s côté mobile.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Liste (potentiellement vide) des userIds qui tapent. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                userIds: string[];
+                            };
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        /**
+         * Déclare que l'appelant tape (ou s'arrête)
+         * @description À envoyer en debounce ~3s tant que l'utilisateur tape, et avec `isTyping=false` quand il s'arrête. L'entrée expire à 5s côté serveur — si le client est déconnecté/crashe, l'indicateur disparaît tout seul.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        isTyping: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                ok: boolean;
+                            };
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Édite un message envoyé
+         * @description Fenêtre stricte de 5 minutes après l'envoi. 403 si l'appelant n'est pas l'auteur. Publie `message.updated` sur le bus pour les clients connectés.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    messageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EditMessageRequest"];
+                };
+            };
+            responses: {
+                /** @description Message édité. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Message"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description Fenêtre d'édition dépassée (> 5 minutes après l'envoi). */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/conversations/{id}/messages/{messageId}/reactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Toggle une réaction emoji
+         * @description Ajoute la réaction si absente, retire-la sinon (idempotent). Whitelist d'emojis fixée serveur (~10 emojis bienveillants). Rate-limité 60/min/user.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    messageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReactionToggleRequest"];
+                };
+            };
+            responses: {
+                /** @description Réaction toggle effectuée. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ReactionToggleResult"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                429: components["responses"]["RateLimited"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Messages d'une conversation
+         * @description Renvoie les messages chronologiquement (max 200). Avec `?since=ISO`, renvoie uniquement les messages strictement postérieurs — pour le polling 5s du mobile.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    since?: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Liste de messages. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Message"][];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        /**
+         * Envoie un message
+         * @description Ajoute un message dans la conversation. Le sender est inféré du rôle de l'appelant (particulier vs admin refuge). Rate-limité.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SendMessageRequest"];
+                };
+            };
+            responses: {
+                /** @description Message envoyé. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SendMessageResult"];
+                        };
+                    };
+                };
+                400: components["responses"]["ValidationError"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                429: components["responses"]["RateLimited"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Marque tous les messages reçus comme lus
+         * @description Idempotent. Met `read_at = NOW()` sur les messages dont le sender est l'autre côté, et reset le compteur unread du côté appelant. À appeler au focus de l'écran thread côté mobile.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Marquage effectué. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["MarkReadResult"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
         trace?: never;
     };
 }
@@ -1350,6 +2094,42 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        /** @description Édition partielle du profil utilisateur. Tous les champs sont optionnels. Envoyer `latitude` ET `longitude` ensemble pour modifier la position. */
+        ProfilePatchRequest: {
+            name?: string;
+            phone?: string | null;
+            latitude?: number;
+            longitude?: number;
+            notificationRadiusKm?: number;
+        };
+        /** @description Candidature d'adoption du point de vue de l'adoptant. */
+        MyApplication: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "envoyee" | "en_cours" | "acceptee" | "refusee" | "annulee";
+            motivation: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            pet: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                /** @enum {string} */
+                species: "chat" | "chien";
+                breed?: string | null;
+                /** @enum {string|null} */
+                ageCategory?: "chaton" | "jeune" | "adulte" | "senior" | null;
+                /** @enum {string} */
+                sex: "male" | "femelle" | "inconnu";
+                /** @enum {string} */
+                status: "disponible" | "reserve" | "adopte" | "retire";
+                /** Format: uri */
+                primaryPhotoUrl: string | null;
+            };
+        };
         /** @enum {string} */
         NotificationType: "match_found" | "application_update" | "new_cat_nearby" | "report_nearby" | "new_message";
         Notification: {
@@ -1390,19 +2170,186 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
-        UploadPresignRequest: {
+        ReactionAgg: {
+            emoji: string;
+            count: number;
+            /** @description IDs des participants ayant réagi avec cet emoji. */
+            userIds: string[];
+        };
+        MessageAttachmentGifMeta: {
             /** @enum {string} */
-            contentType: "image/jpeg" | "image/png" | "image/webp";
+            type: "gif";
+            /** @enum {string} */
+            provider: "tenor";
+            externalId: string;
+            width: number;
+            height: number;
+            /** Format: uri */
+            previewUrl: string;
+        };
+        MessageAttachmentVoiceMeta: {
+            /** @enum {string} */
+            type: "voice";
+            durationMs: number;
+            mimeType: string;
+        };
+        MessageAttachment: {
+            /** @enum {string} */
+            type: "gif" | "voice";
+            /** Format: uri */
+            url: string;
+            meta: components["schemas"]["MessageAttachmentGifMeta"] | components["schemas"]["MessageAttachmentVoiceMeta"];
+        };
+        Message: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            conversationId: string;
+            /** @enum {string} */
+            senderType: "user" | "shelter";
             /**
-             * @description Préfixe S3 utilisé pour ranger les uploads : `reports/<userId>/...`, `pets/...`, etc.
+             * Format: uuid
+             * @description ID utilisateur de l'émetteur. `null` si le compte a été supprimé entre-temps.
+             */
+            senderId: string | null;
+            /** @description Texte du message — `null` si le message est purement GIF ou vocal. */
+            content: string | null;
+            attachment: (components["schemas"]["MessageAttachment"] | null) | null;
+            /** Format: date-time */
+            readAt: string | null;
+            /** Format: date-time */
+            editedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            reactions: components["schemas"]["ReactionAgg"][];
+        };
+        EditMessageRequest: {
+            content: string;
+        };
+        ReactionToggleRequest: {
+            /** @description Emoji parmi la whitelist serveur (cf. domains/messaging/emojis.ts). */
+            emoji: string;
+        };
+        ReactionToggleResult: {
+            /** @description `true` si la réaction a été ajoutée, `false` si retirée. */
+            added: boolean;
+            /** @description Agrégation fraîche du message après le toggle. */
+            reactions: components["schemas"]["ReactionAgg"][];
+        };
+        ArchiveConversationResult: {
+            archived: boolean;
+        };
+        InboxItem: {
+            /** Format: uuid */
+            id: string;
+            subject: string | null;
+            /** Format: date-time */
+            lastMessageAt: string;
+            lastMessagePreview: string | null;
+            /** @enum {string|null} */
+            lastSenderType: "user" | "shelter" | null;
+            unreadCount: number;
+            /** Format: uuid */
+            petId: string | null;
+            petName: string | null;
+            /**
+             * Format: uuid
+             * @description ID de l'interlocuteur : refuge (côté user) ou particulier (côté shelter).
+             */
+            peerId: string;
+            peerName: string;
+            /** Format: uri */
+            peerImageUrl: string | null;
+        };
+        ConversationContext: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Côté représenté par l'appelant courant — détermine quel `peer*` est rendu.
              * @enum {string}
              */
-            kind: "report" | "pet" | "shelter" | "pension";
+            asSide: "user" | "shelter";
+            subject: string | null;
+            /** Format: uuid */
+            petId: string | null;
+            petName: string | null;
+            /** Format: uuid */
+            peerId: string;
+            peerName: string;
+            /** Format: uri */
+            peerImageUrl: string | null;
+            /** @description Slug du refuge si l'appelant est côté user. `null` côté shelter (le peer est un particulier — pas de page publique). */
+            peerSlug: string | null;
+            unreadCount: number;
+        };
+        OpenConversationRequest: {
+            /** Format: uuid */
+            shelterId: string;
+            /**
+             * Format: uuid
+             * @description Optionnel — attache la conversation à un animal précis (question avant adoption).
+             */
+            petId?: string;
+            firstMessage: string;
+        };
+        OpenConversationResult: {
+            /** Format: uuid */
+            conversationId: string;
+            /** @description `false` si une conversation existait déjà pour (user, shelter, pet) — le 1er message a été appendu à l'existante. */
+            isNew: boolean;
+        };
+        /** @description Au moins l'un de `content` ou `attachment` doit être fourni. Un message peut combiner les deux (légende sur un GIF par exemple). */
+        SendMessageRequest: {
+            content?: string;
+            attachment?: components["schemas"]["MessageAttachment"];
+        };
+        GifResult: {
+            id: string;
+            /**
+             * Format: uri
+             * @description URL du GIF final (taille standard). À utiliser dans l'attachment.
+             */
+            url: string;
+            /**
+             * Format: uri
+             * @description Aperçu basse résolution pour le picker (chargement rapide).
+             */
+            previewUrl: string;
+            width: number;
+            height: number;
+            title: string | null;
+        };
+        GifSearchResponse: {
+            results: components["schemas"]["GifResult"][];
+        };
+        SendMessageResult: {
+            /** Format: uuid */
+            messageId: string;
+        };
+        MarkReadResult: {
+            /** @description Nombre de messages effectivement marqués lus à cet appel. */
+            markedCount: number;
+        };
+        UnreadCount: {
+            asUser: number;
+            asShelter: number;
+            total: number;
+        };
+        UploadPresignRequest: {
+            /** @enum {string} */
+            contentType: "image/jpeg" | "image/png" | "image/webp" | "audio/mp4" | "audio/mpeg" | "audio/aac" | "audio/webm";
+            /**
+             * @description Préfixe S3 utilisé pour ranger les uploads : `reports/<userId>/...`, `pets/...`, `messages/voice/<userId>/...`.
+             * @enum {string}
+             */
+            kind: "report" | "pet" | "shelter" | "pension" | "voice";
+            /** @description Taille en octets. Max 5 Mo par fichier. Inclus dans la signature S3 — le PUT est refusé si le client envoie un fichier d'une autre taille. */
+            contentLength: number;
         };
         UploadPresignResponse: {
             /**
              * Format: uri
-             * @description URL signée — PUT le body fichier dessus avec le même `Content-Type` que celui demandé.
+             * @description URL signée — PUT le body fichier dessus avec les mêmes `Content-Type` et `Content-Length` que ceux demandés.
              */
             uploadUrl: string;
             /**
@@ -1413,6 +2360,8 @@ export interface components {
             /** @description Clé S3 — utile pour DELETE ultérieur ou pour debug. Pas requise dans les payloads de création. */
             key: string;
             expiresInSec: number;
+            /** @description Taille max autorisée par le serveur pour ce kind d'upload. Informative — le client doit déjà respecter cette limite. */
+            maxBytes: number;
         };
         ApplicationCreate: {
             /** Format: uuid */

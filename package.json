@@ -24,10 +24,9 @@
     "db:init-roles": "docker exec -i miaou_postgres_1 psql -U miaou -d miaou < scripts/init-db-roles.sql",
     "api:types": "bun scripts/generate-api-types.ts",
     "mobile:assets": "bun scripts/generate-mobile-assets.ts",
-    "mobile:attach": "./scripts/mobile-android-attach.sh",
-    "mobile:devices": "adb devices",
+    "mobile:build": "./scripts/mobile-build.sh",
     "mobile:dev": "./scripts/mobile-dev.sh",
-    "mobile:logcat": "adb logcat ReactNativeJS:V *:S",
+    "mobile:emu": "./scripts/mobile-emu.sh",
     "prod:build": "COMPOSE_PROJECT_NAME=miaou-prod docker compose -f docker-compose.prod.yml --env-file .env.production build",
     "prod:up": "COMPOSE_PROJECT_NAME=miaou-prod docker compose -f docker-compose.prod.yml --env-file .env.production up -d",
     "prod:down": "COMPOSE_PROJECT_NAME=miaou-prod docker compose -f docker-compose.prod.yml --env-file .env.production down",
@@ -41,5 +40,9 @@
     "sharp": "^0.34.5",
     "turbo": "^2.5.0",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
   }
 }
