@@ -34,18 +34,25 @@ type NSFWModel = {
 };
 
 let modelPromise: Promise<NSFWModel> | null = null;
-let tfPromise: Promise<typeof import("@tensorflow/tfjs-node")> | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let tfPromise: Promise<any> | null = null;
+
+// Imports via variable string : empêche le bundler Next.js de tracer
+// `@tensorflow/tfjs-node` et `nsfwjs` dans le bundle de la fonction
+// serverless (Vercel limite 250 Mo, tfjs-node pèse 387 Mo seul).
+// Ces modules sont dans `optionalDependencies` — installés en dev pour
+// pouvoir activer le check NSFW, skip-ables en prod proto.
+const TFJS_MODULE = "@tensorflow/tfjs-node";
+const NSFW_MODULE = "nsfwjs";
 
 async function getModel(): Promise<NSFWModel | null> {
   if (!ENABLED) return null;
 
   if (!modelPromise) {
     modelPromise = (async () => {
-      // Imports dynamiques : permettent au reste de l'app de tourner même
-      // si tfjs-node ne démarre pas (ex. architecture non supportée).
-      const [nsfwjs] = await Promise.all([import("nsfwjs")]);
+      const [nsfwjs] = await Promise.all([import(NSFW_MODULE)]);
       if (!tfPromise) {
-        tfPromise = import("@tensorflow/tfjs-node");
+        tfPromise = import(TFJS_MODULE);
       }
       await tfPromise;
       return nsfwjs.load() as unknown as NSFWModel;
@@ -98,7 +105,7 @@ export async function classifyImage(buffer: Buffer): Promise<NsfwResult> {
   }
   if (!model) return { safe: true, scores: {}, reason: "check_disabled" };
 
-  if (!tfPromise) tfPromise = import("@tensorflow/tfjs-node");
+  if (!tfPromise) tfPromise = import(TFJS_MODULE);
   const tf = await tfPromise;
 
   // tf.node.decodeImage gère JPEG/PNG/WebP/BMP/GIF
