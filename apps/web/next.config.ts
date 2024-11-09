@@ -91,6 +91,19 @@ const nextConfig: NextConfig = {
     "nsfwjs",
     "sharp",
   ],
+  // Vercel : limite 250 Mo par fonction serverless. tfjs-node (~250 Mo)
+  // et nsfwjs blow le budget alors qu'on désactive le check NSFW en
+  // prototype (NSFW_CHECK_ENABLED=false). On exclut explicitement leurs
+  // node_modules du tracing — Next.js charge dynamiquement en runtime
+  // uniquement si la route /api/upload est appelée AVEC le check activé.
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/@tensorflow/**",
+      "node_modules/@mapbox/node-pre-gyp/**",
+      "node_modules/nsfwjs/**",
+      "node_modules/@types/**",
+    ],
+  },
   images: {
     remotePatterns: [
       ...(pattern ? [pattern] : []),
