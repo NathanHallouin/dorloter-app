@@ -1,106 +1,129 @@
 #!/usr/bin/env bash
-# Lance une session dev mobile complète :
-#   1. Vérifie que postgres + minio tournent (`docker compose ps`)
-#   2. Vérifie qu'au moins un device Android est joignable via adb
-#   3. Vérifie que ngrok est dispo et lance le tunnel HTTP vers le port 3000
-#   4. Affiche les commandes à lancer dans des terminaux séparés :
-#      - backend Next.js (avec HOSTNAME=0.0.0.0 pour écouter le LAN)
-#      - Metro Expo en mode tunnel, avec EXPO_PUBLIC_API_BASE_URL pointant
-#        sur l'URL ngrok publique
+# Session dev mobile en UNE commande — Metro tunnel + cloudflared backend auto.
 #
-# On ne lance pas tout dans le même terminal — Metro est interactif (touches
-# r, j, …) et le backend a son propre output. On préfère le user en mode 3
-# panes tmux ou 3 onglets terminal.
+# Workflow EAS dev-client cloud (pas de USB, pas de WSL2 adb) :
+#   1. Tu as installé le dev-client APK sur ton phone (`bun mobile:build`).
+#   2. Tu lances Next.js dans un terminal séparé : `cd apps/web && bun run dev`.
+#   3. Tu lances ce script. Il :
+#        a. vérifie que Next.js répond sur :3000
+#        b. lance cloudflared quick tunnel en background (backend → https public)
+#        c. extrait l'URL trycloudflare.com depuis les logs
+#        d. exporte EXPO_PUBLIC_API_BASE_URL = <cf>/api/v1
+#        e. lance `expo start --tunnel` qui sert le bundle JS au phone
+#   4. Sur le phone : ouvre le dev-client, scanne le QR Metro affiché.
+#   5. Ctrl+C ici → kill cloudflared + Metro proprement.
+#
+# Pourquoi cloudflared et pas ngrok :
+#   - Gratuit, illimité, sans compte
+#   - Plusieurs tunnels simultanés (ngrok free = 1 session, ce qui rentre
+#     en conflit avec celui que `expo start --tunnel` lance pour Metro)
+#
+# Pré-requis (à faire UNE fois) :
+#   - eas-cli installé + connecté : `bun add -g eas-cli && eas login`
+#   - cloudflared installé (cf. message d'erreur si absent)
+#   - dev-client APK installé sur le phone (via `bun mobile:build`)
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# ─── 1. Stack Docker dev ─────────────────────────────────────────────────────
+# ─── Pré-requis ──────────────────────────────────────────────────────────────
 
-if ! command -v docker >/dev/null 2>&1; then
-  echo "✗ docker manquant — installe Docker Desktop avec WSL2 backend."
-  exit 1
-fi
+if ! command -v cloudflared >/dev/null 2>&1; then
+  cat <<'EOF'
+✗ cloudflared non installé.
 
-if ! docker compose -f docker-compose.yml ps --status running --quiet | read -r _; then
-  echo "→ Postgres / MinIO ne tournent pas, lancement..."
-  docker compose -f docker-compose.yml up -d
-fi
-echo "✓ Postgres + MinIO up"
+Installation rapide (Ubuntu/WSL) :
+  curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb \
+    -o /tmp/cloudflared.deb
+  sudo dpkg -i /tmp/cloudflared.deb
+  rm /tmp/cloudflared.deb
 
-# ─── 2. Device Android ───────────────────────────────────────────────────────
-
-if ! command -v adb >/dev/null 2>&1; then
-  echo "✗ adb non installé — lance scripts/mobile-android-attach.sh d'abord."
-  exit 1
-fi
-
-DEVICES="$(adb devices | tail -n +2 | grep -E "device$" | wc -l)"
-if [ "${DEVICES}" -eq 0 ]; then
-  echo "✗ Aucun device Android attaché à WSL."
-  echo "  → Lance : bun mobile:attach"
-  exit 1
-fi
-echo "✓ ${DEVICES} device(s) Android attaché(s)"
-
-# ─── 3. Ngrok ────────────────────────────────────────────────────────────────
-
-if ! command -v ngrok >/dev/null 2>&1; then
-  cat <<EOF
-✗ ngrok non installé.
-
-Une fois :
-  curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
-    sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-  echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | \
-    sudo tee /etc/apt/sources.list.d/ngrok.list
-  sudo apt update && sudo apt install ngrok
-
-Puis configure le authtoken (compte gratuit suffit) :
-  ngrok config add-authtoken VOTRE_TOKEN_ICI
+Vérification : cloudflared --version
 EOF
   exit 1
 fi
 
-echo "✓ ngrok dispo"
+# ─── 1. Backend Next.js joignable ────────────────────────────────────────────
+
+if ! curl -fsS --max-time 2 http://localhost:3000/api/v1/openapi.json >/dev/null 2>&1; then
+  cat <<EOF
+✗ Backend Next.js injoignable sur http://localhost:3000.
+
+Lance d'abord dans un autre terminal :
+  cd apps/web && bun run dev
+
+Puis relance ce script.
+EOF
+  exit 1
+fi
+echo "✓ Backend Next.js OK sur :3000"
+
+# ─── 2. Tunnel cloudflared backend ───────────────────────────────────────────
+
+CF_LOG="$(mktemp -t dorloter-cf.XXXXXX)"
+cloudflared tunnel --url http://localhost:3000 --no-autoupdate \
+  >"${CF_LOG}" 2>&1 &
+CF_PID=$!
+
+cleanup() {
+  echo ""
+  echo "→ Arrêt cloudflared (pid ${CF_PID})"
+  kill "${CF_PID}" 2>/dev/null || true
+  wait "${CF_PID}" 2>/dev/null || true
+  rm -f "${CF_LOG}"
+}
+trap cleanup EXIT INT TERM
+
+# Cloudflared imprime l'URL après quelques secondes — poll max ~15s.
+CF_URL=""
+for _ in $(seq 1 30); do
+  CF_URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "${CF_LOG}" \
+    | head -1 || true)"
+  if [ -n "${CF_URL}" ]; then break; fi
+  sleep 0.5
+done
+
+if [ -z "${CF_URL}" ]; then
+  echo "✗ Impossible de récupérer l'URL cloudflared après 15s."
+  echo "  Dernières lignes de log :"
+  tail -20 "${CF_LOG}"
+  exit 1
+fi
+
+API_BASE_URL="${CF_URL}/api/v1"
+echo "✓ Tunnel backend : ${CF_URL}"
+
+# Smoke test : le tunnel met parfois quelques secondes à se propager.
+SMOKE_OK=false
+for _ in $(seq 1 10); do
+  if curl -fsS --max-time 3 "${API_BASE_URL}/openapi.json" >/dev/null 2>&1; then
+    SMOKE_OK=true
+    break
+  fi
+  sleep 1
+done
+if [ "${SMOKE_OK}" = true ]; then
+  echo "✓ API joignable via cloudflared"
+else
+  echo "⚠ API pas encore joignable via ${CF_URL} — Metro tournera, réessaie depuis l'app si erreur réseau."
+fi
 echo ""
 
-# ─── 4. Imprimer la procédure 3-terminaux ────────────────────────────────────
+# ─── 3. Metro tunnel ─────────────────────────────────────────────────────────
 
 cat <<EOF
 ═══════════════════════════════════════════════════════════════════════════
-   Procédure : ouvre 3 onglets terminal ou panes tmux
+  Metro va démarrer en mode tunnel. Quand le QR apparaît :
+
+    1. Ouvre l'app Dorloter Dev sur ton phone
+    2. Tap "Scan QR code" ou utilise l'app Caméra Samsung
+    3. Hot reload actif : tu modifies un .tsx, le phone recharge en ~1s
+
+  Ctrl+C ici pour tout arrêter (cloudflared + Metro).
 ═══════════════════════════════════════════════════════════════════════════
 
-▸ Terminal 1 — Backend Next.js (sur 0.0.0.0 pour le LAN)
-  ─────────────────────────────────────────────────────
-  HOSTNAME=0.0.0.0 bun --cwd apps/web run dev
-
-▸ Terminal 2 — Tunnel ngrok vers le backend
-  ─────────────────────────────────────────────────────
-  ngrok http 3000
-
-  Attends que l'URL https://xxxxx.ngrok-free.app s'affiche. Copie-la.
-
-▸ Terminal 3 — Metro Expo (Dev Client)
-  ─────────────────────────────────────────────────────
-  EXPO_PUBLIC_API_BASE_URL="https://xxxxx.ngrok-free.app/api/v1" \\
-    bun --cwd apps/mobile run start --tunnel
-
-  Ouvre le Dev Client APK sur ton phone, tap "Enter URL manually",
-  paste l'URL Metro affichée (du genre exp+dorloter://exp.host/...).
-
-▸ Smoke test depuis le phone (browser)
-  ─────────────────────────────────────────────────────
-  Ouvre https://xxxxx.ngrok-free.app/api/v1/openapi.json
-  → tu dois voir le JSON OpenAPI. Si oui, l'app pourra parler à l'API.
-
-▸ Hot reload
-  ─────────────────────────────────────────────────────
-  Modifie un .tsx dans apps/mobile/, sauvegarde → reload immédiat sur
-  le phone. Pas besoin de rebuild le Dev Client tant que tu touches
-  pas aux native deps.
-
-═══════════════════════════════════════════════════════════════════════════
 EOF
+
+cd apps/mobile
+exec env EXPO_PUBLIC_API_BASE_URL="${API_BASE_URL}" bun run start --tunnel
