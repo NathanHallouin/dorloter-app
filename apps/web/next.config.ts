@@ -90,12 +90,8 @@ const nextConfig: NextConfig = {
   // Transpile les packages workspace TypeScript consommés en source brut.
   transpilePackages: ["@dorloter/api-client"],
   // Bibliothèques avec bindings natifs (.node) ou code dynamique non bundlable :
-  // on les laisse résolues au runtime via le node_modules du serveur. Sans ça,
-  // la branche test de @mapbox/node-pre-gyp fait échouer le build sur un
-  // require('nock') introuvable.
+  // on les laisse résolues au runtime via le node_modules du serveur.
   serverExternalPackages: [
-    "@tensorflow/tfjs-node",
-    "nsfwjs",
     "sharp",
   ],
   // Vercel : limite 250 Mo par fonction serverless. On exclut tout ce qui

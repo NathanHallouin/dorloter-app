@@ -66,9 +66,5 @@
     "prettier": "^3.8.3",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.3"
-  },
-  "optionalDependencies": {
-    "@tensorflow/tfjs-node": "^4.22.0",
-    "nsfwjs": "^4.3.0"
   }
 }
