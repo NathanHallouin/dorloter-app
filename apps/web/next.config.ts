@@ -91,17 +91,50 @@ const nextConfig: NextConfig = {
     "nsfwjs",
     "sharp",
   ],
-  // Vercel : limite 250 Mo par fonction serverless. tfjs-node (~250 Mo)
-  // et nsfwjs blow le budget alors qu'on désactive le check NSFW en
-  // prototype (NSFW_CHECK_ENABLED=false). On exclut explicitement leurs
-  // node_modules du tracing — Next.js charge dynamiquement en runtime
-  // uniquement si la route /api/upload est appelée AVEC le check activé.
+  // Vercel : limite 250 Mo par fonction serverless. On exclut tout ce qui
+  // n'a rien à faire côté serveur (deps mobile, libs cartographiques
+  // client-only, build tooling, etc.). Sans ces excludes, Next.js trace
+  // depuis outputFileTracingRoot (le monorepo entier) et embarque 600+ Mo.
   outputFileTracingExcludes: {
     "*": [
+      // Lourdes deps optionnelles (NSFW désactivé en proto)
       "node_modules/@tensorflow/**",
       "node_modules/@mapbox/node-pre-gyp/**",
       "node_modules/nsfwjs/**",
+      // Types TypeScript (jamais utiles au runtime)
       "node_modules/@types/**",
+      // Mobile (apps/mobile)
+      "node_modules/react-native/**",
+      "node_modules/react-native-*/**",
+      "node_modules/@react-native/**",
+      "node_modules/@react-native-*/**",
+      "node_modules/expo/**",
+      "node_modules/expo-*/**",
+      "node_modules/@expo/**",
+      "node_modules/@sentry/react-native/**",
+      "node_modules/metro/**",
+      "node_modules/metro-*/**",
+      "node_modules/@metro-js/**",
+      "node_modules/hermes-*/**",
+      // Cartographie client-only
+      "node_modules/maplibre-gl/**",
+      "node_modules/react-map-gl/**",
+      "node_modules/@vis.gl/**",
+      // Build tooling jamais exécuté en serverless
+      "node_modules/@rolldown/**",
+      "node_modules/@turbo/**",
+      "node_modules/turbo/**",
+      "node_modules/@playwright/**",
+      "node_modules/playwright/**",
+      "node_modules/@axe-core/**",
+      "node_modules/dependency-cruiser/**",
+      "node_modules/drizzle-kit/**",
+      "node_modules/@tailwindcss/**",
+      "node_modules/tailwindcss/**",
+      // Azure SDK (tiré transitivement, jamais utilisé)
+      "node_modules/@azure/**",
+      // App mobile entière (pas un workspace package du web)
+      "apps/mobile/**",
     ],
   },
   images: {
