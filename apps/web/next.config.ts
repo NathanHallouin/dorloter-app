@@ -75,11 +75,18 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Bundle minimal pour Docker (serveur + deps + assets publics uniquement).
-  output: "standalone",
+  // `standalone` : nécessaire pour Docker self-hosted (apps/web embarque
+  // tout). Sur Vercel, ça duplique les fichiers dans `.next/standalone/`
+  // et fait exploser la taille des fonctions serverless. On bascule en
+  // mode normal quand VERCEL est défini par la plateforme.
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   // Monorepo : étendre le tracing de fichiers à la racine du workspace pour
   // que le standalone embarque @dorloter/api-client et les workspace-deps.
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  // Inutile sur Vercel — Vercel gère lui-même les workspace deps via le
+  // Root Directory + le linker bun hoisted.
+  ...(process.env.VERCEL
+    ? {}
+    : { outputFileTracingRoot: path.join(__dirname, "../../") }),
   // Transpile les packages workspace TypeScript consommés en source brut.
   transpilePackages: ["@dorloter/api-client"],
   // Bibliothèques avec bindings natifs (.node) ou code dynamique non bundlable :
