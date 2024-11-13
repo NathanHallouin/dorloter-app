@@ -45,7 +45,7 @@ export function PensionReviewsSection({
               <strong className="text-foreground">
                 {rating.average.toFixed(1)}
               </strong>{" "}
-              sur 5 — {rating.count} avis publié
+              sur 5 · {rating.count} avis publié
               {rating.count > 1 ? "s" : ""}
             </p>
           ) : (

@@ -75,7 +75,7 @@ subscribe<ApplicationStatusChangedEvent>(
         "Le refuge va vous recontacter pour la rencontre. Préparez votre maison à un nouvel arrivant.",
       refusee:
         event.shelterNotes ??
-        "Cette fois ça n'a pas collé — d'autres profils vous attendent dans le catalogue.",
+        "Cette fois ça n'a pas collé · d'autres profils vous attendent dans le catalogue.",
     };
 
     await emitNotification({
@@ -109,14 +109,14 @@ subscribe<ReportMatchesDiscoveredEvent>(
       event.matches.length === 1
         ? isPerduOwner
           ? `Une piste à ${bestDistance} pour votre disparition`
-          : `Quelqu'un cherche peut-être votre trouvé — à ${bestDistance}`
+          : `Quelqu'un cherche peut-être votre trouvé · à ${bestDistance}`
         : isPerduOwner
           ? `${event.matches.length} pistes possibles près de chez vous`
           : `${event.matches.length} familles cherchent un animal correspondant`;
 
     const bodyOwner =
       event.matches.length === 1
-        ? `Score ${bestScore}/100 — vérifiez la fiche, prenez contact si ça ressemble.`
+        ? `Score ${bestScore}/100 · vérifiez la fiche, prenez contact si ça ressemble.`
         : `La plus probable : à ${bestDistance}, score ${bestScore}/100.`;
 
     await emitNotification({
@@ -144,7 +144,7 @@ subscribe<ReportMatchesDiscoveredEvent>(
         userId: m.reportOwnerUserId,
         type: "match_found",
         title: `Un signalement « ${counterpartLabel} » à ${otherDistance} de votre annonce`,
-        body: `Score ${otherScore}/100 — ouvrez la fiche pour comparer les détails et contacter si ça correspond.`,
+        body: `Score ${otherScore}/100 · ouvrez la fiche pour comparer les détails et contacter si ça correspond.`,
         data: {
           reportId: m.reportId,
           matchedReportId: event.reportId,
@@ -168,7 +168,7 @@ subscribe<ReportStaleEvent>("lost-found.report_stale", async (event) => {
     type: "report_nearby",
     title: isPerdu
       ? `${event.daysActive} jours sans nouvelle de ${subject}`
-      : `${subject} attend toujours sa famille — ${event.daysActive} jours`,
+      : `${subject} attend toujours sa famille · ${event.daysActive} jours`,
     body: isPerdu
       ? "Si vous l'avez retrouvé·e, marquez l'annonce comme résolue. Sinon, complétez la fiche pour augmenter les chances."
       : "Si la famille s'est manifestée, marquez l'annonce comme résolue. Sinon, ajoutez des détails pour aider la mise en relation.",

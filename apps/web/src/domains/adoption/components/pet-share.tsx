@@ -98,13 +98,13 @@ export function PetShare({
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
     url
   )}&quote=${encodeURIComponent(
-    `${petName} cherche une famille${shelterName ? ` — ${shelterName}` : ""}`
+    `${petName} cherche une famille${shelterName ? ` · ${shelterName}` : ""}`
   )}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
     url
   )}&text=${encodeURIComponent(
-    `🐾 ${petName} cherche une famille${shelterName ? ` — ${shelterName}` : ""}`
+    `🐾 ${petName} cherche une famille${shelterName ? ` · ${shelterName}` : ""}`
   )}`;
 
   const channelClass = cn(
@@ -240,7 +240,7 @@ export function PetShare({
         </div>
         {photoUrl && (
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Pensez à joindre la photo à votre post —{" "}
+            Pensez à joindre la photo à votre post ·{" "}
             <a
               href={photoUrl}
               target="_blank"
@@ -289,7 +289,7 @@ function buildShareText(args: {
 
   if (args.shelterName) {
     lines.push(
-      `📍 Chez ${args.shelterName}${args.shelterAddress ? ` — ${args.shelterAddress}` : ""}`
+      `📍 Chez ${args.shelterName}${args.shelterAddress ? ` · ${args.shelterAddress}` : ""}`
     );
   }
   lines.push("");
@@ -303,7 +303,7 @@ function buildShareText(args: {
   lines.push(`➡️ Fiche complète : ${args.url}`);
   lines.push("");
   lines.push(
-    "🙏 Partagez autour de vous — un ami, un collègue, un voisin…"
+    "🙏 Partagez autour de vous · un ami, un collègue, un voisin…"
   );
 
   return lines.join("\n");

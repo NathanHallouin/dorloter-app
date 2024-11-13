@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "Chats et chiens à adopter en mode carte : swipez à droite ce qui vous plaît, passez ce qui ne vous correspond pas. Vue liste avec filtres également disponible.",
   alternates: { canonical: "/adopter" },
   openGraph: {
-    title: "Adopter un animal — Dorloter",
+    title: "Adopter un animal · Dorloter",
     description:
       "Découvrez les chats et chiens à adopter chez les refuges partenaires. Mode swipe ou liste filtrable, partout en France.",
     url: "/adopter",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Adopter un animal — Dorloter",
+    title: "Adopter un animal · Dorloter",
     description:
       "Trouvez votre prochain compagnon chez les refuges partenaires de Dorloter.",
   },

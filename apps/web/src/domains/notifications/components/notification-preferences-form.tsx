@@ -88,7 +88,7 @@ export function NotificationPreferencesForm({ initial, pushSupported }: Props) {
         <div>
           <p className="font-medium text-foreground">Réglages rapides</p>
           <p className="text-sm text-muted-foreground">
-            Trois préréglages — vous pourrez réajuster type par type ensuite.
+            Trois préréglages · vous pourrez réajuster type par type ensuite.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

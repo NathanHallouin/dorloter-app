@@ -139,7 +139,7 @@ function validateBbox(bbox: BoundingBox): void {
   // doit zoomer ou paginer plus serré.
   if (bbox.north - bbox.south > 5 || bbox.east - bbox.west > 5) {
     throw validationFailed(
-      "Bbox trop large — restreignez à moins de 5° de côté."
+      "Bbox trop large · restreignez à moins de 5° de côté."
     );
   }
 }
@@ -154,7 +154,7 @@ function validateNear(near: NonNullable<ReportListFilters["near"]>): void {
     throw validationFailed("Coordonnées hors des bornes géographiques.");
   }
   if (near.radiusKm <= 0 || near.radiusKm > 200) {
-    throw validationFailed("Rayon invalide — entre 0.1 et 200 km.");
+    throw validationFailed("Rayon invalide · entre 0.1 et 200 km.");
   }
 }
 
@@ -187,7 +187,7 @@ export async function listReports(input: {
 
   if (filters.bbox && filters.near) {
     throw validationFailed(
-      "`bbox` et `near` sont exclusifs — utilisez l'un ou l'autre."
+      "`bbox` et `near` sont exclusifs · utilisez l'un ou l'autre."
     );
   }
   if (filters.bbox) validateBbox(filters.bbox);
@@ -501,7 +501,7 @@ export async function createReport(
 
   if (duplicate) {
     throw conflict(
-      "Vous avez déjà un signalement actif très similaire — éditez l'existant plutôt que d'en créer un nouveau.",
+      "Vous avez déjà un signalement actif très similaire · éditez l'existant plutôt que d'en créer un nouveau.",
       { existingReportId: duplicate.id }
     );
   }

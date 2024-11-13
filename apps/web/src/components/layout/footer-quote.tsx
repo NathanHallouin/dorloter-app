@@ -65,7 +65,7 @@ export function FooterQuote() {
       <blockquote className="text-sm italic leading-relaxed text-muted-foreground">
         « {quote.text} »
         <cite className="not-italic">
-          {" — "}
+          {" · "}
           <span className="text-foreground/80">{quote.attribution}</span>
         </cite>
       </blockquote>

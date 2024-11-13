@@ -47,7 +47,7 @@ export function TestimonialDisplay({
             {content}
           </blockquote>
           <p className="mt-3 text-xs text-muted-foreground">
-            — {firstName}, {date}
+            · {firstName}, {date}
           </p>
         </div>
       </div>

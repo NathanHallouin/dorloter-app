@@ -114,7 +114,7 @@ export async function cancelApplication(
 
   if (existing.status === "acceptee" || existing.status === "refusee") {
     throw unprocessable(
-      "Cette candidature ne peut plus être annulée — décision déjà prise par le refuge."
+      "Cette candidature ne peut plus être annulée · décision déjà prise par le refuge."
     );
   }
 

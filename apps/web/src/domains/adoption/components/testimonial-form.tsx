@@ -67,7 +67,7 @@ export function TestimonialForm({
       toast.success(
         existing
           ? "Témoignage mis à jour."
-          : "Merci pour votre témoignage — il aidera d'autres adoptants à franchir le pas."
+          : "Merci pour votre témoignage · il aidera d'autres adoptants à franchir le pas."
       );
       router.refresh();
     });
@@ -83,7 +83,7 @@ export function TestimonialForm({
               Vous avez adopté {petName} ?
             </h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Racontez son histoire — votre témoignage aidera d&apos;autres
+              Racontez son histoire · votre témoignage aidera d&apos;autres
               adoptants hésitants.
             </p>
             <Button

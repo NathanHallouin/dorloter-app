@@ -73,7 +73,7 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-              Tout commence par une intention. Choisissez la vôtre — vous
+              Tout commence par une intention. Choisissez la vôtre · vous
               n&apos;avez pas besoin de compte pour explorer.
             </p>
 
@@ -133,7 +133,7 @@ export default async function HomePage() {
                 accent="coral"
                 eyebrow="Adopter"
                 title="Trouver un compagnon"
-                description="Chats et chiens en refuge, fiches détaillées, filtres par compatibilité — ou en mode swipe pour la sérendipité."
+                description="Chats et chiens en refuge, fiches détaillées, filtres par compatibilité · ou en mode swipe pour la sérendipité."
                 stat={`${adoption.available} animaux à adopter`}
                 icon={<Heart className="h-6 w-6" fill="currentColor" />}
               />
@@ -270,8 +270,8 @@ export default async function HomePage() {
                 Quel animal pour votre vie ?
               </h2>
               <p className="mt-4 max-w-lg text-muted-foreground">
-                7 questions rapides — type de logement, présence d&apos;enfants,
-                temps disponible — et on vous propose les profils
+                7 questions rapides · type de logement, présence d&apos;enfants,
+                temps disponible · et on vous propose les profils
                 d&apos;animaux qui colleront le mieux. Sans inscription.
               </p>
               <Link
@@ -318,7 +318,7 @@ export default async function HomePage() {
                 <p className="mt-4 text-muted-foreground">
                   {shelterStats.verified} refuge
                   {shelterStats.verified > 1 ? "s" : ""} vérifié
-                  {shelterStats.verified > 1 ? "s" : ""} sur Dorloter — page
+                  {shelterStats.verified > 1 ? "s" : ""} sur Dorloter · page
                   publique gratuite, contact direct, zéro commission sur les
                   adoptions.
                 </p>
@@ -339,7 +339,7 @@ export default async function HomePage() {
                 <FeatureCard
                   icon={<PawPrint className="h-5 w-5" />}
                   title="Fiches riches"
-                  body="Caractère, santé, compatibilités — pour décider en connaissance de cause."
+                  body="Caractère, santé, compatibilités · pour décider en connaissance de cause."
                 />
                 <FeatureCard
                   icon={<Heart className="h-5 w-5" fill="currentColor" />}

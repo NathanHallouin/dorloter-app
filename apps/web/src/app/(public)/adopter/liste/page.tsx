@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "Parcourez tous les chats et chiens à adopter chez les refuges partenaires. Filtrez par espèce, âge, sexe et compatibilité avec vos enfants ou autres animaux.",
   alternates: { canonical: "/adopter/liste" },
   openGraph: {
-    title: "Tous les animaux à adopter — Dorloter",
+    title: "Tous les animaux à adopter · Dorloter",
     description:
       "Catalogue complet des chats et chiens à adopter, filtres par compatibilité et géographie.",
     url: "/adopter/liste",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tous les animaux à adopter — Dorloter",
+    title: "Tous les animaux à adopter · Dorloter",
     description:
       "Catalogue complet, filtrable, des chats et chiens proposés à l'adoption.",
   },

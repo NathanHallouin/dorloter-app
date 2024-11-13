@@ -729,7 +729,7 @@ function Step2PhotoLocation({
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          5 photos max — JPEG, PNG ou WebP, 5 Mo chacune.
+          5 photos max · JPEG, PNG ou WebP, 5 Mo chacune.
         </p>
       </div>
 

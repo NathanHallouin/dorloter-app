@@ -52,7 +52,7 @@ export const NOTIFICATION_TYPE_META: Record<
   match_found: {
     label: "Correspondance perdu/trouvé",
     description:
-      "Quand un signalement proche du vôtre pourrait correspondre — c'est le cœur du service, on recommande de garder activé.",
+      "Quand un signalement proche du vôtre pourrait correspondre · c'est le cœur du service, on recommande de garder activé.",
   },
   application_update: {
     label: "Suivi de candidature",
@@ -72,7 +72,7 @@ export const NOTIFICATION_TYPE_META: Record<
   report_nearby: {
     label: "Rappel signalement",
     description:
-      "Rappel hebdomadaire sur vos signalements actifs — pour penser à les marquer comme résolus si l'animal est rentré.",
+      "Rappel hebdomadaire sur vos signalements actifs · pour penser à les marquer comme résolus si l'animal est rentré.",
   },
 };
 

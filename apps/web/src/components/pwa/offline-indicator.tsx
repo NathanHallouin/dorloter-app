@@ -33,7 +33,7 @@ export function OfflineIndicator() {
       className="sticky top-14 z-40 flex items-center justify-center gap-2 bg-sable-900 px-4 py-1.5 text-xs font-medium text-sable-100"
     >
       <WifiOff className="h-3.5 w-3.5" />
-      Hors-ligne — seul le contenu déjà consulté est accessible.
+      Hors-ligne · seul le contenu déjà consulté est accessible.
     </div>
   );
 }

@@ -115,7 +115,7 @@ const QUESTIONS: Question[] = [
   {
     id: "experience",
     prompt: "C'est votre premier animal ?",
-    helper: "Pas de jugement — on adapte la recommandation.",
+    helper: "Pas de jugement · on adapte la recommandation.",
     choices: [
       {
         value: "first",
@@ -134,7 +134,7 @@ const QUESTIONS: Question[] = [
     choices: [
       {
         value: "low",
-        label: "Peu — je travaille à l'extérieur",
+        label: "Peu · je travaille à l'extérieur",
         hint: "Plutôt un chat adulte tranquille.",
         icon: <Clock className="h-5 w-5" />,
       },
@@ -144,7 +144,7 @@ const QUESTIONS: Question[] = [
       },
       {
         value: "high",
-        label: "Beaucoup — je télétravaille ou je suis dispo",
+        label: "Beaucoup · je télétravaille ou je suis dispo",
         hint: "Un chiot ou un chien sportif est jouable.",
         icon: <Heart className="h-5 w-5" />,
       },
@@ -172,11 +172,11 @@ function computeRecommendation(answers: Answers): ComputedRecommendation {
     filters.species = answers.species;
     highlights.push(
       answers.species === "chat"
-        ? "Vous préférez un chat — on filtre les profils félins."
-        : "Vous préférez un chien — on filtre les profils canins."
+        ? "Vous préférez un chat · on filtre les profils félins."
+        : "Vous préférez un chien · on filtre les profils canins."
     );
   } else {
-    highlights.push("Vous gardez les deux espèces — on ne filtre pas.");
+    highlights.push("Vous gardez les deux espèces · on ne filtre pas.");
   }
 
   if (answers.children === "young" || answers.children === "older") {
@@ -198,7 +198,7 @@ function computeRecommendation(answers: Answers): ComputedRecommendation {
   // Suggestions d'âge : pas un filtre dur, on l'affiche en hint
   if (answers.experience === "first" || answers.time === "low") {
     highlights.push(
-      "Privilégiez un animal adulte — moins exigeant et déjà éduqué."
+      "Privilégiez un animal adulte · moins exigeant et déjà éduqué."
     );
   }
   if (answers.time === "high" && answers.species !== "chat") {
@@ -294,7 +294,7 @@ export function MatchQuiz() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Le quiz n&apos;enregistre rien — vos réponses restent dans votre
+          Le quiz n&apos;enregistre rien · vos réponses restent dans votre
           navigateur.
         </p>
       </div>

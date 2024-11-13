@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     "Signalez un chat ou un chien perdu ou trouvé. Notre système géolocalisé rapproche automatiquement les signalements et alerte les voisins par notification.",
   alternates: { canonical: "/perdus-trouves" },
   openGraph: {
-    title: "Animaux perdus & trouvés — Dorloter",
+    title: "Animaux perdus & trouvés · Dorloter",
     description:
       "Carte en temps réel des animaux perdus et trouvés. Mise en relation automatique par géolocalisation et description.",
     url: "/perdus-trouves",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Animaux perdus & trouvés — Dorloter",
+    title: "Animaux perdus & trouvés · Dorloter",
     description:
       "Signalez et retrouvez les animaux perdus près de chez vous, en quelques secondes.",
   },
@@ -264,7 +264,7 @@ export default async function PerdusTrouvesPage({ searchParams }: PageProps) {
             hint={
               hasGeo
                 ? "Essayez d'élargir le rayon, ou revenez plus tard. Les signalements arrivent souvent par vagues."
-                : "Tant mieux — c'est le silence qu'on aime sur cette page. Si vous avez perdu ou trouvé un animal, signalez-le."
+                : "Tant mieux · c'est le silence qu'on aime sur cette page. Si vous avez perdu ou trouvé un animal, signalez-le."
             }
             action={
               <Link

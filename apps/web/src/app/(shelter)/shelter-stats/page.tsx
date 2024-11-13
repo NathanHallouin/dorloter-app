@@ -6,7 +6,7 @@ import { requireShelter } from "@infra/auth/session";
 import { getShelterStats } from "@adoption/public";
 
 export const metadata: Metadata = {
-  title: "Statistiques — Refuge",
+  title: "Statistiques · Refuge",
 };
 
 export default async function ShelterStatsPage() {

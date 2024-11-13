@@ -1,14 +1,14 @@
-# CLAUDE.md — Dorloter
+# CLAUDE.md · Dorloter
 
 ## Identité du projet
 
 Dorloter est une plateforme web française d'adoption et de retrouvailles d'animaux domestiques. MVP centré sur **chat et chien** ; extensible aux NAC (lapin, rongeur, reptile…) sans refonte. Trois fonctions :
 
-1. **Adoption** — vitrine des refuges et associations, profils d'animaux à adopter (photos, caractère, besoins médicaux, compatibilités). Matching adoptant/animal en swipe ou en liste filtrée, formulaire de candidature en ligne, suivi du processus.
+1. **Adoption** · vitrine des refuges et associations, profils d'animaux à adopter (photos, caractère, besoins médicaux, compatibilités). Matching adoptant/animal en swipe ou en liste filtrée, formulaire de candidature en ligne, suivi du processus.
 
-2. **Perdus / Trouvés** — réseau de signalement géolocalisé. Les particuliers signalent un animal perdu ou trouvé, le système rapproche automatiquement les signalements par localisation, espèce, description physique et date. Notifications aux utilisateurs proches.
+2. **Perdus / Trouvés** · réseau de signalement géolocalisé. Les particuliers signalent un animal perdu ou trouvé, le système rapproche automatiquement les signalements par localisation, espèce, description physique et date. Notifications aux utilisateurs proches.
 
-3. **Pensions** — annuaire des pensions professionnelles agréées (chatteries, chenils). **Pros uniquement** — SIRET et agrément préfecture vérifiés manuellement par l'équipe Dorloter avant publication. Pas de garde entre particuliers, pas de booking intégré en MVP — contact téléphone/email direct.
+3. **Pensions** · annuaire des pensions professionnelles agréées (chatteries, chenils). **Pros uniquement** · SIRET et agrément préfecture vérifiés manuellement par l'équipe Dorloter avant publication. Pas de garde entre particuliers, pas de booking intégré en MVP · contact téléphone/email direct.
 
 Domaine : `dorloter.fr`. Projet solo, développeur fullstack freelance basé en France. Priorité MVP : un prototype fonctionnel, pas une architecture parfaite.
 
@@ -34,7 +34,7 @@ Organisation modulaire (monolithe à bounded contexts). Voir [docs/ARCHITECTURE.
 
 ```
 src/
-├── app/                          # Next.js routes — orchestration pure
+├── app/                          # Next.js routes · orchestration pure
 │   ├── (public)/                 # Pages sans auth (adopter, perdus-trouves, refuges)
 │   ├── (app)/                    # Pages avec auth user (dashboard, candidater, signaler)
 │   ├── (shelter)/                # Pages refuge admin (shelter-animaux, candidatures, stats)
@@ -43,7 +43,7 @@ src/
 │   ├── api/                      # Routes API (cron, upload, auth handler, SSE messages)
 │   ├── layout.tsx                # Root layout + metadata Dorloter
 │   ├── manifest.ts               # PWA manifest
-│   └── instrumentation.ts        # Next.js register() — bootstrap listeners event-bus
+│   └── instrumentation.ts        # Next.js register() · bootstrap listeners event-bus
 │
 ├── domains/                      # Bounded contexts métier
 │   ├── adoption/                 # pets, applications, favorites, testimonials
@@ -58,7 +58,7 @@ src/
 │   # chaque domaine = schema.ts + actions/ + queries/ + components/
 │   # + public.ts (+ public.client.ts si besoin) + events.ts + listeners.ts
 │
-├── infrastructure/               # Plomberie — zéro métier
+├── infrastructure/               # Plomberie · zéro métier
 │   ├── db/                       # Clients Drizzle (app + admin), enums partagés
 │   ├── auth/                     # Better Auth + session helpers
 │   ├── storage/                  # S3 client
@@ -89,7 +89,7 @@ src/
 └── types/                        # Types TS partagés (inférés Drizzle + ActionResponse)
 ```
 
-**Règles de frontière** (appliquées par dependency-cruiser + CI — voir `.dependency-cruiser.cjs`) :
+**Règles de frontière** (appliquées par dependency-cruiser + CI · voir `.dependency-cruiser.cjs`) :
 - `shared/` n'importe rien d'`infrastructure/`, `domains/`, `app/`
 - `infrastructure/` n'importe rien de `domains/` ou `app/`
 - `domains/X` ne peut importer d'un autre domaine que via `public.ts`, `public.client.ts`, `events.ts`, `schema.ts`
@@ -101,59 +101,59 @@ src/
 
 ### Tables métier
 
-**pets** — animaux à adopter (gérés par les refuges)
+**pets** · animaux à adopter (gérés par les refuges)
 - `id` : UUID (pk, gen_random_uuid)
 - `shelter_id` : UUID (fk → shelters), not null
-- `species` : enum('chat', 'chien') — enum extensible pour les NAC à terme
+- `species` : enum('chat', 'chien') · enum extensible pour les NAC à terme
 - `name` : varchar(255), not null
-- `description` : text — personnalité, histoire
-- `breed` : varchar(100) — race ("Européen", "Golden retriever", "Croisé"...)
-- `color` : varchar(100) — couleur du pelage
+- `description` : text · personnalité, histoire
+- `breed` : varchar(100) · race ("Européen", "Golden retriever", "Croisé"...)
+- `color` : varchar(100) · couleur du pelage
 - `sex` : enum('male', 'femelle', 'inconnu')
-- `age_category` : enum('chaton', 'jeune', 'adulte', 'senior') — "chaton" couvre aussi le chiot
-- `estimated_birth` : date — nullable, approximatif
+- `age_category` : enum('chaton', 'jeune', 'adulte', 'senior') · "chaton" couvre aussi le chiot
+- `estimated_birth` : date · nullable, approximatif
 - `is_sterilized`, `is_chipped`, `is_vaccinated` : boolean
-- `fiv_felv` : enum('negatif', 'fiv_positif', 'felv_positif', 'fiv_felv_positif', 'non_teste') — **nullable, chat uniquement**
-- `indoor_only` : boolean — **nullable, chat uniquement**
+- `fiv_felv` : enum('negatif', 'fiv_positif', 'felv_positif', 'fiv_felv_positif', 'non_teste') · **nullable, chat uniquement**
+- `indoor_only` : boolean · **nullable, chat uniquement**
 - `ok_with_cats`, `ok_with_dogs`, `ok_with_children` : enum('oui', 'non', 'inconnu')
-- `special_needs` : text — besoins spécifiques (régime, médicaments...)
+- `special_needs` : text · besoins spécifiques (régime, médicaments...)
 - `status` : enum('disponible', 'reserve', 'adopte', 'retire')
-- `adoption_fee` : decimal(8,2) — frais d'adoption
+- `adoption_fee` : decimal(8,2) · frais d'adoption
 - `created_at`, `updated_at` : timestamp
 
 Les champs `fiv_felv` et `indoor_only` sont **nullables** : le formulaire les masque si `species != 'chat'`. Côté UI, toujours null-checker avant affichage.
 
-**pet_photos** — plusieurs photos par animal (galerie)
+**pet_photos** · plusieurs photos par animal (galerie)
 - `id` : UUID (pk)
 - `pet_id` : UUID (fk → pets)
 - `url` : text, not null
-- `is_primary` : boolean — photo principale affichée en card
-- `order` : integer — ordre dans la galerie
+- `is_primary` : boolean · photo principale affichée en card
+- `order` : integer · ordre dans la galerie
 - `created_at` : timestamp
 
-**reports** — signalements perdu/trouvé
+**reports** · signalements perdu/trouvé
 - `id` : UUID (pk)
 - `user_id` : UUID (fk → users), not null
 - `type` : enum('perdu', 'trouve'), not null
 - `status` : enum('actif', 'resolu', 'expire')
 - `species` : enum('chat', 'chien'), not null
-- `pet_name` : varchar(255) — nullable (trouvé = pas de nom)
-- `description` : text, not null — description physique détaillée
+- `pet_name` : varchar(255) · nullable (trouvé = pas de nom)
+- `description` : text, not null · description physique détaillée
 - `breed` : varchar(100)
 - `color` : varchar(100)
 - `sex` : enum('male', 'femelle', 'inconnu')
 - `is_chipped` : boolean
-- `chip_number` : varchar(50) — si connu
-- `distinctive_signs` : text — cicatrice, oreille coupée, collier...
-- `location` : geography(Point, 4326), not null — PostGIS, lieu de perte/découverte
-- `address` : text — adresse lisible
-- `date_event` : date, not null — date de perte ou découverte
+- `chip_number` : varchar(50) · si connu
+- `distinctive_signs` : text · cicatrice, oreille coupée, collier...
+- `location` : geography(Point, 4326), not null · PostGIS, lieu de perte/découverte
+- `address` : text · adresse lisible
+- `date_event` : date, not null · date de perte ou découverte
 - `contact_phone` : varchar(20)
 - `contact_email` : varchar(255)
 - `notes` : text
 - `created_at`, `updated_at` : timestamp
 
-**report_photos** — photos du signalement
+**report_photos** · photos du signalement
 - `id` : UUID (pk)
 - `report_id` : UUID (fk → reports)
 - `url` : text, not null
@@ -161,81 +161,81 @@ Les champs `fiv_felv` et `indoor_only` sont **nullables** : le formulaire les ma
 - `order` : integer
 - `created_at` : timestamp
 
-**report_matches** — correspondances suggérées entre perdu et trouvé
+**report_matches** · correspondances suggérées entre perdu et trouvé
 - `id` : UUID (pk)
-- `lost_report_id` : UUID (fk → reports), not null — le signalement "perdu"
-- `found_report_id` : UUID (fk → reports), not null — le signalement "trouvé"
-- `score` : decimal(5,2) — score de similarité (0-100)
-- `distance_meters` : integer — distance entre les deux points
+- `lost_report_id` : UUID (fk → reports), not null · le signalement "perdu"
+- `found_report_id` : UUID (fk → reports), not null · le signalement "trouvé"
+- `score` : decimal(5,2) · score de similarité (0-100)
+- `distance_meters` : integer · distance entre les deux points
 - `status` : enum('suggere', 'confirme', 'rejete')
 - `created_at` : timestamp
 
-**applications** — candidatures d'adoption
+**applications** · candidatures d'adoption
 - `id` : UUID (pk)
 - `pet_id` : UUID (fk → pets), not null
 - `user_id` : UUID (fk → users), not null
 - `status` : enum('envoyee', 'en_cours', 'acceptee', 'refusee', 'annulee')
 - `housing_type` : enum('appartement', 'maison', 'autre')
 - `has_outdoor_access` : boolean
-- `has_other_pets` : text — description des autres animaux
+- `has_other_pets` : text · description des autres animaux
 - `has_children` : boolean
-- `children_ages` : text — âges des enfants
-- `experience` : text — expérience avec les animaux
-- `motivation` : text, not null — pourquoi cet animal
-- `availability` : text — disponibilité pour visite/rencontre
-- `shelter_notes` : text — notes internes du refuge
+- `children_ages` : text · âges des enfants
+- `experience` : text · expérience avec les animaux
+- `motivation` : text, not null · pourquoi cet animal
+- `availability` : text · disponibilité pour visite/rencontre
+- `shelter_notes` : text · notes internes du refuge
 - `created_at`, `updated_at` : timestamp
 
-**favorites** — animaux favoris d'un utilisateur
+**favorites** · animaux favoris d'un utilisateur
 - `user_id` : UUID (fk → users)
 - `pet_id` : UUID (fk → pets)
 - `created_at` : timestamp
 - PK composite : (user_id, pet_id)
 
-**pensions** — pensions professionnelles agréées (chats et/ou chiens)
+**pensions** · pensions professionnelles agréées (chats et/ou chiens)
 - `id` : UUID (pk)
 - `name` : varchar(255), not null
 - `slug` : varchar(255), unique
 - `description` : text
-- `siret` : varchar(14), not null — obligatoire, vérification manuelle
-- `agrement_number` : varchar(100) — certificat de capacité ou ICPE
+- `siret` : varchar(14), not null · obligatoire, vérification manuelle
+- `agrement_number` : varchar(100) · certificat de capacité ou ICPE
 - `address`, `location` (PostGIS), `phone`, `email`, `website`
 - `accepts_cats`, `accepts_dogs` : boolean
 - `capacity_cats`, `capacity_dogs` : integer
 - `price_per_day_cat`, `price_per_day_dog` : decimal(6,2)
 - `services` : jsonb (medication, grooming, outdoorAccess, nightStaff, transport, senior)
 - `opening_hours` : text
-- `is_verified` : boolean — contrôlé manuellement par un platform_admin ; seules les fiches vérifiées apparaissent dans l'annuaire public
+- `is_verified` : boolean · contrôlé manuellement par un platform_admin ; seules les fiches vérifiées apparaissent dans l'annuaire public
 - `created_at`, `updated_at` : timestamp
 
-**pension_photos** — galerie d'une pension
+**pension_photos** · galerie d'une pension
 - `id` : UUID (pk), `pension_id` : UUID (fk → pensions), `url`, `is_primary`, `order`, `created_at`
 
 Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un user peut créer une pension et devient `pension_admin` ; la fiche reste `is_verified=false` jusqu'à validation par un admin plateforme.
 
-**shelters** — refuges et associations partenaires
+**shelters** · refuges et associations partenaires
 - `id` : UUID (pk)
 - `name` : varchar(255), not null
-- `slug` : varchar(255), unique — URL friendly
+- `slug` : varchar(255), unique · URL friendly
 - `description` : text
 - `siret` : varchar(14)
 - `address` : text
-- `location` : geography(Point, 4326) — PostGIS
+- `location` : geography(Point, 4326) · PostGIS
 - `phone` : varchar(20)
 - `email` : varchar(255)
 - `website` : text
 - `logo_url` : text
 - `cover_url` : text
-- `is_verified` : boolean — vérifié par l'admin plateforme
+- `is_verified` : boolean · vérifié par l'admin plateforme
 - `created_at`, `updated_at` : timestamp
 
-**notifications** — notifications persistées
+**notifications** · notifications persistées
 - `id` : UUID (pk)
 - `user_id` : UUID (fk → users), not null
 - `type` : enum('match_found', 'application_update', 'new_cat_nearby', 'report_nearby')
 - `title` : varchar(255)
 - `body` : text
-- `data` : jsonb — payload (lien, IDs concernés)
+- `data` : jsonb · payload (lien, IDs concernés)
 - `is_read` : boolean, default false
 - `created_at` : timestamp
 
@@ -246,16 +246,16 @@ Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un u
 - `email` : varchar(255), unique, not null
 - `email_verified` : boolean
 - `name` : varchar(255), not null
-- `image` : text — avatar
+- `image` : text · avatar
 - `role` : enum('user', 'shelter_admin', 'platform_admin')
-- `shelter_id` : UUID (fk → shelters) — nullable, si admin refuge
-- `location` : geography(Point, 4326) — localisation utilisateur (pour notifications proximité)
-- `notification_radius_km` : integer, default 10 — rayon alertes perdus/trouvés
-- `push_subscription` : jsonb — Web Push subscription
+- `shelter_id` : UUID (fk → shelters) · nullable, si admin refuge
+- `location` : geography(Point, 4326) · localisation utilisateur (pour notifications proximité)
+- `notification_radius_km` : integer, default 10 · rayon alertes perdus/trouvés
+- `push_subscription` : jsonb · Web Push subscription
 - `phone` : varchar(20)
 - `created_at`, `updated_at` : timestamp
 
-**sessions** — gérée automatiquement par Better Auth
+**sessions** · gérée automatiquement par Better Auth
 - `id` : varchar(255) (pk)
 - `user_id` : UUID (fk → users)
 - `token` : varchar(255)
@@ -264,7 +264,7 @@ Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un u
 - `user_agent` : text
 - `created_at`, `updated_at` : timestamp
 
-**accounts** — gérée automatiquement par Better Auth
+**accounts** · gérée automatiquement par Better Auth
 - `id` : varchar(255) (pk)
 - `user_id` : UUID (fk → users)
 - `account_id` : varchar(255)
@@ -273,7 +273,7 @@ Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un u
 - `expires_at` : timestamp
 - `password` : text
 
-**verifications** — gérée automatiquement par Better Auth
+**verifications** · gérée automatiquement par Better Auth
 - `id` : varchar(255) (pk)
 - `identifier` : varchar(255)
 - `value` : varchar(255)
@@ -324,6 +324,12 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - Nommage composants : PascalCase à l'export
 - Un composant par fichier
 
+### Typographie (règle absolue)
+- **Jamais de cadratin `—` (U+2014) ni de demi-cadratin `–` (U+2013)** dans ce projet, ni dans le code, ni dans le texte visible utilisateur (UI, metadata, OG, emails, manifest, toasts, messages d'erreur exposés), ni dans la documentation interne (CLAUDE.md, README, ROADMAP, JSDoc, commentaires).
+- Remplacement par défaut : point médian `·` (U+00B7), qui est déjà la convention du template de titre `%s · Dorloter`.
+- Selon le contexte, préférer `:` (définition), `,` (incise courte), `.` (deux phrases) plutôt que `·` si la lisibilité y gagne.
+- Exception unique : placeholders typographiques "donnée absente" dans des tableaux/listes. Préférer chaîne vide ou `—` standalone uniquement si aucun autre signe ne convient (et demander à l'utilisateur avant d'introduire un cadratin).
+
 ### Server Actions
 - Toujours valider les inputs avec Zod (via `drizzle-orm/zod` pour les schémas dérivés du schema DB) avant toute opération
 - Retourner un objet `{ success: boolean, data?: T, error?: string }`
@@ -350,7 +356,7 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - Tailwind CSS v4 uniquement : configuration via `@theme` dans le CSS (pas de `tailwind.config.js`)
 - Mobile-first obligatoire : le catalogue adoption et les signalements seront principalement consultés sur mobile
 - Composants shadcn/ui comme base, customisés via Tailwind
-- Palette : tons chaleureux (ambre, terre, crème) avec accent teal pour les actions — l'app doit donner envie d'adopter
+- Palette : tons chaleureux (ambre, terre, crème) avec accent teal pour les actions · l'app doit donner envie d'adopter
 - Dark mode supporté via Tailwind `dark:`
 - Plugin Vite `@tailwindcss/vite` pour l'intégration Next.js 16 + Turbopack
 
@@ -409,7 +415,7 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 
 ## Roadmap MVP
 
-### Phase 1 — Fondations + adoption (5-6 semaines)
+### Phase 1 · Fondations + adoption (5-6 semaines)
 - [ ] Setup projet (Next.js 16, Drizzle, Docker Compose, CI)
 - [ ] Auth (Better Auth : inscription, connexion, rôles user/shelter_admin)
 - [ ] Proxy Next.js 16 (protection routes /app et /shelter)
@@ -420,7 +426,7 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 - [ ] Système de favoris (coeur sur les cards)
 - [ ] Upload images vers S3 + optimisation (sharp ou next/image)
 
-### Phase 2 — Perdus/trouvés + matching (5-6 semaines)
+### Phase 2 · Perdus/trouvés + matching (5-6 semaines)
 - [ ] Formulaire signalement perdu/trouvé (localisation carte, photos, description)
 - [ ] Carte interactive des signalements (MapLibre)
 - [ ] Algo de matching automatique (score basé distance + description)
@@ -429,7 +435,7 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 - [ ] Gestion des statuts (actif → résolu)
 - [ ] Page "mes signalements"
 
-### Phase 3 — Candidatures + notifications (4-5 semaines)
+### Phase 3 · Candidatures + notifications (4-5 semaines)
 - [ ] Formulaire de candidature adoption
 - [ ] Espace refuge : réception et gestion des candidatures
 - [ ] Notifications Web Push (nouveau match, mise à jour candidature)
@@ -437,7 +443,7 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 - [ ] Centre de notifications in-app
 - [ ] Dashboard stats refuge (nombre de vues, candidatures, adoptions)
 
-### Phase 4 — Polish + lancement (3-4 semaines)
+### Phase 4 · Polish + lancement (3-4 semaines)
 - [ ] Landing page publique attractive
 - [ ] SEO (metadata, sitemap, structured data pour les animaux)
 - [ ] PWA (manifest, service worker, install prompt)
@@ -447,11 +453,11 @@ RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
 
 ## Notes importantes pour Claude
 
-- Ce projet est un MVP solo — privilégier la simplicité et la vitesse de livraison à l'architecture parfaite.
+- Ce projet est un MVP solo · privilégier la simplicité et la vitesse de livraison à l'architecture parfaite.
 - Ne pas sur-engineer : pas de microservices, pas de message queue, pas de cache Redis pour le MVP.
 - L'app est destinée au grand public (adoptants, propriétaires d) : l'UX doit être simple, chaleureuse, et mobile-first.
 - L'espace refuge est un back-office secondaire : fonctionnel mais pas besoin d'être aussi léché que la partie publique.
-- PostGIS est essentiel pour le matching géographique — ne pas proposer d'alternative NoSQL ou de calcul géo côté client.
+- PostGIS est essentiel pour le matching géographique · ne pas proposer d'alternative NoSQL ou de calcul géo côté client.
 - Le projet vise la souveraineté numérique européenne : pas d'AWS, pas de services Google/Microsoft en infra. Hetzner, Scaleway, OVH uniquement.
 - Les pages publiques (catalogue adoption, signalements) doivent être accessibles sans compte. L'auth est requise uniquement pour : signaler, candidater, gérer un refuge, favoris.
 - Le matching perdu/trouvé est le différenciateur technique du projet. L'algo doit être simple mais efficace, et les résultats affichés clairement avec le score et la distance.

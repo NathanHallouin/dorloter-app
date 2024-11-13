@@ -111,7 +111,7 @@ export const MILESTONE_BADGES: Record<MilestoneBadge, MilestoneConfig> = {
   sentinelle: {
     key: "sentinelle",
     label: "Sentinelle",
-    description: "10 retrouvailles confirmées — un pilier de la communauté.",
+    description: "10 retrouvailles confirmées · un pilier de la communauté.",
     icon: "shield",
     bg: "bg-prune-100",
     text: "text-prune-800",
@@ -121,7 +121,7 @@ export const MILESTONE_BADGES: Record<MilestoneBadge, MilestoneConfig> = {
     key: "eclaireur",
     label: "Éclaireur",
     description:
-      "A déposé 5 signalements ou plus — la communauté garde l'œil ouvert grâce à vous.",
+      "A déposé 5 signalements ou plus · la communauté garde l'œil ouvert grâce à vous.",
     icon: "compass",
     bg: "bg-sable-100",
     text: "text-foreground",

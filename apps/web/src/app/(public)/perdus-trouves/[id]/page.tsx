@@ -249,7 +249,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
             Pistes ({matches.length})
           </h2>
           <p className="mb-6 text-sm text-muted-foreground">
-            Les annonces d&apos;en face qui pourraient correspondre — lieu,
+            Les annonces d&apos;en face qui pourraient correspondre · lieu,
             description, période.
           </p>
           <ReportMatches matches={matchesWithBreakdown} canRespond={isOwner} />

@@ -22,10 +22,10 @@ export const revalidate = 600;
 export const metadata: Metadata = {
   title: "Retrouvailles",
   description:
-    "Toutes les correspondances confirmées sur Dorloter — animaux retrouvés grâce à la communauté. Stats publiques, anonymisées, mises à jour en continu.",
+    "Toutes les correspondances confirmées sur Dorloter · animaux retrouvés grâce à la communauté. Stats publiques, anonymisées, mises à jour en continu.",
   alternates: { canonical: "/perdus-trouves/retrouvailles" },
   openGraph: {
-    title: "Retrouvailles — Dorloter",
+    title: "Retrouvailles · Dorloter",
     description:
       "Le compteur des familles réunies grâce à Dorloter. Une histoire de quartier, multipliée par mille.",
     url: "/perdus-trouves/retrouvailles",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Retrouvailles — Dorloter",
+    title: "Retrouvailles · Dorloter",
     description:
       "Toutes les retrouvailles facilitées sur Dorloter, en chiffres et en visages.",
   },
@@ -121,8 +121,8 @@ export default async function RetrouvaillesPage() {
             </h1>
             <p className="mt-4 max-w-xl text-base text-muted-foreground">
               {stats.total > 0
-                ? "Familles réunies grâce à la communauté Dorloter — chaque chiffre est une histoire, parfois après des semaines d'attente."
-                : "Personne n'a encore confirmé de correspondance ici. La première peut arriver à tout moment — un voisin qui scrolle, un signalement bien rempli, une carte qui s'affine."}
+                ? "Familles réunies grâce à la communauté Dorloter · chaque chiffre est une histoire, parfois après des semaines d'attente."
+                : "Personne n'a encore confirmé de correspondance ici. La première peut arriver à tout moment · un voisin qui scrolle, un signalement bien rempli, une carte qui s'affine."}
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3 sm:max-w-2xl">
@@ -215,7 +215,7 @@ export default async function RetrouvaillesPage() {
                 Les dernières familles réunies
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Anonymisé — on ne montre que la photo et le prénom (s&apos;il
+                Anonymisé · on ne montre que la photo et le prénom (s&apos;il
                 était renseigné). Les fiches sont marquées résolues.
               </p>
             </div>
@@ -300,7 +300,7 @@ export default async function RetrouvaillesPage() {
             <p className="mt-3 text-muted-foreground">
               Plus il y a de signalements bien remplis dans une zone, plus le
               système peut faire le lien. Si vous avez perdu ou trouvé un
-              animal, ne tardez pas — chaque heure compte.
+              animal, ne tardez pas · chaque heure compte.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link

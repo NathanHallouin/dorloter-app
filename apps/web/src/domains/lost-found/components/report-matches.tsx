@@ -234,7 +234,7 @@ function MatchRow({
             />
             <p className="pt-1 text-[11px] text-muted-foreground">
               Le score est une estimation basée sur les infos déclarées. Ce
-              n&apos;est pas une certitude — toujours vérifier en personne.
+              n&apos;est pas une certitude · toujours vérifier en personne.
             </p>
           </div>
         )}
@@ -267,7 +267,7 @@ function MatchRow({
             aria-live="polite"
             className="pt-1 text-sm font-medium text-green-700"
           >
-            ✓ Correspondance confirmée — signalements marqués comme résolus.
+            ✓ Correspondance confirmée · signalements marqués comme résolus.
           </p>
         )}
         {status === "rejete" && (

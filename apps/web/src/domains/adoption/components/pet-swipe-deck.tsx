@@ -319,7 +319,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
       <h3 className="text-lg font-semibold">Vous les avez tous vus 🐾</h3>
       <p className="mt-2 text-sm text-muted-foreground">
         Belles rencontres. Les refuges partenaires publient de nouveaux profils
-        chaque semaine — repassez bientôt.
+        chaque semaine · repassez bientôt.
       </p>
       <Button variant="outline" className="mt-6" onClick={onReset}>
         <RotateCcw className="mr-2 h-4 w-4" />

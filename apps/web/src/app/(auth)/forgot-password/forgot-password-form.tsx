@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
     return (
       <div className="rounded-md bg-teal-50 p-4 text-sm text-teal-800">
         Si cette adresse est liée à un compte, un mail vient de partir.
-        Jetez un œil dans la boîte — et dans les spams au cas où.
+        Jetez un œil dans la boîte · et dans les spams au cas où.
       </div>
     );
   }

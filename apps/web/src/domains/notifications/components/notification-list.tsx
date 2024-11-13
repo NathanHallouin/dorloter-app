@@ -225,7 +225,7 @@ export function NotificationList({ notifications }: Props) {
         >
           préférences
         </Link>{" "}
-        — vous gardez la main sur ce que vous recevez.
+        · vous gardez la main sur ce que vous recevez.
       </p>
     </div>
   );

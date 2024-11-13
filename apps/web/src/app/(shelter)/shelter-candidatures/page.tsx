@@ -9,7 +9,7 @@ import {
 } from "@adoption/public";
 
 export const metadata: Metadata = {
-  title: "Candidatures reçues — Refuge",
+  title: "Candidatures reçues · Refuge",
 };
 
 interface PageProps {

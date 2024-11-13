@@ -66,7 +66,7 @@ export function ReportShare({
         await navigator.share({
           title:
             type === "perdu"
-              ? `Animal perdu${petName ? ` — ${petName}` : ""}`
+              ? `Animal perdu${petName ? ` · ${petName}` : ""}`
               : "Animal trouvé",
           text: description.slice(0, 140),
           url,
@@ -107,7 +107,7 @@ export function ReportShare({
     url
   )}&text=${encodeURIComponent(
     type === "perdu"
-      ? `🆘 Animal perdu${petName ? ` — ${petName}` : ""}${address ? ` à ${address}` : ""}`
+      ? `🆘 Animal perdu${petName ? ` · ${petName}` : ""}${address ? ` à ${address}` : ""}`
       : `🐾 Animal trouvé${address ? ` à ${address}` : ""}`
   )}`;
 
@@ -247,7 +247,7 @@ export function ReportShare({
         </div>
         {photoUrl && (
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Ajoutez aussi la photo à votre post —{" "}
+            Ajoutez aussi la photo à votre post ·{" "}
             <a
               href={photoUrl}
               target="_blank"
@@ -287,7 +287,7 @@ function buildShareText(args: {
   const lines: string[] = [];
   lines.push(
     args.type === "perdu"
-      ? `🆘 CHAT PERDU${args.petName ? ` — ${args.petName.toUpperCase()}` : ""}`
+      ? `🆘 CHAT PERDU${args.petName ? ` · ${args.petName.toUpperCase()}` : ""}`
       : "🐾 CHAT TROUVÉ"
   );
   lines.push("");

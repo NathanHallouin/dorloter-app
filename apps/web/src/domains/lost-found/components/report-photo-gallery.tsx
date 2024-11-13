@@ -34,7 +34,7 @@ export function ReportPhotoGallery({ photos, alt }: ReportPhotoGalleryProps) {
     <>
       <section
         className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3"
-        aria-label={`Photos — ${alt}`}
+        aria-label={`Photos · ${alt}`}
       >
         {photos.map((photo, i) => (
           <button
@@ -50,7 +50,7 @@ export function ReportPhotoGallery({ photos, alt }: ReportPhotoGalleryProps) {
           >
             <Image
               src={photo.url}
-              alt={photo.alt ?? `${alt} — photo ${i + 1}`}
+              alt={photo.alt ?? `${alt} · photo ${i + 1}`}
               fill
               sizes="(max-width: 640px) 50vw, 33vw"
               className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"

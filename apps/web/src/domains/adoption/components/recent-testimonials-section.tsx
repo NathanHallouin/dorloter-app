@@ -33,7 +33,7 @@ export function RecentTestimonialsSection({ testimonials }: Props) {
             Ils ont trouvé leur compagnon
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Quelques nouvelles d&apos;animaux qui ont quitté leur refuge —
+            Quelques nouvelles d&apos;animaux qui ont quitté leur refuge ·
             envoyées par leurs nouvelles familles.
           </p>
         </div>

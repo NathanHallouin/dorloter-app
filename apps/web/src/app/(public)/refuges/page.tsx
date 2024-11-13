@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     "Refuges et associations partenaires : les équipes qui recueillent, soignent et placent les animaux. Parcourez leurs pages, suivez-les, soutenez-les.",
   alternates: { canonical: "/refuges" },
   openGraph: {
-    title: "Refuges & associations — Dorloter",
+    title: "Refuges & associations · Dorloter",
     description:
       "Annuaire des refuges et associations partenaires de Dorloter, partout en France. SIRET vérifié, page publique gratuite.",
     url: "/refuges",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Refuges & associations partenaires — Dorloter",
+    title: "Refuges & associations partenaires · Dorloter",
     description:
       "Découvrez les refuges qui prennent soin des animaux abandonnés et leur trouvent un foyer.",
   },
@@ -113,7 +113,7 @@ export default async function RefugesPage({
               variant="illustrated"
               icon={<ShieldCheck className="h-9 w-9" />}
               title="Aucun refuge ne correspond à ce filtre"
-              hint="Tous les refuges ne sont pas encore vérifiés — repassez bientôt ou parcourez la liste complète."
+              hint="Tous les refuges ne sont pas encore vérifiés · repassez bientôt ou parcourez la liste complète."
               action={
                 <Link
                   href="/refuges"
@@ -218,7 +218,7 @@ export default async function RefugesPage({
               </h2>
               <p className="mt-3 text-muted-foreground">
                 Rejoignez les équipes sur Dorloter : page publique, gestion des
-                chats, candidatures, suivi — le tout gratuit, sans commission
+                chats, candidatures, suivi · le tout gratuit, sans commission
                 sur les adoptions.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">

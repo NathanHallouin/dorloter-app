@@ -95,7 +95,7 @@ export function InboxList({
                       : "text-muted-foreground"
                   )}
                 >
-                  {row.lastMessagePreview ?? "—"}
+                  {row.lastMessagePreview ?? "·"}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1">

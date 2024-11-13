@@ -94,7 +94,7 @@ export function ContactShelterButton({
           <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-xl">
             <h2 className="text-lg font-semibold">
               Écrire à {shelterName}
-              {petName ? ` — à propos de ${petName}` : ""}
+              {petName ? ` · à propos de ${petName}` : ""}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Le refuge recevra une notification et pourra vous répondre dans

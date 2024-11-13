@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Comment Dorloter vérifie ses partenaires",
     description:
-      "SIRET contrôlés, agréments préfecture, contact humain — voici exactement comment on attribue le badge « Vérifié ».",
+      "SIRET contrôlés, agréments préfecture, contact humain · voici exactement comment on attribue le badge « Vérifié ».",
     url: "/verification",
     type: "article",
   },
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Comment Dorloter vérifie",
     description:
-      "Le détail du processus de vérification — sans jargon, sans boîte noire.",
+      "Le détail du processus de vérification · sans jargon, sans boîte noire.",
   },
 };
 
@@ -68,7 +68,7 @@ const PENSION_STEPS = [
   {
     icon: <Building2 className="h-5 w-5" />,
     title: "Profil professionnel uniquement",
-    body: "Dorloter ne référence que des pensions professionnelles — pas de garde entre particuliers. Le SIRET est obligatoire à la création.",
+    body: "Dorloter ne référence que des pensions professionnelles · pas de garde entre particuliers. Le SIRET est obligatoire à la création.",
   },
   {
     icon: <FileCheck2 className="h-5 w-5" />,
@@ -210,7 +210,7 @@ export default function VerificationPage() {
             chaque fiche embarque un bouton « Signaler ce contenu » accessible
             à toute personne qui l&apos;ouvre. Un contenu signalé par cinq
             personnes différentes est masqué automatiquement le temps qu&apos;un
-            humain réexamine — pas de modération opaque, pas de censure
+            humain réexamine · pas de modération opaque, pas de censure
             instantanée par un seul signalement.
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">
@@ -257,7 +257,7 @@ export default function VerificationPage() {
                 Un doute, une remarque ?
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                L&apos;équipe Dorloter lit chaque message — n&apos;hésitez pas
+                L&apos;équipe Dorloter lit chaque message · n&apos;hésitez pas
                 à nous écrire si vous avez repéré un comportement bizarre, ou
                 si vous voulez référencer un nouveau partenaire.
               </p>

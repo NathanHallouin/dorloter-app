@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "nodejs";
-export const alt = "Dorloter — adopter, retrouver, prendre soin";
+export const alt = "Dorloter · adopter, retrouver, prendre soin";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -83,7 +83,7 @@ export function PetPhotoGallery({
                 >
                   <Image
                     src={photo.url}
-                    alt={`${alt} — photo ${i + 2}`}
+                    alt={`${alt} · photo ${i + 2}`}
                     fill
                     sizes="200px"
                     className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"

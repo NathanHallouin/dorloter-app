@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Dorloter — adopter, retrouver, prendre soin",
+    name: "Dorloter · adopter, retrouver, prendre soin",
     short_name: "Dorloter",
     description:
       "Adoptez un animal en refuge ou signalez un compagnon perdu ou trouvé. Plateforme française, géolocalisée, avec mise en relation automatique.",

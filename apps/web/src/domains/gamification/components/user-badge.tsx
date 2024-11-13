@@ -68,7 +68,7 @@ export function UserBadge({
           tier ? `${tier.border} ${tier.bg} ${tier.text}` : "border-border bg-muted text-muted-foreground",
           className
         )}
-        title={tier ? `${tier.label} — ${resolvedLabel(count)}` : resolvedLabel(count)}
+        title={tier ? `${tier.label} · ${resolvedLabel(count)}` : resolvedLabel(count)}
       >
         <Medal className="h-3 w-3" />
         {count}

@@ -156,7 +156,7 @@ export default async function AdminUsersPage({
                     {u.shelterName ? (
                       <span className="truncate">{u.shelterName}</span>
                     ) : (
-                      <span className="text-muted-foreground/60">—</span>
+                      <span className="text-muted-foreground/60">·</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right text-xs tabular-nums text-muted-foreground">

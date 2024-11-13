@@ -19,7 +19,7 @@ export function UserBadgesGrid({ badges }: { badges: MilestoneConfig[] }) {
     return (
       <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5 text-sm">
         <p className="font-medium text-foreground">
-          Aucun badge pour l&apos;instant — pas de panique
+          Aucun badge pour l&apos;instant · pas de panique
         </p>
         <p className="mt-1 text-muted-foreground">
           Les badges arrivent au fil de votre engagement : un signalement, une

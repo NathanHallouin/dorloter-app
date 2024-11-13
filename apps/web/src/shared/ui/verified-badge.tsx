@@ -30,8 +30,8 @@ export function VerifiedBadge({
   const label = variant === "pension" ? "Agrément vérifié" : "Vérifié";
   const fullTitle =
     variant === "pension"
-      ? "Pension agréée — comment Dorloter vérifie ?"
-      : "Refuge vérifié par Dorloter — comment ?";
+      ? "Pension agréée · comment Dorloter vérifie ?"
+      : "Refuge vérifié par Dorloter · comment ?";
 
   const baseClass = cn(
     "inline-flex items-center gap-1 rounded-full font-semibold transition",

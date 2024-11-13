@@ -54,7 +54,7 @@ export function verificationEmailTemplate(url: string): {
   text: string;
 } {
   return {
-    subject: "Un dernier clic pour activer le compte — Dorloter",
+    subject: "Un dernier clic pour activer le compte · Dorloter",
     text: `Bienvenue.
 
 Un clic sur ce lien pour confirmer votre adresse :
@@ -62,7 +62,7 @@ ${url}
 
 Le lien expire dans une heure. Si ce n'est pas vous, ignorez simplement ce mail.
 
-— Dorloter`,
+· Dorloter`,
     html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#2b1810">
 <h1 style="font-size:22px;margin:0 0 16px">Bienvenue.</h1>
 <p>Un clic pour confirmer votre adresse et c&apos;est parti.</p>
@@ -79,19 +79,19 @@ export function resetPasswordEmailTemplate(url: string): {
   text: string;
 } {
   return {
-    subject: "Nouveau mot de passe — Dorloter",
+    subject: "Nouveau mot de passe · Dorloter",
     text: `Pour choisir un nouveau mot de passe, cliquez sur ce lien :
 ${url}
 
-Lien valable une heure. Si la demande ne vient pas de vous, ignorez ce mail — rien ne change.
+Lien valable une heure. Si la demande ne vient pas de vous, ignorez ce mail · rien ne change.
 
-— Dorloter`,
+· Dorloter`,
     html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#2b1810">
 <h1 style="font-size:22px;margin:0 0 16px">Nouveau mot de passe</h1>
 <p>Un clic pour en choisir un nouveau :</p>
 <p style="margin:24px 0"><a href="${url}" style="display:inline-block;background:#e8634d;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Choisir un nouveau mot de passe</a></p>
 <p style="color:#6b5347;font-size:14px">Ou ce lien dans votre navigateur :<br><a href="${url}" style="color:#e8634d;word-break:break-all">${url}</a></p>
-<p style="color:#6b5347;font-size:14px;margin-top:24px">Lien valable une heure. Si la demande ne vient pas de vous, ignorez — rien ne change.</p>
+<p style="color:#6b5347;font-size:14px;margin-top:24px">Lien valable une heure. Si la demande ne vient pas de vous, ignorez · rien ne change.</p>
 </div>`,
   };
 }
@@ -130,7 +130,7 @@ export function applicationUpdateEmailTemplate(params: {
     (shelterNotes ? `<blockquote style="margin:16px 0;padding:12px 16px;border-left:3px solid #e8634d;background:#fff5f2;color:#52483e">${shelterNotes.replace(/\n/g, "<br>")}</blockquote>` : "") +
     `Vous pouvez suivre le statut de votre candidature à tout moment.`;
   return {
-    subject: `${title} — Dorloter`,
+    subject: `${title} · Dorloter`,
     text,
     html: card(title, bodyHtml, "Voir ma candidature", "/candidatures"),
   };
@@ -144,7 +144,7 @@ export function shelterInvitationEmailTemplate(params: {
   const { shelterName, invitedBy, url } = params;
   const title = `${invitedBy} vous invite à gérer « ${shelterName} »`;
   return {
-    subject: `${title} — Dorloter`,
+    subject: `${title} · Dorloter`,
     text: `${title}
 
 Un clic pour rejoindre l'équipe :
@@ -152,7 +152,7 @@ ${url}
 
 Ce lien expire dans 7 jours.
 
-— Dorloter`,
+· Dorloter`,
     html: card(
       title,
       `En acceptant, vous pourrez gérer les chats, répondre aux candidatures et voir les stats du refuge.<br><br>Le lien est valable 7 jours.`,
@@ -175,7 +175,7 @@ export function matchFoundEmailTemplate(params: {
     : `Une correspondance pour votre signalement`;
   const detail = `Meilleur match : score ${Math.round(bestScore)}/100 à ${bestDistanceKm.toFixed(1)} km.`;
   return {
-    subject: `${title} — Dorloter`,
+    subject: `${title} · Dorloter`,
     text: `${title}\n${detail}\n\nVoir le détail : ${baseUrl}/perdus-trouves/${reportId}`,
     html: card(
       title,
@@ -222,7 +222,7 @@ export function staleReportReminderEmailTemplate(params: {
     .join("");
   const text = `${title}\n\nQuelques pistes pour maximiser vos chances :\n- ${tips.join("\n- ")}\n\nVoir l'annonce : ${baseUrl}/perdus-trouves/${reportId}`;
   return {
-    subject: `${title} — Dorloter`,
+    subject: `${title} · Dorloter`,
     text,
     html: card(
       title,
@@ -249,7 +249,7 @@ export function newMessageEmailTemplate(params: {
     : `Nouveau message de ${senderName}`;
   const text = `${title}\n\n« ${preview} »\n\nRépondre : ${baseUrl}${conversationUrl}`;
   return {
-    subject: `${title} — Dorloter`,
+    subject: `${title} · Dorloter`,
     text,
     html: card(
       title,
@@ -294,14 +294,14 @@ ${photo}<span style="display:inline-block;vertical-align:middle">
   const catsText = pets
     .map(
       (c) =>
-        `— ${c.name} (${c.shelterName ?? "refuge"}, ${c.distanceKm.toFixed(1)} km)\n  ${baseUrl}/adopter/${c.id}`
+        `· ${c.name} (${c.shelterName ?? "refuge"}, ${c.distanceKm.toFixed(1)} km)\n  ${baseUrl}/adopter/${c.id}`
     )
     .join("\n");
 
   const hello = userName ? `Bonjour ${userName.split(" ")[0]},` : "Bonjour,";
-  const text = `${hello}\n\n${title} :\n\n${catsText}\n\nVoir tous les animaux : ${baseUrl}/adopter\n\n— Dorloter\n\nVous recevez ce récap hebdo parce que votre profil a une localisation définie. Ajustez le rayon ou désactivez sur ${baseUrl}/profil`;
+  const text = `${hello}\n\n${title} :\n\n${catsText}\n\nVoir tous les animaux : ${baseUrl}/adopter\n\n· Dorloter\n\nVous recevez ce récap hebdo parce que votre profil a une localisation définie. Ajustez le rayon ou désactivez sur ${baseUrl}/profil`;
   return {
-    subject: `${title} — Dorloter`,
+    subject: `${title} · Dorloter`,
     text,
     html: card(
       title,

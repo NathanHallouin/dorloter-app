@@ -26,7 +26,7 @@ export default function GlobalError({
         </h1>
         <p className="mt-3 max-w-md text-muted-foreground">
           Un truc a mal tourné de notre côté. Réessayez, ou revenez à
-          l&apos;accueil — si ça revient, dites-le nous.
+          l&apos;accueil · si ça revient, dites-le nous.
         </p>
         {error.digest && (
           <p className="mt-2 text-xs text-muted-foreground">

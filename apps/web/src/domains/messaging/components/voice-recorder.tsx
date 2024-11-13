@@ -96,7 +96,7 @@ export function VoiceRecorder({ disabled, onUploaded }: VoiceRecorderProps) {
     cleanup();
 
     if (durationMs < 500) {
-      toast.error("Trop court — maintiens un peu plus longtemps.");
+      toast.error("Trop court · maintiens un peu plus longtemps.");
       return;
     }
 

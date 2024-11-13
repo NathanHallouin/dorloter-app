@@ -23,7 +23,7 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Dorloter — adopter, retrouver, prendre soin",
+    default: "Dorloter · adopter, retrouver, prendre soin",
     template: "%s · Dorloter",
   },
   description:
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     siteName: "Dorloter",
     url: siteUrl,
-    title: "Dorloter — adopter, retrouver, prendre soin",
+    title: "Dorloter · adopter, retrouver, prendre soin",
     description:
       "Trouvez votre prochain compagnon parmi les refuges partenaires, ou aidez à réunir une famille avec l'animal qu'elle cherche.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dorloter — adopter, retrouver, prendre soin",
+    title: "Dorloter · adopter, retrouver, prendre soin",
     description:
       "Plateforme française pour l'adoption en refuge et les retrouvailles d'animaux perdus.",
   },
