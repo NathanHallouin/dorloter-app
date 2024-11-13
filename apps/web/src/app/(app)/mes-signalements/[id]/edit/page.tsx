@@ -41,7 +41,7 @@ export default async function EditReportPage({ params }: PageProps) {
     .where(eq(reportPhotos.reportId, id));
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       <Link
         href={`/perdus-trouves/${id}`}
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -51,7 +51,7 @@ export default async function EditReportPage({ params }: PageProps) {
       </Link>
       <PageHeader
         title="Compléter le signalement"
-        description="Plus la fiche est précise, plus le système peut faire le lien avec une annonce en face. Le type, la date et le lieu ne sont pas modifiables — supprimez et recréez si besoin."
+        description="Plus la fiche est précise, plus le système peut faire le lien avec une annonce en face. Le type, la date et le lieu ne sont pas modifiables · supprimez et recréez si besoin."
       />
       <ReportEditForm
         reportId={report.id}

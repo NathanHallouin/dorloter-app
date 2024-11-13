@@ -70,7 +70,7 @@ export default async function MesSignalementsContenuPage() {
   const reports = await getContentReportsByUser(session.user.id);
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       <Link
         href="/profil"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -80,7 +80,7 @@ export default async function MesSignalementsContenuPage() {
       </Link>
       <PageHeader
         title="Mes signalements de contenu"
-        description="Le suivi des contenus que vous avez signalés à l'équipe Dorloter. La modération est faite par un humain — on n'efface pas sur un seul signalement."
+        description="Le suivi des contenus que vous avez signalés à l'équipe Dorloter. La modération est faite par un humain · on n'efface pas sur un seul signalement."
       />
 
       {reports.length === 0 ? (

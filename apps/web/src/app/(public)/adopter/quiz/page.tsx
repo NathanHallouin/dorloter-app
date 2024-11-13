@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "7 questions rapides pour découvrir les profils d'animaux qui collent le mieux à votre vie. Sans inscription, anonyme, à refaire à volonté.",
   alternates: { canonical: "/adopter/quiz" },
   openGraph: {
-    title: "Quel animal pour vous ? — Dorloter",
+    title: "Quel animal pour vous ? · Dorloter",
     description:
       "Le quiz pour trouver le compagnon adapté à votre logement, votre rythme, votre famille.",
     url: "/adopter/quiz",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Quel animal pour vous ? — Dorloter",
+    title: "Quel animal pour vous ? · Dorloter",
     description:
       "Quiz rapide pour découvrir les profils d'animaux qui vous correspondent.",
   },
@@ -29,7 +29,7 @@ export default function MatchQuizPage() {
   return (
     <>
       <Navbar />
-      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <Link
           href="/adopter"
           className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -47,7 +47,7 @@ export default function MatchQuizPage() {
             Quel animal pour vous ?
           </h1>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            7 questions rapides — moins d&apos;une minute. À la fin, on vous
+            7 questions rapides · moins d&apos;une minute. À la fin, on vous
             propose les profils d&apos;animaux compatibles. Vos réponses
             restent dans votre navigateur.
           </p>

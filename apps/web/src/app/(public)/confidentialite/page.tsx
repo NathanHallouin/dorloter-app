@@ -19,7 +19,7 @@ export default function ConfidentialitePage() {
   return (
     <>
       <Navbar />
-      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <h1 className="mb-2 text-3xl font-bold text-foreground">
           Politique de confidentialité
         </h1>
@@ -99,7 +99,7 @@ export default function ConfidentialitePage() {
             <ul className="list-inside list-disc space-y-1">
               <li>
                 Adresse IP (conservée temporairement pour le rate-limiting et
-                la sécurité — jamais de profilage publicitaire)
+                la sécurité · jamais de profilage publicitaire)
               </li>
               <li>
                 User-Agent du navigateur (stocké avec la session pour afficher
@@ -170,16 +170,16 @@ export default function ConfidentialitePage() {
             </p>
             <ul className="mt-2 list-inside list-disc space-y-0.5">
               <li>
-                <strong>OVH</strong> (France) — hébergement VPS, base de
+                <strong>OVH</strong> (France) · hébergement VPS, base de
                 données, stockage des photos
               </li>
               <li>
-                <strong>Resend</strong> (Delaware, USA — clauses
-                contractuelles types appliquées) — envoi des emails
+                <strong>Resend</strong> (Delaware, USA · clauses
+                contractuelles types appliquées) · envoi des emails
                 transactionnels (vérification, reset password, notifications)
               </li>
               <li>
-                <strong>MapTiler</strong> (Suisse) — affichage des cartes.
+                <strong>MapTiler</strong> (Suisse) · affichage des cartes.
                 Votre IP est vue par MapTiler mais aucun profilage n&apos;est
                 fait.
               </li>
@@ -198,7 +198,7 @@ export default function ConfidentialitePage() {
             </p>
             <ul className="mt-2 list-inside list-disc space-y-0.5">
               <li>
-                Cookie de session (Better Auth) — expire après 7 jours
+                Cookie de session (Better Auth) · expire après 7 jours
                 d&apos;inactivité
               </li>
               <li>Préférence de thème (clair / sombre)</li>
@@ -242,7 +242,7 @@ export default function ConfidentialitePage() {
               </li>
               <li>
                 <strong>Réclamation</strong> : vous pouvez saisir la CNIL si
-                vous estimez que vos droits ne sont pas respectés —{" "}
+                vous estimez que vos droits ne sont pas respectés ·{" "}
                 <a
                   href="https://www.cnil.fr/fr/plaintes"
                   target="_blank"

@@ -22,7 +22,7 @@ export default async function MesSignalementsPage() {
   const photoMap = await getPrimaryPhotosForReports(reports.map((r) => r.id));
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       <PageHeader
         title="Mes signalements"
         description={`${reports.length} signalement${reports.length > 1 ? "s" : ""} au total`}
@@ -39,7 +39,7 @@ export default async function MesSignalementsPage() {
           variant="illustrated"
           icon={<Radio className="h-9 w-9" />}
           title="Aucun signalement pour le moment"
-          hint="Tant mieux — pas de panique à signaler. Si un jour vous perdez ou trouvez un animal, c'est par ici."
+          hint="Tant mieux · pas de panique à signaler. Si un jour vous perdez ou trouvez un animal, c'est par ici."
           action={
             <Link
               href="/signaler"

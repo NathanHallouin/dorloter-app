@@ -57,7 +57,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
   return (
     <>
       <Navbar />
-      <PageContainer className="space-y-8 py-10">
+      <PageContainer variant="wide" className="space-y-8 py-10">
         <div>
           <Link
             href="/pensions"
@@ -111,7 +111,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                         {rating.average.toFixed(1)} ({rating.count})
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">·</span>
                     )}
                   </Stat>
                   <Stat label="Espèces">
@@ -119,19 +119,19 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                       {p.acceptsCats && <Cat className="h-3.5 w-3.5" />}
                       {p.acceptsDogs && <Dog className="h-3.5 w-3.5" />}
                       {!p.acceptsCats && !p.acceptsDogs && (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">·</span>
                       )}
                     </span>
                   </Stat>
                   <Stat label="Tarif chat">
                     {p.acceptsCats && p.pricePerDayCat
                       ? `${Number(p.pricePerDayCat)} € / jour`
-                      : "—"}
+                      : "·"}
                   </Stat>
                   <Stat label="Tarif chien">
                     {p.acceptsDogs && p.pricePerDayDog
                       ? `${Number(p.pricePerDayDog)} € / jour`
-                      : "—"}
+                      : "·"}
                   </Stat>
                   <Stat label="Capacité">
                     {[
@@ -139,7 +139,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                       p.capacityDogs ? `${p.capacityDogs} chiens` : null,
                     ]
                       .filter(Boolean)
-                      .join(" · ") || "—"}
+                      .join(" · ") || "·"}
                   </Stat>
                   <Stat label="Agrément">
                     <span className="inline-flex items-center gap-1 text-green-700">
@@ -254,7 +254,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                         </span>
                       )}
                       {!p.acceptsCats && !p.acceptsDogs && (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">·</span>
                       )}
                     </span>
                   ))}
@@ -267,7 +267,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                         {Number(p.pricePerDayCat)} €
                       </strong>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">·</span>
                     )
                   )}
                 />
@@ -279,7 +279,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                         {Number(p.pricePerDayDog)} €
                       </strong>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">·</span>
                     )
                   )}
                 />
@@ -293,7 +293,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
                     return parts.length > 0 ? (
                       <span>{parts.join(" · ")}</span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">·</span>
                     );
                   })}
                 />
@@ -329,7 +329,7 @@ export default async function ComparePensionsPage({ searchParams }: Props) {
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          Les prix affichés sont indicatifs — confirmez auprès de chaque
+          Les prix affichés sont indicatifs · confirmez auprès de chaque
           pension avant de réserver.
         </p>
       </PageContainer>
@@ -342,7 +342,7 @@ function EmptyState() {
   return (
     <>
       <Navbar />
-      <PageContainer className="py-20 text-center">
+      <PageContainer variant="wide" className="py-20 text-center">
         <h1 className="text-2xl font-bold">Comparaison vide</h1>
         <p className="mt-2 text-muted-foreground">
           Sélectionnez au moins deux pensions depuis l&apos;annuaire.

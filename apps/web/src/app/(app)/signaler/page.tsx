@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function SignalerPage() {
   return (
-    <PageContainer variant="narrow">
+    <PageContainer variant="wide">
       <PageHeader
         title="Un signalement"
         description="Prenez deux minutes : plus les détails sont précis, plus vite on peut faire le lien avec une annonce en face."

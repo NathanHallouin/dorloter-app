@@ -40,7 +40,7 @@ export default async function MessageThreadPage({
   if (!ctx) notFound();
 
   return (
-    <PageContainer variant="stream" className="space-y-3">
+    <PageContainer variant="wide" className="space-y-3">
       <Link
         href="/messages"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

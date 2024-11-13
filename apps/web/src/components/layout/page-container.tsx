@@ -30,7 +30,7 @@ const VARIANT_CLASSES: Record<Variant, string> = {
 
 export function PageContainer({
   children,
-  variant = "stream",
+  variant = "wide",
   className,
   as: As = "div",
 }: {

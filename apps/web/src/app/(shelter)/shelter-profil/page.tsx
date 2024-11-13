@@ -32,7 +32,7 @@ export default async function ShelterProfilPage() {
   if (!shelter) notFound();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-10">
+    <div className="mx-auto max-w-6xl space-y-10">
       <header>
         <h1 className="text-3xl font-bold text-foreground">
           Profil du refuge

@@ -16,7 +16,7 @@ export default async function MessagesInboxPage() {
   const rows = await getInboxForUser(session.user.id);
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       <PageHeader
         title="Messages"
         description="Vos conversations avec les refuges."

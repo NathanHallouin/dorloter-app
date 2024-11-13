@@ -32,7 +32,7 @@ export default async function NotificationsPreferencesPage() {
   const pushSupported = !!user?.pushSubscription;
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       <Link
         href="/notifications"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

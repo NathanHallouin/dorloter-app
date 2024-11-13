@@ -10,7 +10,7 @@ export default function NotFound() {
       <Navbar />
       <main
         id="main"
-        className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center px-4 py-16"
+        className="mx-auto flex w-full max-w-6xl flex-1 items-center justify-center px-4 py-16"
       >
         <div className="text-center">
           {/* Empreintes qui partent en cavale — bandeau visuel léger */}
@@ -36,7 +36,7 @@ export default function NotFound() {
           </h1>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             Un lien cassé, une URL mal tapée, ou une fiche retirée. Pas
-            grave — il y a sûrement un compagnon qui vous attend ailleurs
+            grave · il y a sûrement un compagnon qui vous attend ailleurs
             sur le site.
           </p>
 

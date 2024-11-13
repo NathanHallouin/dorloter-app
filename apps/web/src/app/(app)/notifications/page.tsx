@@ -22,7 +22,7 @@ export default async function NotificationsPage() {
   ]);
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       <PageHeader
         title="Notifications"
         description="Tout ce qui se passe pour vous : pistes pour vos signalements, suivi de candidatures, messages, refuges suivis."

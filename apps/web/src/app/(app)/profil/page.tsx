@@ -44,7 +44,7 @@ export default async function ProfilPage() {
   const badges = deriveUserBadges(stats);
 
   return (
-    <PageContainer variant="narrow" className="space-y-8">
+    <PageContainer variant="wide" className="space-y-8">
       <PageHeader
         title="Mon profil"
         description="Qui vous êtes, où vous êtes, ce qu'on peut vous envoyer."

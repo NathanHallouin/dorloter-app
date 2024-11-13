@@ -36,7 +36,7 @@ export default async function CandidaturesPage({ searchParams }: PageProps) {
   );
 
   return (
-    <PageContainer variant="stream">
+    <PageContainer variant="wide">
       {acceptedApplications.map(({ application }) => (
         <Celebrate
           key={application.id}
@@ -73,7 +73,7 @@ export default async function CandidaturesPage({ searchParams }: PageProps) {
           variant="illustrated"
           icon={<FileHeart className="h-9 w-9" />}
           title="Pas encore de candidature"
-          hint="Quand vous postulerez pour un animal, vous suivrez ici l'état de votre dossier — du dépôt à la rencontre."
+          hint="Quand vous postulerez pour un animal, vous suivrez ici l'état de votre dossier · du dépôt à la rencontre."
           action={
             <Link
               href="/adopter"

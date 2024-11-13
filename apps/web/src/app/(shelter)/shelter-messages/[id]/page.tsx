@@ -39,7 +39,7 @@ export default async function ShelterMessageThreadPage({
   if (!ctx) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-3">
+    <div className="mx-auto w-full max-w-6xl space-y-3">
       <Link
         href="/shelter-messages"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

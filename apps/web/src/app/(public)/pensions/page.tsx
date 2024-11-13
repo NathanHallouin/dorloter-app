@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "Annuaire des pensions professionnelles agréées pour chats et chiens, partout en France. SIRET et agrément préfecture vérifiés par l'équipe Dorloter.",
   alternates: { canonical: "/pensions" },
   openGraph: {
-    title: "Pensions pour animaux — Dorloter",
+    title: "Pensions pour animaux · Dorloter",
     description:
       "Pensions professionnelles agréées pour vos chats et chiens. SIRET et agrément vérifiés, contact direct.",
     url: "/pensions",
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pensions pour animaux — Dorloter",
+    title: "Pensions pour animaux · Dorloter",
     description:
-      "Trouvez une pension professionnelle agréée pour votre animal — SIRET vérifié.",
+      "Trouvez une pension professionnelle agréée pour votre animal · SIRET vérifié.",
   },
 };
 
@@ -82,7 +82,7 @@ export default async function PensionsPage({ searchParams }: Props) {
   return (
     <>
       <Navbar />
-      <PageContainer className="space-y-8 py-10">
+      <PageContainer variant="wide" className="space-y-8 py-10">
         <PageHeader
           title="Pensions partenaires"
           description="Établissements professionnels agréés qui accueillent votre animal quand vous devez vous absenter. SIRET et agrément préfecture vérifiés."

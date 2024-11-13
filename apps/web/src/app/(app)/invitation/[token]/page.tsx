@@ -31,7 +31,7 @@ export default async function InvitationPage({ params }: PageProps) {
 
   if (!row) {
     return (
-      <PageContainer variant="narrow" className="py-16 text-center">
+      <PageContainer variant="wide" className="py-16 text-center">
         <h1 className="text-2xl font-bold">Invitation introuvable</h1>
         <p className="mt-2 text-muted-foreground">
           Le lien est peut-être cassé ou l&apos;invitation a été révoquée.
@@ -52,7 +52,7 @@ export default async function InvitationPage({ params }: PageProps) {
     invitation.email.toLowerCase() !== session.user.email.toLowerCase();
 
   return (
-    <PageContainer variant="narrow" className="py-12">
+    <PageContainer variant="wide" className="py-12">
       <div className="rounded-lg border border-border bg-card p-6">
         <h1 className="text-2xl font-bold">Rejoindre « {shelterName} »</h1>
         <p className="mt-2 text-muted-foreground">

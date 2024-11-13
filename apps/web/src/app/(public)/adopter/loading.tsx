@@ -6,7 +6,7 @@ export default function Loading() {
   return (
     <>
       <Navbar />
-      <main id="main" className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <div className="mb-6 space-y-2 text-center">
           <Skeleton className="mx-auto h-9 w-72" />
           <Skeleton className="mx-auto h-4 w-56" />

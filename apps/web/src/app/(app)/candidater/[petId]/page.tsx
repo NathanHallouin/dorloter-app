@@ -50,7 +50,7 @@ export default async function CandidaterPage({ params }: PageProps) {
     pet.photos.find((p) => p.isPrimary) ?? pet.photos[0] ?? null;
 
   return (
-    <PageContainer variant="narrow">
+    <PageContainer variant="wide">
       <Link
         href={`/adopter/${petId}`}
         className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

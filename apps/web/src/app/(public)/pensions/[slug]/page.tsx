@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: pension.name,
     description:
       pension.description?.slice(0, 160) ??
-      `${pension.name} — pension professionnelle agréée pour ${
+      `${pension.name} · pension professionnelle agréée pour ${
         pension.acceptsCats && pension.acceptsDogs
           ? "chats et chiens"
           : pension.acceptsCats
@@ -89,7 +89,7 @@ export default async function PensionPage({ params }: Props) {
         />
       </div>
 
-      <PageContainer className="space-y-10 py-10 pb-32 md:pb-10">
+      <PageContainer variant="wide" className="space-y-10 py-10 pb-32 md:pb-10">
         <header className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">

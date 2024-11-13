@@ -19,7 +19,7 @@ export default function MentionsLegalesPage() {
   return (
     <>
       <Navbar />
-      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <h1 className="mb-8 text-3xl font-bold text-foreground">
           Mentions légales
         </h1>

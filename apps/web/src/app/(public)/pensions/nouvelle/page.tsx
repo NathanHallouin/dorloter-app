@@ -23,7 +23,7 @@ export default async function NewPensionPage() {
   return (
     <>
       <Navbar />
-      <PageContainer className="max-w-3xl space-y-6 py-10">
+      <PageContainer className="space-y-6 py-10">
         <header className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Référencer ma pension

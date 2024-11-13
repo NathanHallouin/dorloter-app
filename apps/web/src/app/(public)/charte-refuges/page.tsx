@@ -14,7 +14,7 @@ export default function CharteRefugesPage() {
   return (
     <>
       <Navbar />
-      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <h1 className="mb-2 text-3xl font-bold text-foreground">
           Charte des refuges partenaires
         </h1>
@@ -68,7 +68,7 @@ export default function CharteRefugesPage() {
                 <strong>Vacciné</strong> (au minimum typhus et coryza)
               </li>
               <li>
-                <strong>Testé FIV/FeLV</strong> — le résultat doit être
+                <strong>Testé FIV/FeLV</strong> · le résultat doit être
                 mentionné honnêtement sur l&apos;annonce
               </li>
             </ul>
@@ -80,7 +80,7 @@ export default function CharteRefugesPage() {
             <ul className="mt-2 list-inside list-disc space-y-0.5">
               <li>L&apos;âge estimé, le caractère, les besoins spécifiques</li>
               <li>
-                Les compatibilités réelles (chats, chiens, enfants) — ne pas
+                Les compatibilités réelles (chats, chiens, enfants) · ne pas
                 écrire <em>« oui »</em> par défaut
               </li>
               <li>Les antécédents médicaux connus</li>
@@ -143,7 +143,7 @@ export default function CharteRefugesPage() {
               Le refuge doit maintenir un canal de contact avec
               l&apos;adoptant pendant au minimum 6 mois après l&apos;adoption
               et accepter le retour de l&apos;animal sans condition si
-              l&apos;adoption échoue — c&apos;est une obligation légale
+              l&apos;adoption échoue · c&apos;est une obligation légale
               (art. L.214-6-3 Code rural) et une exigence éthique.
             </p>
           </section>
