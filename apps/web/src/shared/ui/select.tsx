@@ -6,7 +6,55 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@shared/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
-const Select = SelectPrimitive.Root
+const useIsoLayoutEffect =
+  typeof document !== "undefined" ? React.useLayoutEffect : React.useEffect
+
+// Context interne : chaque SelectItem enregistre son label ici à la volée
+// pour que SelectValue puisse afficher le bon label (au lieu de la value
+// brute, ex. "all" / "oui"). base-ui ne le fait pas tout seul sauf si on
+// lui passe une prop `items`, ce qu'on évite pour rester sur le pattern
+// JSX déclaratif `<SelectItem value="x">Label</SelectItem>`.
+type LabelsMap = ReadonlyMap<unknown, React.ReactNode>
+interface LabelsContextValue {
+  labels: LabelsMap
+  register: (value: unknown, label: React.ReactNode) => void
+  unregister: (value: unknown) => void
+}
+const SelectLabelsContext = React.createContext<LabelsContextValue | null>(
+  null
+)
+
+function Select<Value, Multiple extends boolean | undefined = false>(
+  props: SelectPrimitive.Root.Props<Value, Multiple>
+) {
+  // Ref pour le Map stable (toujours la même instance entre renders), state
+  // pour signaler les changements de contenu. Garder `ctx` stable est crucial :
+  // sinon le useLayoutEffect des SelectItem se redéclenche → register →
+  // setVersion → nouveau ctx → boucle infinie.
+  const labelsRef = React.useRef<Map<unknown, React.ReactNode>>(new Map())
+  const [, forceUpdate] = React.useReducer((n: number) => n + 1, 0)
+  const ctx = React.useMemo<LabelsContextValue>(
+    () => ({
+      labels: labelsRef.current,
+      register: (value, label) => {
+        if (labelsRef.current.get(value) === label) return
+        labelsRef.current.set(value, label)
+        forceUpdate()
+      },
+      unregister: (value) => {
+        if (!labelsRef.current.has(value)) return
+        labelsRef.current.delete(value)
+        forceUpdate()
+      },
+    }),
+    []
+  )
+  return (
+    <SelectLabelsContext.Provider value={ctx}>
+      <SelectPrimitive.Root {...props} />
+    </SelectLabelsContext.Provider>
+  )
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -18,13 +66,30 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   )
 }
 
-function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
+function SelectValue({
+  className,
+  placeholder,
+  children,
+  ...props
+}: SelectPrimitive.Value.Props) {
+  const ctx = React.useContext(SelectLabelsContext)
+  const renderFromLabels = React.useCallback(
+    (value: unknown) => {
+      const label = ctx?.labels.get(value)
+      if (label != null) return label as React.ReactNode
+      return placeholder ?? null
+    },
+    [ctx, placeholder]
+  )
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
+      placeholder={placeholder}
       className={cn("flex flex-1 text-left", className)}
       {...props}
-    />
+    >
+      {children ?? renderFromLabels}
+    </SelectPrimitive.Value>
   )
 }
 
@@ -41,7 +106,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group/select-trigger flex w-fit items-center justify-between gap-2 rounded-lg border border-input bg-card py-2 pr-2 pl-3 text-sm whitespace-nowrap shadow-xs shadow-sable-900/[0.04] outline-none select-none transition-[background-color,border-color,box-shadow,color] duration-200 ease-out hover:border-sable-300 hover:bg-sable-50/70 hover:shadow-sm focus-visible:border-coral-400 focus-visible:ring-3 focus-visible:ring-coral-200/50 data-[popup-open]:border-coral-300 data-[popup-open]:bg-card data-[popup-open]:shadow-sm data-[popup-open]:ring-3 data-[popup-open]:ring-coral-200/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -49,7 +114,7 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon
         render={
-          <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
+          <ChevronDownIcon className="pointer-events-none size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-[popup-open]/select-trigger:rotate-180 group-data-[popup-open]/select-trigger:text-coral-500" />
         }
       />
     </SelectPrimitive.Trigger>
@@ -60,10 +125,10 @@ function SelectContent({
   className,
   children,
   side = "bottom",
-  sideOffset = 4,
-  align = "center",
+  sideOffset = 6,
+  align = "start",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<
@@ -83,7 +148,10 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           data-align-trigger={alignItemWithTrigger}
-          className={cn("relative isolate z-50 max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95", className )}
+          className={cn(
+            "relative isolate z-50 max-h-(--available-height) min-w-(--anchor-width) max-w-[min(20rem,calc(100vw-1rem))] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-xl border border-sable-200/80 bg-popover p-1 text-popover-foreground shadow-lg shadow-sable-900/[0.08] ring-1 ring-foreground/[0.04] duration-150 ease-out data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-1 data-[side=inline-end]:slide-in-from-left-1 data-[side=inline-start]:slide-in-from-right-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 dark:border-border dark:shadow-black/40",
+            className
+          )}
           {...props}
         >
           <SelectScrollUpButton />
@@ -111,13 +179,23 @@ function SelectLabel({
 function SelectItem({
   className,
   children,
+  value,
+  label,
   ...props
 }: SelectPrimitive.Item.Props) {
+  const ctx = React.useContext(SelectLabelsContext)
+  useIsoLayoutEffect(() => {
+    if (!ctx || value === undefined) return
+    ctx.register(value, (children ?? label) as React.ReactNode)
+    return () => ctx.unregister(value)
+  }, [ctx, value, children, label])
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
+      value={value}
+      label={label}
       className={cn(
-        "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "relative flex w-full cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-sm outline-hidden transition-colors duration-100 select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-selected:font-medium data-selected:text-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className
       )}
       {...props}
@@ -127,7 +205,7 @@ function SelectItem({
       </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator
         render={
-          <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
+          <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center text-coral-500" />
         }
       >
         <CheckIcon className="pointer-events-none" />
