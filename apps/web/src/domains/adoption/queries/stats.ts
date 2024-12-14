@@ -1,6 +1,6 @@
 import { db } from "@infra/db";
 import { applications, pets } from "@/server/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 export interface ShelterStats {
   catsTotal: number;
@@ -42,6 +42,31 @@ export async function getShelterStats(shelterId: string): Promise<ShelterStats> 
     applicationsPending: Number(appCounts?.pending ?? 0),
     applicationsAccepted: Number(appCounts?.accepted ?? 0),
   };
+}
+
+/**
+ * Compte les candidatures pending (envoyee/en_cours) pour un lot de pets.
+ * Retourne un Map petId → count. Utilisé sur la liste refuge pour afficher
+ * un badge "N candidatures" sur chaque card.
+ */
+export async function getPendingApplicationsCountForPets(
+  petIds: string[]
+): Promise<Map<string, number>> {
+  if (petIds.length === 0) return new Map();
+  const rows = await db
+    .select({
+      petId: applications.petId,
+      count: sql<number>`count(*)`,
+    })
+    .from(applications)
+    .where(
+      and(
+        inArray(applications.petId, petIds),
+        sql`${applications.status} IN ('envoyee', 'en_cours')`
+      )
+    )
+    .groupBy(applications.petId);
+  return new Map(rows.map((r) => [r.petId, Number(r.count)]));
 }
 
 export async function getApplicationsCountForCat(

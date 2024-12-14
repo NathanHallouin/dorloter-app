@@ -71,6 +71,7 @@ export {
   type GlobalAdoptionStats,
   getShelterStats,
   getApplicationsCountForCat,
+  getPendingApplicationsCountForPets,
   getGlobalAdoptionStats,
 } from "./queries/stats";
 export { getUserFavorites } from "./actions/favorites";

@@ -28,6 +28,7 @@ export {
   getMessagesSince,
   getInboxForUser,
   getInboxForShelter,
+  getShelterUnreadCount,
   getConversationContext,
   getUnreadCounts,
 } from "./queries";

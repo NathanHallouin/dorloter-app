@@ -272,6 +272,25 @@ export async function getInboxForShelter(shelterId: string) {
 }
 
 /**
+ * Total des messages non lus pour un refuge (somme sur ses conversations
+ * non archivées). Pour le badge "Messages" dans la sidebar refuge.
+ */
+export async function getShelterUnreadCount(shelterId: string): Promise<number> {
+  const [row] = await db
+    .select({
+      total: sql<number>`COALESCE(sum(${conversations.shelterUnreadCount}), 0)`,
+    })
+    .from(conversations)
+    .where(
+      and(
+        eq(conversations.shelterId, shelterId),
+        eq(conversations.archivedByShelter, false)
+      )
+    );
+  return Number(row?.total ?? 0);
+}
+
+/**
  * Récupère une conversation avec ses métadonnées (refuge, chat, user).
  * Retourne aussi la side de l'appelant pour adapter l'UI.
  */
