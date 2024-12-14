@@ -19,12 +19,23 @@ type GlobalCache = {
 
 const globalCache = globalThis as unknown as GlobalCache;
 
+// Supabase transaction pooler (port 6543, pgbouncer transaction mode) ne
+// supporte pas les prepared statements. postgres-js les utilise par défaut,
+// ce qui casse les queries un peu complexes (FILTER WHERE, CTE, etc.) avec
+// un opaque "Failed query". Désactiver `prepare` est la recommandation
+// officielle Supabase pour ce pooler.
+function isTransactionPooler(url: string): boolean {
+  return /:6543\b/.test(url) || /pooler\.supabase/.test(url);
+}
+
 function getAppClient() {
   if (!globalCache.__miaouAppPg) {
-    globalCache.__miaouAppPg = postgres(process.env.DATABASE_URL!, {
+    const url = process.env.DATABASE_URL!;
+    globalCache.__miaouAppPg = postgres(url, {
       max: 10,
       idle_timeout: 20,
       connect_timeout: 10,
+      prepare: !isTransactionPooler(url),
     });
   }
   return globalCache.__miaouAppPg;
@@ -37,6 +48,7 @@ function getAdminClient() {
       max: 5,
       idle_timeout: 20,
       connect_timeout: 10,
+      prepare: !isTransactionPooler(url),
     });
   }
   return globalCache.__miaouAdminPg;
