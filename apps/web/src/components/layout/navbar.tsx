@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Home, Shield } from "lucide-react";
 import { auth } from "@infra/auth/auth";
 import { headers } from "next/headers";
 import { UserNav } from "./user-nav";
@@ -16,7 +17,11 @@ export async function Navbar() {
     <header className="sticky top-0 z-50 border-b border-sable-200/80 bg-white/80 backdrop-blur-lg dark:border-border dark:bg-background/80">
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
         <div className="flex items-center gap-1">
-          <MobileMenu isSignedIn={!!session} />
+          <MobileMenu
+            isSignedIn={!!session}
+            isPlatformAdmin={session?.user.role === "platform_admin"}
+            isShelterAdmin={session?.user.role === "shelter_admin"}
+          />
           <LogoLink />
         </div>
 
@@ -39,6 +44,28 @@ export async function Navbar() {
 
         {session ? (
           <div className="flex items-center gap-1">
+            {session.user.role === "platform_admin" && (
+              <Link
+                href="/admin"
+                title="Administration"
+                aria-label="Administration"
+                className="hidden h-9 items-center gap-1.5 rounded-full border border-prune-200 bg-prune-50 px-3 text-xs font-semibold text-prune-700 transition-colors hover:border-prune-300 hover:bg-prune-100 sm:inline-flex"
+              >
+                <Shield className="h-3.5 w-3.5" />
+                Admin
+              </Link>
+            )}
+            {session.user.role === "shelter_admin" && (
+              <Link
+                href="/shelter"
+                title="Espace refuge"
+                aria-label="Espace refuge"
+                className="hidden h-9 items-center gap-1.5 rounded-full border border-lavande-200 bg-lavande-50 px-3 text-xs font-semibold text-lavande-700 transition-colors hover:border-lavande-300 hover:bg-lavande-100 sm:inline-flex"
+              >
+                <Home className="h-3.5 w-3.5" />
+                Refuge
+              </Link>
+            )}
             <MessagesNavLink />
             <NotificationBell />
             <UserNav user={session.user} />

@@ -53,7 +53,7 @@ export function UserNav({ user }: UserNavProps) {
         {user.role === "shelter_admin" && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push("/shelter-animaux")}>
+            <DropdownMenuItem onClick={() => router.push("/shelter")}>
               Espace refuge
             </DropdownMenuItem>
           </>

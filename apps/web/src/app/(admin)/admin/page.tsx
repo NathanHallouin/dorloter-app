@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Flag, ShieldCheck } from "lucide-react";
+import { Flag, ShieldCheck, Store } from "lucide-react";
 import { sql } from "drizzle-orm";
 import { db } from "@infra/db";
-import {
-  contentReports,
-  shelters,
-  users,
-  reports,
-  pets,
-} from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { shelters, users, reports, pets, pensions } from "@/server/db/schema";
+import { getAdminPendingCounts } from "@moderation/public";
 
 export const metadata: Metadata = {
   title: "Tableau de bord · Plateforme",
@@ -18,23 +12,14 @@ export const metadata: Metadata = {
 
 export default async function AdminHomePage() {
   const [
-    pendingModeration,
-    unverifiedShelters,
+    pendingCounts,
     totalUsers,
     totalShelters,
+    totalPensions,
     totalCats,
     totalReports,
   ] = await Promise.all([
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(contentReports)
-      .where(eq(contentReports.status, "en_attente"))
-      .then((r) => Number(r[0]?.count ?? 0)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(shelters)
-      .where(eq(shelters.isVerified, false))
-      .then((r) => Number(r[0]?.count ?? 0)),
+    getAdminPendingCounts(),
     db
       .select({ count: sql<number>`count(*)` })
       .from(users)
@@ -42,6 +27,10 @@ export default async function AdminHomePage() {
     db
       .select({ count: sql<number>`count(*)` })
       .from(shelters)
+      .then((r) => Number(r[0]?.count ?? 0)),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(pensions)
       .then((r) => Number(r[0]?.count ?? 0)),
     db
       .select({ count: sql<number>`count(*)` })
@@ -64,12 +53,12 @@ export default async function AdminHomePage() {
       </header>
 
       {/* Actions urgentes */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2">
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <ActionCard
           href="/admin/moderation"
           icon={<Flag className="h-5 w-5" />}
           title="Modération"
-          count={pendingModeration}
+          count={pendingCounts.moderation}
           unit="signalement"
           emptyLabel="Aucun contenu signalé."
         />
@@ -77,9 +66,17 @@ export default async function AdminHomePage() {
           href="/admin/shelters"
           icon={<ShieldCheck className="h-5 w-5" />}
           title="Refuges à vérifier"
-          count={unverifiedShelters}
+          count={pendingCounts.shelters}
           unit="refuge"
           emptyLabel="Tous les refuges sont vérifiés."
+        />
+        <ActionCard
+          href="/admin/pensions"
+          icon={<Store className="h-5 w-5" />}
+          title="Pensions à vérifier"
+          count={pendingCounts.pensions}
+          unit="pension"
+          emptyLabel="Toutes les pensions sont vérifiées."
         />
       </div>
 
@@ -87,14 +84,15 @@ export default async function AdminHomePage() {
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         Vue d&apos;ensemble
       </h2>
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <StatMini
           label="Utilisateurs"
           value={totalUsers}
           href="/admin/users"
         />
         <StatMini label="Refuges" value={totalShelters} />
-        <StatMini label="Chats" value={totalCats} />
+        <StatMini label="Pensions" value={totalPensions} />
+        <StatMini label="Animaux" value={totalCats} />
         <StatMini label="Signalements" value={totalReports} />
       </div>
     </div>

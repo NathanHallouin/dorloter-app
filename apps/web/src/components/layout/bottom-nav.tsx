@@ -117,12 +117,16 @@ export function BottomNav({ isSignedIn }: BottomNavProps) {
     return () => window.clearInterval(iv);
   }, [isSignedIn]);
 
-  // Masquer sur les pages d'auth (layout split-screen)
+  // Masquer sur les pages d'auth (layout split-screen) et sur les panels
+  // admin / refuge (séparation visuelle avec le reste du site).
   if (
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/forgot-password" ||
-    pathname.startsWith("/reset-password")
+    pathname.startsWith("/reset-password") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname.startsWith("/shelter-")
   ) {
     return null;
   }

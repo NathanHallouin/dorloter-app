@@ -6,6 +6,7 @@ import {
   reports,
   shelters,
   users,
+  pensions,
 } from "@/server/db/schema";
 
 /**
@@ -125,6 +126,36 @@ export async function getUnverifiedShelters() {
     .from(shelters)
     .where(eq(shelters.isVerified, false))
     .orderBy(desc(shelters.createdAt));
+}
+
+/**
+ * Compteurs des items "à traiter" affichés en badges dans la sidebar admin
+ * et la home admin. Une seule query par compteur, parallélisées.
+ */
+export async function getAdminPendingCounts(): Promise<{
+  moderation: number;
+  shelters: number;
+  pensions: number;
+}> {
+  const [moderationRows, shelterRows, pensionRows] = await Promise.all([
+    db
+      .select({ count: sql<number>`count(distinct (content_type, content_id))` })
+      .from(contentReports)
+      .where(eq(contentReports.status, "en_attente")),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(shelters)
+      .where(eq(shelters.isVerified, false)),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(pensions)
+      .where(eq(pensions.isVerified, false)),
+  ]);
+  return {
+    moderation: Number(moderationRows[0]?.count ?? 0),
+    shelters: Number(shelterRows[0]?.count ?? 0),
+    pensions: Number(pensionRows[0]?.count ?? 0),
+  };
 }
 
 export interface UserContentReport {

@@ -3,7 +3,22 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import {
+  BarChart3,
+  Flag,
+  Home,
+  Inbox,
+  LayoutDashboard,
+  Menu,
+  MessageCircle,
+  PawPrint,
+  Settings,
+  Shield,
+  ShieldCheck,
+  Store,
+  Users,
+  X,
+} from "lucide-react";
 import { InstallButton } from "@/components/pwa/install-prompt";
 
 const PUBLIC_LINKS = [
@@ -13,11 +28,34 @@ const PUBLIC_LINKS = [
   { href: "/pensions", label: "Pensions" },
 ];
 
+const ADMIN_LINKS = [
+  { href: "/admin", label: "Tableau de bord", Icon: LayoutDashboard },
+  { href: "/admin/moderation", label: "Modération", Icon: Flag },
+  { href: "/admin/shelters", label: "Refuges à vérifier", Icon: ShieldCheck },
+  { href: "/admin/pensions", label: "Pensions à vérifier", Icon: Store },
+  { href: "/admin/users", label: "Utilisateurs", Icon: Users },
+];
+
+const SHELTER_LINKS = [
+  { href: "/shelter", label: "Tableau de bord", Icon: LayoutDashboard },
+  { href: "/shelter-animaux", label: "Mes animaux", Icon: PawPrint },
+  { href: "/shelter-candidatures", label: "Candidatures", Icon: Inbox },
+  { href: "/shelter-messages", label: "Messages", Icon: MessageCircle },
+  { href: "/shelter-stats", label: "Statistiques", Icon: BarChart3 },
+  { href: "/shelter-profil", label: "Profil du refuge", Icon: Settings },
+];
+
 interface MobileMenuProps {
   isSignedIn: boolean;
+  isPlatformAdmin?: boolean;
+  isShelterAdmin?: boolean;
 }
 
-export function MobileMenu({ isSignedIn }: MobileMenuProps) {
+export function MobileMenu({
+  isSignedIn,
+  isPlatformAdmin,
+  isShelterAdmin,
+}: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -68,6 +106,62 @@ export function MobileMenu({ isSignedIn }: MobileMenuProps) {
                 {l.label}
               </Link>
             ))}
+            {isPlatformAdmin && (
+              <>
+                <div className="my-2 h-px bg-sable-200" />
+                <div className="flex items-center gap-1.5 px-3 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-prune-700">
+                  <Shield className="h-3 w-3" />
+                  Administration
+                </div>
+                {ADMIN_LINKS.map(({ href, label, Icon }) => {
+                  const active =
+                    href === "/admin"
+                      ? pathname === "/admin"
+                      : pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`inline-flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
+                        active
+                          ? "bg-coral-50 text-coral-700"
+                          : "text-foreground hover:bg-sable-100"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
+            {isShelterAdmin && (
+              <>
+                <div className="my-2 h-px bg-sable-200" />
+                <div className="flex items-center gap-1.5 px-3 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-lavande-700">
+                  <Home className="h-3 w-3" />
+                  Espace refuge
+                </div>
+                {SHELTER_LINKS.map(({ href, label, Icon }) => {
+                  const active =
+                    pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`inline-flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
+                        active
+                          ? "bg-coral-50 text-coral-700"
+                          : "text-foreground hover:bg-sable-100"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
             {!isSignedIn && (
               <>
                 <div className="my-2 h-px bg-sable-200" />

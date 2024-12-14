@@ -15,6 +15,7 @@ export {
   getPendingModerationQueue,
   getReportsForContent,
   getUnverifiedShelters,
+  getAdminPendingCounts,
   getContentReportsByUser,
   type UserContentReport,
 } from "./queries";

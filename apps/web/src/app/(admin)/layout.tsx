@@ -1,68 +1,24 @@
-import Link from "next/link";
-import { Navbar } from "@/components/layout/navbar";
 import { requirePlatformAdmin } from "@infra/auth/session";
-import { ShieldCheck, Flag, Home, Users } from "lucide-react";
+import { getAdminPendingCounts } from "@moderation/public";
+import { AdminHeader } from "./_components/admin-header";
+import { AdminSidebar } from "./_components/admin-sidebar";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requirePlatformAdmin();
+  const session = await requirePlatformAdmin();
+  const counts = await getAdminPendingCounts();
   return (
-    <>
-      <Navbar />
-      <div className="mx-auto flex w-full max-w-6xl flex-1 gap-8 px-4 py-8">
-        <aside className="hidden w-56 shrink-0 md:block">
-          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Espace plateforme
-          </p>
-          <nav className="flex flex-col gap-1 text-sm">
-            <NavLink href="/admin" icon={<Home className="h-4 w-4" />}>
-              Tableau de bord
-            </NavLink>
-            <NavLink
-              href="/admin/moderation"
-              icon={<Flag className="h-4 w-4" />}
-            >
-              File de modération
-            </NavLink>
-            <NavLink
-              href="/admin/shelters"
-              icon={<ShieldCheck className="h-4 w-4" />}
-            >
-              Vérification refuges
-            </NavLink>
-            <NavLink
-              href="/admin/users"
-              icon={<Users className="h-4 w-4" />}
-            >
-              Utilisateurs
-            </NavLink>
-          </nav>
-        </aside>
-        <main id="main" className="min-w-0 flex-1">{children}</main>
+    <div className="flex min-h-screen flex-col bg-sable-50/40">
+      <AdminHeader user={session.user} />
+      <div className="flex w-full flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:px-6 lg:px-8">
+        <AdminSidebar counts={counts} />
+        <main id="main" className="min-w-0 flex-1">
+          {children}
+        </main>
       </div>
-    </>
-  );
-}
-
-function NavLink({
-  href,
-  icon,
-  children,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-foreground hover:bg-sable-100"
-    >
-      {icon}
-      {children}
-    </Link>
+    </div>
   );
 }
