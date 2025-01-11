@@ -228,7 +228,12 @@ export default async function AdminUsersPage({
 function RoleBadge({
   role,
 }: {
-  role: "user" | "shelter_admin" | "pension_admin" | "platform_admin";
+  role:
+    | "user"
+    | "shelter_admin"
+    | "pension_admin"
+    | "veterinarian_admin"
+    | "platform_admin";
 }) {
   if (role === "platform_admin") {
     return <Badge className="bg-prune text-white hover:bg-prune/90">Plateforme</Badge>;
@@ -238,6 +243,9 @@ function RoleBadge({
   }
   if (role === "pension_admin") {
     return <Badge className="bg-coral text-white hover:bg-coral/90">Pension</Badge>;
+  }
+  if (role === "veterinarian_admin") {
+    return <Badge className="bg-teal-600 text-white hover:bg-teal-700">Vétérinaire</Badge>;
   }
   return <Badge variant="outline">Adoptant</Badge>;
 }

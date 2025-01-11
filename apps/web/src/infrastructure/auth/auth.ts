@@ -96,6 +96,10 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      vetId: {
+        type: "string",
+        required: false,
+      },
       phone: {
         type: "string",
         required: false,

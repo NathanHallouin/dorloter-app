@@ -16,6 +16,7 @@ export type UserRole =
   | "user"
   | "shelter_admin"
   | "pension_admin"
+  | "veterinarian_admin"
   | "platform_admin";
 
 export interface MeProfile {
@@ -27,6 +28,7 @@ export interface MeProfile {
   role: UserRole;
   shelterId: string | null;
   pensionId: string | null;
+  vetId: string | null;
   phone: string | null;
   location: { latitude: number; longitude: number } | null;
   notificationRadiusKm: number | null;
@@ -54,6 +56,7 @@ export async function getCurrentUserProfile(
       role: users.role,
       shelterId: users.shelterId,
       pensionId: users.pensionId,
+      vetId: users.vetId,
       phone: users.phone,
       location: users.location,
       notificationRadiusKm: users.notificationRadiusKm,
@@ -78,6 +81,7 @@ export async function getCurrentUserProfile(
     role: row.role,
     shelterId: row.shelterId,
     pensionId: row.pensionId,
+    vetId: row.vetId,
     phone: row.phone,
     location: row.location
       ? { latitude: row.location.y, longitude: row.location.x }

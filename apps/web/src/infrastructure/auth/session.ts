@@ -34,6 +34,17 @@ export async function requirePension(): Promise<
   return session as Session & { user: { pensionId: string } };
 }
 
+export async function requireVeterinarian(): Promise<
+  Session & { user: { vetId: string } }
+> {
+  const session = await getCurrentSession();
+  if (!session) redirect("/login");
+  if (session.user.role !== "veterinarian_admin" || !session.user.vetId) {
+    redirect("/dashboard");
+  }
+  return session as Session & { user: { vetId: string } };
+}
+
 export async function requirePlatformAdmin(): Promise<Session> {
   const session = await getCurrentSession();
   if (!session) redirect("/login");

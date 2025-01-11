@@ -14,11 +14,13 @@ import {
 import { geometry } from "drizzle-orm/pg-core/columns/postgis_extension/geometry";
 import { shelters } from "@shelters/schema";
 import { pensions } from "@pensions/schema";
+import { veterinarians } from "@veterinarians/schema";
 
 export const userRoleEnum = pgEnum("user_role", [
   "user",
   "shelter_admin",
   "pension_admin",
+  "veterinarian_admin",
   "platform_admin",
 ]);
 
@@ -35,6 +37,9 @@ export const users = pgTable(
       onDelete: "set null",
     }),
     pensionId: uuid("pension_id").references(() => pensions.id, {
+      onDelete: "set null",
+    }),
+    vetId: uuid("vet_id").references(() => veterinarians.id, {
       onDelete: "set null",
     }),
     location: geometry({ type: "point", srid: 4326, mode: "xy" }),

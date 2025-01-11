@@ -12,9 +12,11 @@ import {
   Menu,
   MessageCircle,
   PawPrint,
+  Search,
   Settings,
   Shield,
   ShieldCheck,
+  Stethoscope,
   Store,
   Users,
   X,
@@ -26,6 +28,7 @@ const PUBLIC_LINKS = [
   { href: "/perdus-trouves", label: "Perdus / Trouvés" },
   { href: "/refuges", label: "Refuges" },
   { href: "/pensions", label: "Pensions" },
+  { href: "/veterinaires", label: "Vétérinaires" },
 ];
 
 const ADMIN_LINKS = [
@@ -45,16 +48,29 @@ const SHELTER_LINKS = [
   { href: "/shelter-profil", label: "Profil du refuge", Icon: Settings },
 ];
 
+const VET_LINKS = [
+  { href: "/vet", label: "Tableau de bord", Icon: LayoutDashboard },
+  {
+    href: "/vet-recherche-signalements",
+    label: "Recherche signalements",
+    Icon: Search,
+  },
+  { href: "/vet-equipe", label: "Équipe", Icon: Users },
+  { href: "/vet-profil", label: "Profil du cabinet", Icon: Settings },
+];
+
 interface MobileMenuProps {
   isSignedIn: boolean;
   isPlatformAdmin?: boolean;
   isShelterAdmin?: boolean;
+  isVetAdmin?: boolean;
 }
 
 export function MobileMenu({
   isSignedIn,
   isPlatformAdmin,
   isShelterAdmin,
+  isVetAdmin,
 }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -152,6 +168,35 @@ export function MobileMenu({
                       className={`inline-flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
                         active
                           ? "bg-coral-50 text-coral-700"
+                          : "text-foreground hover:bg-sable-100"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
+            {isVetAdmin && (
+              <>
+                <div className="my-2 h-px bg-sable-200" />
+                <div className="flex items-center gap-1.5 px-3 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-teal-700">
+                  <Stethoscope className="h-3 w-3" />
+                  Espace vétérinaire
+                </div>
+                {VET_LINKS.map(({ href, label, Icon }) => {
+                  const active =
+                    href === "/vet"
+                      ? pathname === "/vet"
+                      : pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`inline-flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
+                        active
+                          ? "bg-teal-50 text-teal-700"
                           : "text-foreground hover:bg-sable-100"
                       }`}
                     >

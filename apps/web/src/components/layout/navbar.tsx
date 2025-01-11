@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, Shield } from "lucide-react";
+import { Home, Shield, Stethoscope } from "lucide-react";
 import { auth } from "@infra/auth/auth";
 import { headers } from "next/headers";
 import { UserNav } from "./user-nav";
@@ -21,6 +21,7 @@ export async function Navbar() {
             isSignedIn={!!session}
             isPlatformAdmin={session?.user.role === "platform_admin"}
             isShelterAdmin={session?.user.role === "shelter_admin"}
+            isVetAdmin={session?.user.role === "veterinarian_admin"}
           />
           <LogoLink />
         </div>
@@ -31,6 +32,7 @@ export async function Navbar() {
             { href: "/perdus-trouves", label: "Perdus / Trouvés" },
             { href: "/refuges", label: "Refuges" },
             { href: "/pensions", label: "Pensions" },
+            { href: "/veterinaires", label: "Vétérinaires" },
           ].map((link) => (
             <Link
               key={link.href}
@@ -64,6 +66,17 @@ export async function Navbar() {
               >
                 <Home className="h-3.5 w-3.5" />
                 Refuge
+              </Link>
+            )}
+            {session.user.role === "veterinarian_admin" && (
+              <Link
+                href="/vet"
+                title="Espace vétérinaire"
+                aria-label="Espace vétérinaire"
+                className="hidden h-9 items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 text-xs font-semibold text-teal-700 transition-colors hover:border-teal-300 hover:bg-teal-100 sm:inline-flex"
+              >
+                <Stethoscope className="h-3.5 w-3.5" />
+                Cabinet
               </Link>
             )}
             <MessagesNavLink />

@@ -13,11 +13,18 @@ export interface MeDto {
   emailVerified: boolean;
   name: string;
   image: string | null;
-  role: "user" | "shelter_admin" | "pension_admin" | "platform_admin";
-  /** Si l'user gère un refuge — utile pour afficher l'onglet admin. */
+  role:
+    | "user"
+    | "shelter_admin"
+    | "pension_admin"
+    | "veterinarian_admin"
+    | "platform_admin";
+  /** Si l'user gère un refuge · utile pour afficher l'onglet admin. */
   shelterId: string | null;
   /** Si l'user gère une pension. */
   pensionId: string | null;
+  /** Si l'user gère un cabinet vétérinaire. */
+  vetId: string | null;
   phone: string | null;
   location: { latitude: number; longitude: number } | null;
   notificationRadiusKm: number | null;
@@ -36,6 +43,7 @@ export function toMeDto(profile: MeProfile): MeDto {
     role: profile.role,
     shelterId: profile.shelterId,
     pensionId: profile.pensionId,
+    vetId: profile.vetId,
     phone: profile.phone,
     location: profile.location,
     notificationRadiusKm: profile.notificationRadiusKm,

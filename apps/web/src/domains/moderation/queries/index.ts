@@ -7,6 +7,7 @@ import {
   shelters,
   users,
   pensions,
+  veterinarians,
 } from "@/server/db/schema";
 
 /**
@@ -136,25 +137,32 @@ export async function getAdminPendingCounts(): Promise<{
   moderation: number;
   shelters: number;
   pensions: number;
+  veterinarians: number;
 }> {
-  const [moderationRows, shelterRows, pensionRows] = await Promise.all([
-    db
-      .select({ count: sql<number>`count(distinct (content_type, content_id))` })
-      .from(contentReports)
-      .where(eq(contentReports.status, "en_attente")),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(shelters)
-      .where(eq(shelters.isVerified, false)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(pensions)
-      .where(eq(pensions.isVerified, false)),
-  ]);
+  const [moderationRows, shelterRows, pensionRows, vetRows] =
+    await Promise.all([
+      db
+        .select({ count: sql<number>`count(distinct (content_type, content_id))` })
+        .from(contentReports)
+        .where(eq(contentReports.status, "en_attente")),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(shelters)
+        .where(eq(shelters.isVerified, false)),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(pensions)
+        .where(eq(pensions.isVerified, false)),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(veterinarians)
+        .where(eq(veterinarians.isVerified, false)),
+    ]);
   return {
     moderation: Number(moderationRows[0]?.count ?? 0),
     shelters: Number(shelterRows[0]?.count ?? 0),
     pensions: Number(pensionRows[0]?.count ?? 0),
+    veterinarians: Number(vetRows[0]?.count ?? 0),
   };
 }
 

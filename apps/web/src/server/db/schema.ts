@@ -82,6 +82,17 @@ export {
   pensionContactActionEnum,
 } from "@/domains/pensions/schema";
 
+// Tables veterinarians + vet_photos + vet_report_access_log + vet_invitations
+// extraites vers `src/domains/veterinarians/schema.ts`. Import lazy car
+// `users.vetId` réfère à `veterinarians`.
+import {
+  veterinarians,
+  vetPhotos,
+  vetReportAccessLog,
+  vetInvitations,
+} from "@/domains/veterinarians/schema";
+export { veterinarians, vetPhotos, vetReportAccessLog, vetInvitations };
+
 // Tables pets, petPhotos extraites vers `src/domains/adoption/schema.ts`.
 import {
   pets,
@@ -96,8 +107,10 @@ import {
   reports,
   reportPhotos,
   reportMatches,
+  reportSightings,
 } from "@/domains/lost-found/schema";
-export { reports, reportPhotos, reportMatches };
+export { reports, reportPhotos, reportMatches, reportSightings };
+export { sightingStatusEnum } from "@/domains/lost-found/schema";
 
 // Tables applications, favorites extraites vers `src/domains/adoption/schema.ts`.
 export {

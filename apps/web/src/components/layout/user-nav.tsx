@@ -58,6 +58,14 @@ export function UserNav({ user }: UserNavProps) {
             </DropdownMenuItem>
           </>
         )}
+        {user.role === "veterinarian_admin" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.push("/vet")}>
+              Espace vétérinaire
+            </DropdownMenuItem>
+          </>
+        )}
         {user.role === "platform_admin" && (
           <>
             <DropdownMenuSeparator />

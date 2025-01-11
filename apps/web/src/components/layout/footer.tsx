@@ -52,6 +52,12 @@ export function Footer() {
                 >
                   Pensions
                 </Link>
+                <Link
+                  href="/veterinaires"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Vétérinaires
+                </Link>
               </div>
             </div>
             <div>

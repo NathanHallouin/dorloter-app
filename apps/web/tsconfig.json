@@ -31,7 +31,8 @@
       "@adoption/*": ["./src/domains/adoption/*"],
       "@identity/*": ["./src/domains/identity/*"],
       "@notifications/*": ["./src/domains/notifications/*"],
-      "@pensions/*": ["./src/domains/pensions/*"]
+      "@pensions/*": ["./src/domains/pensions/*"],
+      "@veterinarians/*": ["./src/domains/veterinarians/*"]
     }
   },
   "include": [

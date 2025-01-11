@@ -6,11 +6,9 @@ import { useState } from "react";
 import {
   ArrowLeft,
   ChevronDown,
-  Flag,
-  Home,
-  ShieldCheck,
-  Stethoscope,
-  Store,
+  LayoutDashboard,
+  Search,
+  Settings,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -19,59 +17,30 @@ interface NavLink {
   href: string;
   label: string;
   icon: LucideIcon;
-  /** Compteur "à traiter". Affiché en badge à droite si > 0. */
   count?: number;
 }
 
-interface AdminSidebarProps {
-  counts: {
-    moderation: number;
-    shelters: number;
-    pensions: number;
-    veterinarians: number;
-  };
-}
-
-export function AdminSidebar({ counts }: AdminSidebarProps) {
+export function VetSidebar() {
   const pathname = usePathname();
 
   const links: NavLink[] = [
-    { href: "/admin", label: "Tableau de bord", icon: Home },
+    { href: "/vet", label: "Tableau de bord", icon: LayoutDashboard },
     {
-      href: "/admin/moderation",
-      label: "Modération",
-      icon: Flag,
-      count: counts.moderation,
+      href: "/vet-recherche-signalements",
+      label: "Recherche signalements",
+      icon: Search,
     },
-    {
-      href: "/admin/shelters",
-      label: "Refuges à vérifier",
-      icon: ShieldCheck,
-      count: counts.shelters,
-    },
-    {
-      href: "/admin/pensions",
-      label: "Pensions à vérifier",
-      icon: Store,
-      count: counts.pensions,
-    },
-    {
-      href: "/admin/veterinaires",
-      label: "Vétérinaires à vérifier",
-      icon: Stethoscope,
-      count: counts.veterinarians,
-    },
-    { href: "/admin/users", label: "Utilisateurs", icon: Users },
+    { href: "/vet-equipe", label: "Équipe", icon: Users },
+    { href: "/vet-profil", label: "Profil du cabinet", icon: Settings },
   ];
 
   const activeLink = links.find((l) => isActive(pathname, l.href));
 
   return (
     <>
-      {/* Desktop : sidebar latérale */}
       <aside className="hidden w-60 shrink-0 md:block">
         <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Espace plateforme
+          Espace vétérinaire
         </p>
         <nav className="flex flex-col gap-0.5 text-sm">
           {links.map((link) => (
@@ -82,7 +51,7 @@ export function AdminSidebar({ counts }: AdminSidebarProps) {
             />
           ))}
         </nav>
-        <div className="mt-6 border-t border-sable-200 pt-4">
+        <div className="mt-6 border-t border-teal-200/80 pt-4">
           <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-sable-100 hover:text-foreground"
@@ -93,7 +62,6 @@ export function AdminSidebar({ counts }: AdminSidebarProps) {
         </div>
       </aside>
 
-      {/* Mobile : top accordion */}
       <MobileNav links={links} activeLink={activeLink} pathname={pathname} />
     </>
   );
@@ -113,13 +81,13 @@ function DesktopLink({
       aria-current={active ? "page" : undefined}
       className={`group inline-flex items-center justify-between gap-2 rounded-md px-3 py-2 transition-colors ${
         active
-          ? "bg-coral-50 text-coral-700"
+          ? "bg-teal-50 text-teal-700"
           : "text-foreground hover:bg-sable-100"
       }`}
     >
       <span className="inline-flex items-center gap-2">
         <Icon
-          className={`h-4 w-4 ${active ? "text-coral-600" : "text-muted-foreground"}`}
+          className={`h-4 w-4 ${active ? "text-teal-600" : "text-muted-foreground"}`}
         />
         {link.label}
       </span>
@@ -127,8 +95,8 @@ function DesktopLink({
         <span
           className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums ${
             active
-              ? "bg-coral-600 text-white"
-              : "bg-coral-100 text-coral-700"
+              ? "bg-teal-600 text-white"
+              : "bg-teal-100 text-teal-700"
           }`}
         >
           {link.count > 99 ? "99+" : link.count}
@@ -148,8 +116,7 @@ function MobileNav({
   pathname: string;
 }) {
   const [open, setOpen] = useState(false);
-  const ActiveIcon = activeLink?.icon ?? Home;
-  const totalPending = links.reduce((n, l) => n + (l.count ?? 0), 0);
+  const ActiveIcon = activeLink?.icon ?? LayoutDashboard;
 
   return (
     <div className="mb-5 md:hidden">
@@ -160,21 +127,14 @@ function MobileNav({
         className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left shadow-xs"
       >
         <span className="inline-flex items-center gap-2.5">
-          <ActiveIcon className="h-4 w-4 text-coral-600" />
+          <ActiveIcon className="h-4 w-4 text-teal-600" />
           <span className="text-sm font-medium text-foreground">
-            {activeLink?.label ?? "Administration"}
+            {activeLink?.label ?? "Espace vétérinaire"}
           </span>
         </span>
-        <span className="inline-flex items-center gap-2">
-          {totalPending > 0 && !open && (
-            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-coral-500 px-1.5 text-[10px] font-bold tabular-nums text-white">
-              {totalPending > 99 ? "99+" : totalPending}
-            </span>
-          )}
-          <ChevronDown
-            className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
@@ -189,31 +149,18 @@ function MobileNav({
                   href={link.href}
                   onClick={() => setOpen(false)}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center justify-between gap-2 px-4 py-2.5 text-sm transition-colors ${
+                  className={`flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
                     active
-                      ? "bg-coral-50 text-coral-700"
+                      ? "bg-teal-50 text-teal-700"
                       : "text-foreground hover:bg-sable-50"
                   }`}
                 >
-                  <span className="inline-flex items-center gap-2.5">
-                    <Icon
-                      className={`h-4 w-4 ${
-                        active ? "text-coral-600" : "text-muted-foreground"
-                      }`}
-                    />
-                    {link.label}
-                  </span>
-                  {link.count !== undefined && link.count > 0 && (
-                    <span
-                      className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums ${
-                        active
-                          ? "bg-coral-600 text-white"
-                          : "bg-coral-100 text-coral-700"
-                      }`}
-                    >
-                      {link.count > 99 ? "99+" : link.count}
-                    </span>
-                  )}
+                  <Icon
+                    className={`h-4 w-4 ${
+                      active ? "text-teal-600" : "text-muted-foreground"
+                    }`}
+                  />
+                  {link.label}
                 </Link>
               );
             })}
@@ -233,6 +180,6 @@ function MobileNav({
 }
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/admin") return pathname === "/admin";
+  if (href === "/vet") return pathname === "/vet";
   return pathname === href || pathname.startsWith(href + "/");
 }

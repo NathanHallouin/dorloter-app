@@ -118,7 +118,7 @@ export function BottomNav({ isSignedIn }: BottomNavProps) {
   }, [isSignedIn]);
 
   // Masquer sur les pages d'auth (layout split-screen) et sur les panels
-  // admin / refuge (séparation visuelle avec le reste du site).
+  // admin / refuge / vétérinaire (séparation visuelle avec le reste du site).
   if (
     pathname === "/login" ||
     pathname === "/register" ||
@@ -126,7 +126,9 @@ export function BottomNav({ isSignedIn }: BottomNavProps) {
     pathname.startsWith("/reset-password") ||
     pathname === "/admin" ||
     pathname.startsWith("/admin/") ||
-    pathname.startsWith("/shelter-")
+    pathname.startsWith("/shelter-") ||
+    pathname === "/vet" ||
+    pathname.startsWith("/vet-")
   ) {
     return null;
   }
