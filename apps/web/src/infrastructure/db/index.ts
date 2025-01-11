@@ -11,10 +11,16 @@ import { relations } from "@/server/db/relations";
  *
  * max: 10 par pool (app + admin = 20 max) — largement suffisant pour le MVP
  * et bien en deçà du `max_connections=100` de Postgres par défaut.
+ *
+ * `CACHE_VERSION` : bumper cette constante invalide les clients en cache
+ * (utile quand on change une option postgres-js qui doit reprendre effet
+ * sans redémarrer manuellement le process dev).
  */
+const CACHE_VERSION = "v2-prepare-aware";
+
 type GlobalCache = {
-  __miaouAppPg?: ReturnType<typeof postgres>;
-  __miaouAdminPg?: ReturnType<typeof postgres>;
+  __miaouAppPg?: { version: string; client: ReturnType<typeof postgres> };
+  __miaouAdminPg?: { version: string; client: ReturnType<typeof postgres> };
 };
 
 const globalCache = globalThis as unknown as GlobalCache;
@@ -29,29 +35,47 @@ function isTransactionPooler(url: string): boolean {
 }
 
 function getAppClient() {
-  if (!globalCache.__miaouAppPg) {
+  if (
+    !globalCache.__miaouAppPg ||
+    globalCache.__miaouAppPg.version !== CACHE_VERSION
+  ) {
+    if (globalCache.__miaouAppPg?.client) {
+      globalCache.__miaouAppPg.client.end({ timeout: 1 }).catch(() => {});
+    }
     const url = process.env.DATABASE_URL!;
-    globalCache.__miaouAppPg = postgres(url, {
-      max: 10,
-      idle_timeout: 20,
-      connect_timeout: 10,
-      prepare: !isTransactionPooler(url),
-    });
+    globalCache.__miaouAppPg = {
+      version: CACHE_VERSION,
+      client: postgres(url, {
+        max: 10,
+        idle_timeout: 20,
+        connect_timeout: 10,
+        prepare: !isTransactionPooler(url),
+      }),
+    };
   }
-  return globalCache.__miaouAppPg;
+  return globalCache.__miaouAppPg.client;
 }
 
 function getAdminClient() {
-  const url = process.env.DATABASE_URL_ADMIN ?? process.env.DATABASE_URL!;
-  if (!globalCache.__miaouAdminPg) {
-    globalCache.__miaouAdminPg = postgres(url, {
-      max: 5,
-      idle_timeout: 20,
-      connect_timeout: 10,
-      prepare: !isTransactionPooler(url),
-    });
+  if (
+    !globalCache.__miaouAdminPg ||
+    globalCache.__miaouAdminPg.version !== CACHE_VERSION
+  ) {
+    if (globalCache.__miaouAdminPg?.client) {
+      globalCache.__miaouAdminPg.client.end({ timeout: 1 }).catch(() => {});
+    }
+    const url = process.env.DATABASE_URL_ADMIN ?? process.env.DATABASE_URL!;
+    globalCache.__miaouAdminPg = {
+      version: CACHE_VERSION,
+      client: postgres(url, {
+        max: 5,
+        idle_timeout: 20,
+        connect_timeout: 10,
+        prepare: !isTransactionPooler(url),
+      }),
+    };
   }
-  return globalCache.__miaouAdminPg;
+  return globalCache.__miaouAdminPg.client;
 }
 
 /**
