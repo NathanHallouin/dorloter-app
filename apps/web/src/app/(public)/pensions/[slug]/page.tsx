@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { PageContainer } from "@/components/layout/page-container";
 import { VerifiedBadge } from "@shared/ui/verified-badge";
+import { DemoBadge } from "@shared/ui/demo-badge";
 import {
   getPensionWithPhotos,
   getRatingSummariesForPensions,
@@ -90,6 +91,7 @@ export default async function PensionPage({ params }: Props) {
       </div>
 
       <PageContainer variant="wide" className="space-y-10 py-10 pb-32 md:pb-10">
+        {pension.isDemo && <DemoBadge variant="banner" />}
         <header className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">

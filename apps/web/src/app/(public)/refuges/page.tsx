@@ -1,5 +1,6 @@
 import { EmptyState } from "@shared/ui/empty-state";
 import { VerifiedBadge } from "@shared/ui/verified-badge";
+import { DemoBadge } from "@shared/ui/demo-badge";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -141,11 +142,12 @@ export default async function RefugesPage({
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
 
-                    {shelter.isVerified && (
-                      <div className="absolute right-3 top-3">
+                    <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+                      {shelter.isVerified && (
                         <VerifiedBadge size="sm" asLink={false} />
-                      </div>
-                    )}
+                      )}
+                      {shelter.isDemo && <DemoBadge variant="compact" />}
+                    </div>
 
                     {shelter.logoUrl && (
                       <div className="absolute -bottom-6 left-4 h-14 w-14 overflow-hidden rounded-xl border-2 border-white bg-white shadow-md">

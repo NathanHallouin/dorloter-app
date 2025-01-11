@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FavoriteButton } from "./favorite-button";
 import { placeholderPets } from "@shared/utils/placeholder-images";
+import { DemoBadge } from "@shared/ui/demo-badge";
 import type { Pet, PetPhoto } from "@/types";
 
 const fallbackPhotos = Object.values(placeholderPets);
@@ -74,6 +75,10 @@ export function PetCard({
 
           {/* Dégradé bas pour lisibilité du texte */}
           <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
+
+          {pet.isDemo && (
+            <DemoBadge variant="compact" className="absolute left-3 top-3" />
+          )}
 
           {/* Contenu overlay bas */}
           <div className="absolute inset-x-0 bottom-0 p-4 text-white">

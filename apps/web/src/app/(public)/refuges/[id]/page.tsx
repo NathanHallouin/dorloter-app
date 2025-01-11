@@ -1,5 +1,6 @@
 import { EmptyState } from "@shared/ui/empty-state";
 import { VerifiedBadge } from "@shared/ui/verified-badge";
+import { DemoBadge } from "@shared/ui/demo-badge";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -230,6 +231,7 @@ export default async function ShelterDetailPage({
         </section>
 
         <div className="mx-auto mt-12 w-full max-w-6xl px-4 pb-16">
+          {shelter.isDemo && <DemoBadge variant="banner" className="mb-6" />}
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Colonne principale */}
             <div className="lg:col-span-2">

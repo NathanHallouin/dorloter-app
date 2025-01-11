@@ -50,6 +50,7 @@ export const pensions = pgTable(
     // Vérification manuelle par un platform_admin — contrôle du SIRET, de
     // l'agrément, et de l'authenticité du compte.
     isVerified: boolean("is_verified").default(false).notNull(),
+    isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

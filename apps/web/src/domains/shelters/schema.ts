@@ -33,6 +33,7 @@ export const shelters = pgTable(
     logoUrl: text("logo_url"),
     coverUrl: text("cover_url"),
     isVerified: boolean("is_verified").default(false).notNull(),
+    isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

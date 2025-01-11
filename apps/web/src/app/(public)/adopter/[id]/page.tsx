@@ -7,6 +7,7 @@ import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@shared/ui/card";
 import { Separator } from "@shared/ui/separator";
+import { DemoBadge } from "@shared/ui/demo-badge";
 import { getPetWithDetails } from "@adoption/public";
 import { FavoriteButton } from "@adoption/public";
 import { PetShare } from "@adoption/public";
@@ -147,6 +148,7 @@ export default async function CatDetailPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <TrackVisit url={`/adopter/${pet.id}`} title={pet.name} />
+        {pet.isDemo && <DemoBadge variant="banner" className="mb-4" />}
         {/* Galerie photos avec lightbox */}
         <PetPhotoGallery
           photos={

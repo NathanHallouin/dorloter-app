@@ -97,6 +97,7 @@ export const pets = pgTable(
     specialNeeds: text("special_needs"),
     status: petStatusEnum().default("disponible").notNull(),
     adoptionFee: decimal("adoption_fee", { precision: 8, scale: 2 }),
+    isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

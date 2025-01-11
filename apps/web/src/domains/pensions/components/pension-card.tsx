@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MapPin, Cat, Dog, Star } from "lucide-react";
 import type { Pension, PensionPhoto } from "@/types";
 import { placeholderCovers } from "@shared/utils/placeholder-images";
+import { DemoBadge } from "@shared/ui/demo-badge";
 import { PensionCompareToggle } from "./pension-compare-toggle";
 import type { RatingSummary } from "../queries";
 
@@ -43,6 +44,9 @@ export function PensionCard({ pension, photo, rating }: PensionCardProps) {
                 ({rating.count})
               </span>
             </span>
+          )}
+          {pension.isDemo && (
+            <DemoBadge variant="compact" className="absolute right-2 top-2" />
           )}
         </div>
         <div className="space-y-2 p-4">

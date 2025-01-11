@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Clock, AlertCircle, HelpCircle } from "lucide-react";
 import type { Report, ReportPhoto } from "@/types";
+import { DemoBadge } from "@shared/ui/demo-badge";
 
 interface ReportCardProps {
   report: Report;
@@ -86,7 +87,7 @@ export function ReportCard({ report, primaryPhoto }: ReportCardProps) {
 
       {/* Contenu */}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:p-4">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span
             className={`inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${t.badge}`}
           >
@@ -96,6 +97,7 @@ export function ReportCard({ report, primaryPhoto }: ReportCardProps) {
           <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             {t.tag}
           </span>
+          {report.isDemo && <DemoBadge variant="compact" />}
         </div>
 
         <h3 className="truncate text-base font-bold text-foreground">
