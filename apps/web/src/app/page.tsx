@@ -19,6 +19,8 @@ import { EasterEgg } from "@/components/easter-egg";
 import { placeholderPets } from "@shared/utils/placeholder-images";
 import {
   getGlobalAdoptionStats,
+  getPets,
+  getPrimaryPhotosForPets,
   getRecentTestimonials,
   RecentTestimonialsSection,
 } from "@adoption/public";
@@ -42,6 +44,7 @@ export default async function HomePage() {
     shelterStats,
     recentReports,
     testimonials,
+    showcasePetsRaw,
   ] = await Promise.all([
     getGlobalAdoptionStats(),
     getGlobalReportStats(),
@@ -49,7 +52,24 @@ export default async function HomePage() {
     getGlobalShelterStats(),
     getReports({ status: "actif" }, 30),
     getRecentTestimonials(6),
+    getPets({}, 12, 0),
   ]);
+
+  // Galerie défilante : les 8 derniers animaux disponibles qui ont au moins
+  // une photo principale. Si la DB n'en a pas assez, on retombe sur les
+  // placeholders pour ne pas afficher une section vide ou mitigée.
+  const photoMap = await getPrimaryPhotosForPets(
+    showcasePetsRaw.pets.map((p) => p.id)
+  );
+  const showcasePets = showcasePetsRaw.pets
+    .filter((p) => photoMap.has(p.id))
+    .slice(0, 8)
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      url: photoMap.get(p.id)!,
+    }));
+  const hasRealShowcase = showcasePets.length >= 4;
 
   return (
     <>
@@ -231,30 +251,49 @@ export default async function HomePage() {
         <section className="px-4 py-12">
           <div className="mx-auto max-w-6xl">
             <p className="mb-6 text-center text-sm font-medium text-muted-foreground">
-              Quelques-uns, parmi ceux qui attendent
+              {hasRealShowcase
+                ? "Quelques-uns, parmi ceux qui attendent"
+                : "Bientôt, les premiers profils des refuges partenaires"}
             </p>
             <div className="flex gap-4 overflow-x-auto pb-2">
-              {Object.entries(placeholderPets).map(([name, src]) => (
-                <Link
-                  key={name}
-                  href="/adopter"
-                  className="group relative h-48 w-36 shrink-0 overflow-hidden rounded-2xl sm:h-56 sm:w-44"
-                  aria-label={`${name} et d'autres animaux à adopter`}
-                >
-                  <Image
-                    src={src}
-                    alt={`${name}, à adopter`}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                    sizes="176px"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/60 to-transparent p-3">
-                    <p className="text-sm font-semibold capitalize text-white">
-                      {name}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+              {hasRealShowcase
+                ? showcasePets.map((pet) => (
+                    <Link
+                      key={pet.id}
+                      href={`/adopter/${pet.id}`}
+                      className="group relative h-48 w-36 shrink-0 overflow-hidden rounded-2xl sm:h-56 sm:w-44"
+                      aria-label={`Voir la fiche de ${pet.name}`}
+                    >
+                      <Image
+                        src={pet.url}
+                        alt={`${pet.name}, à adopter`}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        sizes="176px"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/60 to-transparent p-3">
+                        <p className="text-sm font-semibold text-white">
+                          {pet.name}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+                : Object.entries(placeholderPets).map(([name, src]) => (
+                    <div
+                      key={name}
+                      aria-hidden
+                      className="relative h-48 w-36 shrink-0 overflow-hidden rounded-2xl sm:h-56 sm:w-44"
+                    >
+                      <Image
+                        src={src}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="176px"
+                      />
+                      <div className="absolute inset-0 bg-sable-50/30" />
+                    </div>
+                  ))}
             </div>
           </div>
         </section>

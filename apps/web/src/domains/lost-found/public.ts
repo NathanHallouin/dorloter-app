@@ -14,6 +14,7 @@ export {
 export { markReportResolved } from "./actions/resolve";
 export { importReportFromUrl } from "./actions/import";
 export { revealReportContact } from "./actions/contact";
+export { createSighting, maskSighting } from "./actions/sightings";
 
 // ─── Services (logique métier — appelés par Server Actions ET API v1) ──────
 export {
@@ -56,6 +57,11 @@ export {
   updateMatchStatus,
   type MatchBreakdown,
 } from "./queries/matching";
+export {
+  getSightingsForReport,
+  countSightingsForReport,
+  type SightingRow,
+} from "./queries/sightings";
 
 // ─── Validation ─────────────────────────────────────────────────────────────
 export { reportFormSchema } from "./validation";
@@ -73,3 +79,17 @@ export { ResolveReportButton } from "./components/resolve-report-button";
 export { ReportForm } from "./components/report-form";
 export { ReportEditForm } from "./components/report-edit-form";
 export { MyReportRow } from "./components/my-report-row";
+export {
+  ReportSearchMap,
+  type SightingMarker,
+  type MatchMarker,
+} from "./components/report-search-map";
+export {
+  ReportActivityFeed,
+  type ActivityEvent,
+} from "./components/report-activity-feed";
+export { ReportActivityFeedLive } from "./components/report-activity-feed-live";
+export { ReportSightingsSection } from "./components/report-sightings-section";
+export { ReportSightingModalButton } from "./components/report-sighting-modal-button";
+export { ReportTipsBanner } from "./components/report-tips-banner";
+export { ReportDetailShell } from "./components/report-detail-shell";

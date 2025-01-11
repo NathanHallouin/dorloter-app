@@ -1,11 +1,17 @@
 import { unstable_cache } from "next/cache";
 import { db } from "@infra/db";
 import { reports, reportPhotos, reportMatches } from "@/server/db/schema";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ilike, or, sql } from "drizzle-orm";
 
 interface ReportFilters {
   type?: "perdu" | "trouve";
   status?: "actif" | "resolu" | "expire";
+  species?: "chat" | "chien";
+  sex?: "male" | "femelle";
+  /** Filtre "puce électronique connue" : true = pucé, false = non pucé. */
+  chipped?: boolean;
+  /** Recherche libre sur pet_name / breed / color / description. */
+  search?: string;
   centerLat?: number;
   centerLng?: number;
   radiusKm?: number;
@@ -26,6 +32,23 @@ export async function getReports(
   if (filters.type) conditions.push(eq(reports.type, filters.type));
   if (filters.status) conditions.push(eq(reports.status, filters.status));
   else conditions.push(eq(reports.status, "actif"));
+
+  if (filters.species) conditions.push(eq(reports.species, filters.species));
+  if (filters.sex) conditions.push(eq(reports.sex, filters.sex));
+  if (typeof filters.chipped === "boolean")
+    conditions.push(eq(reports.isChipped, filters.chipped));
+
+  if (filters.search && filters.search.trim().length > 0) {
+    const term = `%${filters.search.trim()}%`;
+    const orClause = or(
+      ilike(reports.petName, term),
+      ilike(reports.breed, term),
+      ilike(reports.color, term),
+      ilike(reports.description, term),
+      ilike(reports.address, term)
+    );
+    if (orClause) conditions.push(orClause);
+  }
 
   if (
     filters.centerLat !== undefined &&
