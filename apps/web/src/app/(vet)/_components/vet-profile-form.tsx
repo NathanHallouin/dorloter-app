@@ -10,7 +10,7 @@ import { Button } from "@shared/ui/button";
 import {
   updateVeterinarian,
   updateSearchRadius,
-} from "@veterinarians/public";
+} from "@veterinarians/public.client";
 
 interface VetProfileFormProps {
   vet: {

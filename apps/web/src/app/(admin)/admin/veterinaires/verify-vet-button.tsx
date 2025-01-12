@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
-import { verifyVeterinarian } from "@veterinarians/public";
+import { verifyVeterinarian } from "@veterinarians/public.client";
 
 export function VerifyVetButton({ vetId }: { vetId: string }) {
   const router = useRouter();

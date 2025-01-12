@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Input } from "@shared/ui/input";
 import { Textarea } from "@shared/ui/textarea";
 import { Button } from "@shared/ui/button";
-import { createVeterinarian } from "@veterinarians/public";
+import { createVeterinarian } from "@veterinarians/public.client";
 
 export function VetSignupForm() {
   const router = useRouter();
