@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   Clock,
   PencilLine,
+  Printer,
   Sparkles,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
@@ -353,6 +354,14 @@ export default async function ReportDetailPage({ params }: PageProps) {
         contactPhone={report.contactPhone}
         photoUrl={primaryPhoto?.url ?? null}
       />
+
+      <Link
+        href={`/perdus-trouves/${report.id}/affiche`}
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-coral-300 hover:bg-coral-50/50"
+      >
+        <Printer className="h-4 w-4" />
+        Télécharger l&apos;affiche
+      </Link>
 
       {isOwner && report.status === "actif" && (
         <ResolveReportButton reportId={report.id} type={report.type} />
