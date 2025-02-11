@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { PetFilters } from "@adoption/public";
 import { PetCard } from "@adoption/public";
+import { PetCompareBar } from "@adoption/public";
 import { CatalogModeToggle } from "@adoption/public";
 import { getPets } from "@adoption/public";
 import { db } from "@infra/db";
@@ -198,6 +199,7 @@ export default async function AdopterListePage({
           </>
         )}
       </main>
+      <PetCompareBar />
       <Footer />
     </>
   );

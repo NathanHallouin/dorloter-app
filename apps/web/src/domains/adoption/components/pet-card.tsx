@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FavoriteButton } from "./favorite-button";
+import { PetCompareToggle } from "./pet-compare-toggle";
 import { placeholderPets } from "@shared/utils/placeholder-images";
 import { DemoBadge } from "@shared/ui/demo-badge";
 import type { Pet, PetPhoto } from "@/types";
@@ -101,14 +102,15 @@ export function PetCard({
         </div>
       </Link>
 
-      {/* Cœur flottant en haut à droite, hors du Link */}
-      {showFavorite && (
-        <div className="absolute right-3 top-3">
+      {/* Actions flottantes en haut à droite, hors du Link */}
+      <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+        {showFavorite && (
           <div className="rounded-full bg-white/85 p-0.5 shadow-md backdrop-blur-sm">
             <FavoriteButton petId={pet.id} initialFavorite={isFavorite} />
           </div>
-        </div>
-      )}
+        )}
+        <PetCompareToggle petId={pet.id} petName={pet.name} />
+      </div>
     </article>
   );
 }

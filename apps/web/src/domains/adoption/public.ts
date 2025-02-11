@@ -92,6 +92,8 @@ export { MatchQuiz } from "./components/match-quiz";
 export { CatalogModeToggle } from "./components/catalog-mode-toggle";
 export { PetCompatibilityPills } from "./components/pet-compatibility-pills";
 export { FavoriteButton } from "./components/favorite-button";
+export { PetCompareToggle } from "./components/pet-compare-toggle";
+export { PetCompareBar } from "./components/pet-compare-bar";
 export { TestimonialDisplay } from "./components/testimonial-display";
 export { TestimonialForm } from "./components/testimonial-form";
 export { RecentTestimonialsSection } from "./components/recent-testimonials-section";
