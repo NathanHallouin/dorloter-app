@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Picto patte Dorloter">
+  <title>Picto patte Dorloter</title>
+  <g fill="#e8634d">
+    <path d="M 100 138 C 80 138 64 122 64 102 C 64 86 80 70 100 70 C 120 70 136 86 136 102 C 136 122 120 138 100 138 Z"/>
+    <ellipse cx="60" cy="80" rx="14" ry="19" transform="rotate(-20 60 80)"/>
+    <ellipse cx="82" cy="52" rx="13" ry="20"/>
+    <ellipse cx="118" cy="52" rx="13" ry="20"/>
+    <ellipse cx="140" cy="80" rx="14" ry="19" transform="rotate(20 140 80)"/>
+  </g>
+</svg>
