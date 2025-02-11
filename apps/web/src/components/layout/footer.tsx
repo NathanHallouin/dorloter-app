@@ -110,6 +110,12 @@ export function Footer() {
                 >
                   Comment on vérifie
                 </Link>
+                <Link
+                  href="/presse"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Espace presse
+                </Link>
               </div>
             </div>
           </div>
