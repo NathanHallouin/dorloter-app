@@ -21,7 +21,7 @@ import {
   TRANSFER_STATUS_CLASSES,
   TRANSFER_STATUS_LABELS,
   type PetTransferWithContext,
-} from "@adoption/public";
+} from "@adoption/public.client";
 
 interface Props {
   currentShelterId: string;

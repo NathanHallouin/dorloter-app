@@ -18,7 +18,7 @@ import { Button } from "@shared/ui/button";
 import { Textarea } from "@shared/ui/textarea";
 import { ApplicationStatusBadge } from "./application-status";
 import { updateApplicationStatus } from "@adoption/actions/applications";
-import type { FollowupRow } from "@adoption/public";
+import type { FollowupRow } from "@adoption/public.client";
 import {
   TemplateSelector,
   type ResponseTemplate,

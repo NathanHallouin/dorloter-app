@@ -13,7 +13,7 @@ import {
   PET_FIELDS,
   PET_FIELD_LABELS,
   type PetField,
-} from "@adoption/public";
+} from "@adoption/public.client";
 
 type CellMap = Map<number, PetField>;
 

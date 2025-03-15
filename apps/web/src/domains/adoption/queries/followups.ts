@@ -1,15 +1,9 @@
 import { asc, eq, inArray } from "drizzle-orm";
 import { db } from "@infra/db";
 import { adoptionFollowups } from "@/server/db/schema";
+import type { FollowupRow } from "../lib/followup-types";
 
-export interface FollowupRow {
-  id: string;
-  applicationId: string;
-  stage: "j15" | "j90" | "j365";
-  status: "pending" | "sent" | "skipped";
-  dueAt: Date;
-  sentAt: Date | null;
-}
+export type { FollowupRow } from "../lib/followup-types";
 
 /**
  * Récupère les followups (J+15, J+90, J+365) pour un lot de candidatures.

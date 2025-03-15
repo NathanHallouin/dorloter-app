@@ -26,7 +26,7 @@ import {
   MEDICAL_EVENT_COLOR_CLASSES,
   type MedicalEvent,
   type MedicalEventType,
-} from "@adoption/public";
+} from "@adoption/public.client";
 
 interface SerializedEvent extends MedicalEvent {
   typeLabel: string;

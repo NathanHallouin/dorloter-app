@@ -12,7 +12,7 @@ import {
   TRANSFER_STATUS_CLASSES,
   TRANSFER_STATUS_LABELS,
   type PetTransfer,
-} from "@adoption/public";
+} from "@adoption/public.client";
 
 interface TargetShelter {
   id: string;
