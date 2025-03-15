@@ -24,9 +24,93 @@ export {
   revokeShelterInvitation,
   acceptShelterInvitation,
 } from "./actions/invitations";
+export {
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+  type TemplateInput,
+} from "./actions/templates";
+export {
+  replaceShelterVisitSlots,
+  createVisitBooking,
+  updateBookingStatusAsShelter,
+  cancelBookingAsUser,
+} from "./actions/visits";
+export {
+  createShelterTag,
+  updateShelterTag,
+  deleteShelterTag,
+  setPetTags,
+  type TagInput,
+} from "./actions/tags";
+export {
+  createShelterEvent,
+  updateShelterEvent,
+  deleteShelterEvent,
+  type EventInput,
+} from "./actions/events";
+export { sendNewsletter } from "./actions/newsletters";
+export {
+  NEWSLETTER_KINDS,
+  NEWSLETTER_LABELS,
+  type ShelterNewsletter,
+  type ShelterNewsletterKind,
+} from "./lib/newsletter-types";
+export {
+  createShelterDocument,
+  updateShelterDocument,
+  deleteShelterDocument,
+  type DocumentInput,
+} from "./actions/documents";
+export {
+  DOCUMENT_KINDS,
+  DOCUMENT_KIND_LABELS,
+  formatBytes,
+  type ShelterDocument,
+  type DocumentKind,
+  type DocumentVisibility,
+} from "./lib/document-types";
+export {
+  EVENT_TYPES,
+  EVENT_TYPE_LABELS,
+  EVENT_TYPE_CLASSES,
+  type ShelterEvent,
+  type ShelterEventType,
+} from "./lib/event-types";
+export {
+  TAG_COLORS,
+  TAG_COLOR_CLASSES,
+  TAG_COLOR_LABELS,
+  type TagColor,
+} from "./lib/tag-colors";
+export type { ShelterTag } from "./lib/tag-types";
+export {
+  computeAvailability,
+  groupByDay,
+  formatMinutes,
+  formatRange,
+  getIsoDayOfWeek,
+  DAY_LABELS_ISO,
+  DAY_LABELS_SHORT_ISO,
+  HALF_HOURS_FROM_8_TO_19,
+  type AvailabilitySlot,
+} from "./lib/visit-slots";
+export {
+  TEMPLATE_VARIABLES,
+  renderTemplate,
+  buildTemplateContext,
+  type TemplateContext,
+} from "./lib/template-variables";
 
 // Composants "use client" — eux-mêmes safe à bundler côté client.
 export { ShelterProfileForm } from "./components/shelter-profile-form";
 export { FollowButton } from "./components/follow-button";
 export { AdminsSection } from "./components/admins-section";
 export { AcceptInvitation } from "./components/accept-invitation";
+export { TemplateSelector } from "./components/template-selector";
+
+// Types réutilisés côté client (purement structurels, pas de runtime DB).
+export type {
+  ResponseTemplate,
+  ResponseTemplateKind,
+} from "./lib/template-types";

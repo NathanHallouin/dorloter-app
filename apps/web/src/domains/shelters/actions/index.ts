@@ -161,6 +161,8 @@ export async function updateShelter(
       email: data.email,
       website: data.website,
       donationUrl: data.donationUrl || null,
+      donationLabel: data.donationLabel || null,
+      donationDescription: data.donationDescription || null,
       visitHours: data.visitHours || null,
       logoUrl: data.logoUrl || null,
       coverUrl: data.coverUrl || null,

@@ -62,6 +62,11 @@ export {
   countSightingsForReport,
   type SightingRow,
 } from "./queries/sightings";
+export { getReportMapPoints } from "./queries/map-points";
+export {
+  getRetrouvaillesMapPoints,
+  type RetrouvaillesMapPoint,
+} from "./queries/retrouvailles-map";
 
 // ─── Validation ─────────────────────────────────────────────────────────────
 export { reportFormSchema } from "./validation";

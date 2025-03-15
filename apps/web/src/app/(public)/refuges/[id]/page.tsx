@@ -13,6 +13,8 @@ import {
   Globe,
   ShieldCheck,
   Clock,
+  ExternalLink,
+  FileText,
   HeartHandshake,
   PawPrint as PawIcon,
   Calendar,
@@ -31,6 +33,9 @@ import { PetCard } from "@adoption/public";
 import {
   getShelterById,
   getShelterPublicStats,
+  getPublicDocumentsForShelter,
+  formatBytes,
+  DOCUMENT_KIND_LABELS,
 } from "@shelters/public";
 import { getPets } from "@adoption/public";
 import { db } from "@infra/db";
@@ -78,9 +83,10 @@ export default async function ShelterDetailPage({
   const shelter = await getShelterById(id);
   if (!shelter) notFound();
 
-  const [{ pets: shelterCats }, publicStats] = await Promise.all([
+  const [{ pets: shelterCats }, publicStats, publicDocs] = await Promise.all([
     getPets({ shelterId: shelter.id }, 50, 0),
     getShelterPublicStats(shelter.id),
+    getPublicDocumentsForShelter(shelter.id),
   ]);
 
   const photos = await db
@@ -291,9 +297,9 @@ export default async function ShelterDetailPage({
                     <HeartHandshake className="h-3.5 w-3.5" />
                     Soutenir le refuge
                   </div>
-                  <p className="mb-4 text-sm text-foreground">
-                    Un don permet aux bénévoles de soigner, nourrir et abriter
-                    les chats recueillis.
+                  <p className="mb-4 whitespace-pre-wrap text-sm text-foreground">
+                    {shelter.donationDescription?.trim() ||
+                      "Un don permet aux bénévoles de soigner, nourrir et abriter les animaux recueillis."}
                   </p>
                   <a
                     href={shelter.donationUrl}
@@ -301,8 +307,48 @@ export default async function ShelterDetailPage({
                     rel="noopener noreferrer"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-coral-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-coral-600"
                   >
-                    Faire un don
+                    <ExternalLink className="h-4 w-4" />
+                    {shelter.donationLabel?.trim() || "Faire un don"}
                   </a>
+                  <p className="mt-3 text-[10px] text-muted-foreground">
+                    Vous serez redirigé·e vers la plateforme du refuge.
+                    Dorloter ne collecte aucun paiement.
+                  </p>
+                </section>
+              )}
+
+              {/* Documents publics */}
+              {publicDocs.length > 0 && (
+                <section className="rounded-xl border border-border bg-card p-5">
+                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    Documents publics
+                  </h3>
+                  <ul className="space-y-2">
+                    {publicDocs.map((d) => (
+                      <li key={d.id}>
+                        <a
+                          href={d.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-start gap-3 rounded-lg border border-border bg-sable-50/40 p-2.5 transition hover:border-coral-300 hover:bg-coral-50/40"
+                        >
+                          <FileText className="mt-0.5 h-4 w-4 shrink-0 text-coral-500" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {d.title}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {DOCUMENT_KIND_LABELS[d.kind]}
+                              {d.fileSizeBytes
+                                ? ` · ${formatBytes(d.fileSizeBytes)}`
+                                : ""}
+                            </p>
+                          </div>
+                          <ExternalLink className="mt-1 h-3 w-3 shrink-0 text-muted-foreground" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </section>
               )}
 

@@ -16,7 +16,7 @@ import { relations } from "@/server/db/relations";
  * (utile quand on change une option postgres-js qui doit reprendre effet
  * sans redémarrer manuellement le process dev).
  */
-const CACHE_VERSION = "v2-prepare-aware";
+const CACHE_VERSION = "v3-timeout-aware";
 
 type GlobalCache = {
   __miaouAppPg?: { version: string; client: ReturnType<typeof postgres> };
@@ -50,6 +50,11 @@ function getAppClient() {
         idle_timeout: 20,
         connect_timeout: 10,
         prepare: !isTransactionPooler(url),
+        // Borne la durée max d'une statement côté serveur — fail-fast
+        // au lieu de tenir une connexion bloquée. En dev/prod Supabase
+        // a déjà un statement_timeout (~8s), mais le forcer côté client
+        // garantit un comportement identique partout.
+        connection: { statement_timeout: 8000 },
       }),
     };
   }
@@ -72,6 +77,7 @@ function getAdminClient() {
         idle_timeout: 20,
         connect_timeout: 10,
         prepare: !isTransactionPooler(url),
+        connection: { statement_timeout: 8000 },
       }),
     };
   }

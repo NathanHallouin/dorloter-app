@@ -22,6 +22,12 @@ export {
   getRecentReportAccess,
   type VetListFilters,
 } from "./queries";
+export { getVetMapPoints } from "./queries/map-points";
+export {
+  getVetAlertSummaryForReport,
+  getVetAlertsForReport,
+  type VetReportAlertSummary,
+} from "./queries/report-alerts";
 
 // ─── Validation + constantes ───────────────────────────────────────────────
 export {

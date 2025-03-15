@@ -15,6 +15,16 @@ export const shelterFormSchema = z.object({
   missionLong: z.string().max(2000).optional().or(z.literal("")),
   visitHours: z.string().max(500).optional().or(z.literal("")),
   donationUrl: z.string().url().optional().or(z.literal("")),
+  donationLabel: z
+    .string()
+    .max(80, "Libellé trop long (80 max)")
+    .optional()
+    .or(z.literal("")),
+  donationDescription: z
+    .string()
+    .max(500, "Description trop longue (500 max)")
+    .optional()
+    .or(z.literal("")),
   foundedYear: z.number().int().min(1900).max(2100).optional(),
 });
 

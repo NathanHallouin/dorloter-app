@@ -260,6 +260,553 @@ export function newMessageEmailTemplate(params: {
   };
 }
 
+// ─── Suivi post-adoption ───────────────────────────────────────────────────
+
+/**
+ * J+15 : email d'adaptation. On prend des nouvelles, on rassure, on rappelle
+ * que le refuge reste joignable en cas de souci comportemental ou médical.
+ */
+export function followupJ15EmailTemplate(params: {
+  userName: string;
+  petName: string;
+  shelterName: string;
+  shelterEmail: string | null;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, shelterName, shelterEmail } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const title = `Comment se passe l'adaptation de ${petName} ?`;
+  const contactBlock = shelterEmail
+    ? `Une question, un doute, un souci ? Le refuge ${shelterName} reste joignable : <a href="mailto:${shelterEmail}" style="color:#e8634d">${shelterEmail}</a>.`
+    : `Une question, un doute ? Le refuge ${shelterName} reste votre meilleur interlocuteur.`;
+
+  const text = `Bonjour ${firstName},
+
+Cela fait deux semaines que ${petName} est rentré·e chez vous. On voulait prendre de ses nouvelles, et des vôtres.
+
+L'adaptation, c'est un marathon : les premiers jours, l'animal explore, se cache, se teste. Les premières semaines, il commence à reconnaître son territoire, sa routine, ses humains. Comptez 3 semaines pour la décompression, 3 mois pour s'installer, 3 ans pour partager une vie totalement intégrée.
+
+${shelterEmail ? `Une question ? Le refuge reste joignable : ${shelterEmail}.` : `Une question ? Le refuge ${shelterName} reste votre meilleur interlocuteur.`}
+
+Bonne continuation,
+L'équipe Dorloter`;
+
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `Bonjour ${firstName},<br><br>Cela fait deux semaines que ${petName} est rentré·e chez vous. On voulait prendre de ses nouvelles.<br><br>L'adaptation, c'est un marathon : <strong>3 semaines</strong> pour la décompression, <strong>3 mois</strong> pour s'installer, <strong>3 ans</strong> pour partager une vie totalement intégrée.<br><br>${contactBlock}`,
+      "Voir mon espace",
+      "/dashboard"
+    ),
+  };
+}
+
+/**
+ * J+90 : invitation à publier un témoignage public sur Dorloter. Permet
+ * de nourrir la home, redonner espoir aux autres adoptants potentiels.
+ */
+export function followupJ90EmailTemplate(params: {
+  userName: string;
+  petName: string;
+  petId: string;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, petId } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const title = `Et si vous partagiez l'histoire de ${petName} ?`;
+
+  const text = `Bonjour ${firstName},
+
+Trois mois que ${petName} a rejoint votre foyer. C'est le moment idéal pour partager votre expérience : votre témoignage motive les futurs adoptants, donne de l'élan aux refuges et nourrit toute la communauté Dorloter.
+
+Cela ne prend que quelques minutes. Une photo, quelques lignes sur votre adaptation, et c'est en ligne (modéré par nos soins).
+
+Publier votre témoignage : ${process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr"}/adopter/${petId}#temoignage
+
+Merci pour ce que vous faites,
+L'équipe Dorloter`;
+
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `Bonjour ${firstName},<br><br>Trois mois que ${petName} a rejoint votre foyer. C'est le moment idéal pour partager votre expérience.<br><br>Un témoignage, c'est :<br>· un coup de pouce aux futurs adoptants<br>· de la fierté pour le refuge<br>· de la lumière pour toute la communauté<br><br>Quelques lignes, une photo, et c'est en ligne.`,
+      "Partager mon témoignage",
+      `/adopter/${petId}#temoignage`
+    ),
+  };
+}
+
+/**
+ * J+365 : email anniversaire de l'adoption + invitation à parrainer un
+ * autre animal du même refuge.
+ */
+export function followupJ365EmailTemplate(params: {
+  userName: string;
+  petName: string;
+  shelterName: string;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, shelterName } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const title = `Un an avec ${petName} !`;
+
+  const text = `Bonjour ${firstName},
+
+C'est l'anniversaire ! Voilà un an que ${petName} partage votre quotidien. On espère que vous avez plein d'aventures à raconter.
+
+Si vous voulez prolonger l'élan, sachez que ${shelterName} accueille toujours d'autres animaux qui attendent une famille. Adoption, parrainage à distance, partage de fiches : chaque geste compte.
+
+Découvrir les nouveaux profils : ${process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr"}/refuges
+
+Merci pour votre engagement,
+L'équipe Dorloter`;
+
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `Bonjour ${firstName},<br><br>Voilà <strong>un an</strong> que ${petName} partage votre quotidien. On espère que vous avez plein d'aventures à raconter.<br><br>Si vous voulez prolonger l'élan : ${shelterName} accueille toujours d'autres animaux. Adoption, parrainage, partage de fiches : chaque geste compte.`,
+      "Découvrir les nouveaux profils",
+      "/refuges"
+    ),
+  };
+}
+
+// ─── Transferts inter-refuges ─────────────────────────────────────────────
+
+/**
+ * Email envoyé aux admins du refuge destinataire à l'initiation d'un
+ * transfert. Le destinataire peut accepter ou refuser depuis sa page
+ * `/shelter-transferts`.
+ */
+export function petTransferRequestedEmailTemplate(params: {
+  userName: string;
+  petName: string;
+  petSpecies: "chat" | "chien";
+  fromShelterName: string;
+  requestedByName: string;
+  message: string | null;
+  transferId: string;
+}): { subject: string; html: string; text: string } {
+  const {
+    userName,
+    petName,
+    petSpecies,
+    fromShelterName,
+    requestedByName,
+    message,
+    transferId,
+  } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const speciesLabel = petSpecies === "chat" ? "chat" : "chien";
+  const subject = `Demande de transfert : ${petName} (${speciesLabel}) depuis ${fromShelterName}`;
+  const messageBlock = message
+    ? `\n\nMessage du refuge :\n« ${message} »`
+    : "";
+
+  const text = `Bonjour ${firstName},
+
+${requestedByName} (équipe ${fromShelterName}) sollicite votre refuge pour la prise en charge de ${petName} (${speciesLabel}).${messageBlock}
+
+Acceptez ou refusez cette demande depuis votre tableau de bord :
+${process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr"}/shelter-transferts
+
+À l'acceptation, ${petName} bascule automatiquement sous la responsabilité de votre refuge sur Dorloter.
+
+Bonne réception,
+L'équipe Dorloter`;
+
+  const safeMessage = message
+    ? message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")
+    : "";
+
+  return {
+    subject: `${subject} · Dorloter`,
+    text,
+    html: card(
+      subject,
+      `Bonjour ${firstName},<br><br><strong>${requestedByName}</strong> (équipe ${fromShelterName}) sollicite votre refuge pour la prise en charge de <strong>${petName}</strong> (${speciesLabel}).${
+        message
+          ? `<br><br><blockquote style="margin:12px 0;padding:8px 16px;border-left:3px solid #e8634d;background:#fff5f2;color:#52483e">${safeMessage}</blockquote>`
+          : ""
+      }<br>À l'acceptation, ${petName} basculera automatiquement sous la responsabilité de votre refuge.`,
+      "Traiter cette demande",
+      `/shelter-transferts#${transferId}`
+    ),
+  };
+}
+
+/**
+ * Email envoyé à l'initiateur quand le refuge destinataire prend une
+ * décision (accept/refuse).
+ */
+export function petTransferDecidedEmailTemplate(params: {
+  userName: string;
+  petName: string;
+  toShelterName: string;
+  decided: "accepte" | "refuse";
+  decisionNote: string | null;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, toShelterName, decided, decisionNote } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const subject =
+    decided === "accepte"
+      ? `Transfert de ${petName} accepté par ${toShelterName}`
+      : `Transfert de ${petName} refusé par ${toShelterName}`;
+  const intro =
+    decided === "accepte"
+      ? `${toShelterName} a accepté le transfert de ${petName}. La fiche est maintenant sous leur responsabilité sur Dorloter.`
+      : `${toShelterName} a refusé le transfert de ${petName}. La fiche reste sous votre responsabilité.`;
+  const noteBlock = decisionNote
+    ? `\n\nNote du refuge :\n« ${decisionNote} »`
+    : "";
+  const safeNote = decisionNote
+    ? decisionNote
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/\n/g, "<br>")
+    : "";
+
+  return {
+    subject: `${subject} · Dorloter`,
+    text: `Bonjour ${firstName},
+
+${intro}${noteBlock}
+
+· Dorloter`,
+    html: card(
+      subject,
+      `Bonjour ${firstName},<br><br>${intro}${
+        decisionNote
+          ? `<br><br><blockquote style="margin:12px 0;padding:8px 16px;border-left:3px solid #e8634d;background:#fff5f2;color:#52483e">${safeNote}</blockquote>`
+          : ""
+      }`,
+      "Voir mes transferts",
+      "/shelter-transferts"
+    ),
+  };
+}
+
+// ─── Newsletter refuge ────────────────────────────────────────────────────
+
+/**
+ * Email envoyé aux followers d'un refuge quand l'équipe publie une
+ * newsletter (nouvel arrivage, urgence FA, appel aux dons, événement,
+ * général). Le `body` est texte brut — converti en HTML basique en
+ * remplaçant les sauts de ligne par `<br>` (pas de Markdown rendering
+ * en V1 pour rester déterministe).
+ */
+export function shelterNewsletterEmailTemplate(params: {
+  userName: string;
+  shelterName: string;
+  shelterSlug: string;
+  subject: string;
+  body: string;
+}): { subject: string; html: string; text: string } {
+  const { userName, shelterName, shelterSlug, subject, body } = params;
+  const firstName = userName.split(" ")[0] || userName;
+
+  const text = `Bonjour ${firstName},
+
+${shelterName} vient de publier une nouvelle :
+
+${body}
+
+Voir la fiche du refuge : ${process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr"}/refuges/${shelterSlug}
+
+Vous recevez cet email parce que vous suivez ${shelterName} sur Dorloter. Pour ne plus recevoir leurs nouvelles, retirez-le de vos refuges suivis depuis votre profil.
+
+· Dorloter`;
+
+  const safeBody = body
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+
+  return {
+    subject: `${subject} · ${shelterName}`,
+    text,
+    html: card(
+      subject,
+      `Bonjour ${firstName},<br><br><strong>${shelterName}</strong> vient de publier une nouvelle :<br><br><div style="border-left:3px solid #e8634d;padding:8px 16px;background:#fff5f2;color:#2b1810">${safeBody}</div>`,
+      "Voir le refuge",
+      `/refuges/${shelterSlug}`
+    ),
+  };
+}
+
+// ─── Alerte signalement aux cabinets vétos du secteur ─────────────────────
+
+/**
+ * Email envoyé à un compte vétérinaire admin quand un signalement
+ * perdu/trouvé est créé dans son rayon de recherche configuré.
+ */
+export function vetReportAlertEmailTemplate(params: {
+  userName: string;
+  vetName: string;
+  vetSlug: string;
+  reportId: string;
+  reportType: "perdu" | "trouve";
+  species: "chat" | "chien";
+  petName: string | null;
+  distanceMeters: number;
+}): { subject: string; html: string; text: string } {
+  const {
+    userName,
+    vetName,
+    reportType,
+    species,
+    petName,
+    distanceMeters,
+  } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const speciesLabel = species === "chat" ? "chat" : "chien";
+  const typeLabel = reportType === "perdu" ? "perdu" : "trouvé";
+  const distanceKm = (distanceMeters / 1000).toFixed(1);
+  const titleAnimal = petName
+    ? `${petName} (${speciesLabel} ${typeLabel})`
+    : `${speciesLabel} ${typeLabel}`;
+  const title = `Alerte signalement à ${distanceKm} km de ${vetName}`;
+
+  const text = `Bonjour ${firstName},
+
+Un nouveau signalement vient d'être publié à ${distanceKm} km de votre cabinet ${vetName} : ${titleAnimal}.
+
+Pourquoi ce mail : votre cabinet est référencé sur Dorloter avec un rayon d'écoute. Les signalements de votre périmètre vous parviennent automatiquement. Vous pouvez les consulter, contacter le propriétaire ou signaler une suspicion d'identification chez vous.
+
+Voir la fiche : ${process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr"}/perdus-trouves/${params.reportId}
+
+Si vous ne souhaitez plus recevoir ces alertes, ajustez votre rayon de recherche dans votre profil cabinet.
+
+· Dorloter`;
+
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `Bonjour ${firstName},<br><br>Un nouveau signalement vient d'être publié à <strong>${distanceKm} km</strong> de votre cabinet <strong>${vetName}</strong> :<br><br><strong>${titleAnimal}</strong><br><br>Pourquoi ce mail : votre cabinet est référencé sur Dorloter avec un rayon d'écoute. Les signalements de votre périmètre vous parviennent automatiquement.<br><br><span style="color:#6b5e4f;font-size:12px">Si vous ne souhaitez plus recevoir ces alertes, ajustez votre rayon de recherche dans votre profil cabinet.</span>`,
+      "Voir la fiche signalement",
+      `/perdus-trouves/${params.reportId}`
+    ),
+  };
+}
+
+// ─── RDV visite refuge ─────────────────────────────────────────────────────
+
+function formatDateTimeFR(d: Date): string {
+  const date = d.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const time = d.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${date} à ${time}`;
+}
+
+/**
+ * Confirmation d'un RDV de visite par le refuge.
+ */
+export function visitBookingConfirmedEmailTemplate(params: {
+  userName: string;
+  petName: string | null;
+  shelterName: string;
+  shelterAddress: string | null;
+  scheduledFor: Date;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, shelterName, shelterAddress, scheduledFor } =
+    params;
+  const firstName = userName.split(" ")[0] || userName;
+  const datetime = formatDateTimeFR(scheduledFor);
+  const subject = petName
+    ? `Visite confirmée pour ${petName}`
+    : `Visite confirmée chez ${shelterName}`;
+
+  const text = `Bonjour ${firstName},
+
+${shelterName} confirme votre rendez-vous de visite${petName ? ` pour ${petName}` : ""} le ${datetime}.
+
+${shelterAddress ? `Lieu : ${shelterAddress}\n\n` : ""}À noter :
+- Prévoyez environ 30 minutes.
+- Apportez une pièce d'identité.
+- Posez toutes vos questions.
+- En cas d'empêchement, prévenez le refuge dès que possible.
+
+À bientôt,
+L'équipe Dorloter`;
+
+  return {
+    subject: `${subject} · Dorloter`,
+    text,
+    html: card(
+      subject,
+      `Bonjour ${firstName},<br><br>${shelterName} confirme votre rendez-vous${petName ? ` pour <strong>${petName}</strong>` : ""} le <strong>${datetime}</strong>.${shelterAddress ? `<br><br>Lieu : ${shelterAddress}` : ""}<br><br>À prévoir : environ 30 min, une pièce d'identité, vos questions. En cas d'empêchement, prévenez le refuge.`,
+      "Voir mes RDV",
+      "/dashboard?tab=rdv"
+    ),
+  };
+}
+
+/**
+ * Refus d'un RDV par le refuge.
+ */
+export function visitBookingRefusedEmailTemplate(params: {
+  userName: string;
+  petName: string | null;
+  shelterName: string;
+  scheduledFor: Date;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, shelterName, scheduledFor } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const datetime = formatDateTimeFR(scheduledFor);
+  const subject = `Créneau du ${datetime.split(" à ")[0]} non disponible`;
+
+  const text = `Bonjour ${firstName},
+
+${shelterName} n'est malheureusement pas disponible le ${datetime}.
+
+Pas d'inquiétude, vous pouvez choisir un autre créneau parmi ceux ouverts par le refuge${petName ? `, ou contacter ${shelterName} directement pour parler de ${petName}` : ""}.
+
+Bonne continuation,
+L'équipe Dorloter`;
+
+  return {
+    subject: `${subject} · Dorloter`,
+    text,
+    html: card(
+      subject,
+      `Bonjour ${firstName},<br><br>${shelterName} n'est malheureusement pas disponible le <strong>${datetime}</strong>.<br><br>Pas d'inquiétude, vous pouvez choisir un autre créneau parmi ceux ouverts${petName ? `, ou contacter ${shelterName} directement à propos de ${petName}` : ""}.`,
+      "Choisir un autre créneau",
+      petName ? `/adopter` : "/refuges"
+    ),
+  };
+}
+
+/**
+ * Rappel J-1 d'un RDV confirmé.
+ */
+export function visitBookingReminderEmailTemplate(params: {
+  userName: string;
+  petName: string | null;
+  shelterName: string;
+  shelterAddress: string | null;
+  scheduledFor: Date;
+}): { subject: string; html: string; text: string } {
+  const { userName, petName, shelterName, shelterAddress, scheduledFor } =
+    params;
+  const firstName = userName.split(" ")[0] || userName;
+  const datetime = formatDateTimeFR(scheduledFor);
+  const subject = petName
+    ? `Rappel : visite pour ${petName} demain`
+    : `Rappel : visite chez ${shelterName} demain`;
+
+  const text = `Bonjour ${firstName},
+
+Petit rappel : votre rendez-vous chez ${shelterName}${petName ? ` pour ${petName}` : ""} est demain, ${datetime}.
+
+${shelterAddress ? `Lieu : ${shelterAddress}\n\n` : ""}Bonne visite,
+L'équipe Dorloter
+
+PS : un empêchement de dernière minute ? Prévenez le refuge directement par téléphone.`;
+
+  return {
+    subject: `${subject} · Dorloter`,
+    text,
+    html: card(
+      subject,
+      `Bonjour ${firstName},<br><br>Petit rappel : votre rendez-vous chez <strong>${shelterName}</strong>${petName ? ` pour <strong>${petName}</strong>` : ""} est demain, <strong>${datetime}</strong>.${shelterAddress ? `<br><br>Lieu : ${shelterAddress}` : ""}<br><br>Bonne visite. En cas d'empêchement, prévenez le refuge directement.`,
+      "Voir mes RDV",
+      "/dashboard?tab=rdv"
+    ),
+  };
+}
+
+/**
+ * Digest d'une recherche sauvegardée (alertes adoption ou perdus/trouvés).
+ * Pas plus de 6 items par email — le reste est sur le site.
+ */
+export function savedSearchDigestEmailTemplate(params: {
+  userName: string;
+  searchName: string;
+  kind: "adoption" | "lost-found";
+  items: Array<{
+    id: string;
+    title: string;
+    subtitle: string | null;
+    photoUrl: string | null;
+    href: string;
+  }>;
+  baseUrl: string;
+}): { subject: string; html: string; text: string } {
+  const { userName, searchName, kind, items, baseUrl } = params;
+  const firstName = userName.split(" ")[0] || userName;
+  const plural = items.length > 1;
+  const noun =
+    kind === "adoption"
+      ? plural
+        ? "nouveaux profils"
+        : "nouveau profil"
+      : plural
+        ? "nouveaux signalements"
+        : "nouveau signalement";
+
+  const title = `${items.length} ${noun} pour « ${searchName} »`;
+
+  const itemsHtml = items
+    .map((c) => {
+      const photo = c.photoUrl
+        ? `<img src="${c.photoUrl}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;vertical-align:middle;margin-right:12px">`
+        : `<div style="display:inline-block;width:72px;height:72px;border-radius:12px;background:#f3f0ea;vertical-align:middle;margin-right:12px"></div>`;
+      const subtitle = c.subtitle
+        ? `<span style="color:#6b5e4f;font-size:13px">${c.subtitle}</span>`
+        : "";
+      return `<a href="${baseUrl}${c.href}" style="display:block;padding:12px 0;border-bottom:1px solid #e6e0d5;color:#2b1810;text-decoration:none">
+${photo}<span style="display:inline-block;vertical-align:middle">
+<strong style="display:block;margin-bottom:2px">${c.title}</strong>
+${subtitle}
+</span></a>`;
+    })
+    .join("");
+
+  const itemsText = items
+    .map(
+      (c) =>
+        `· ${c.title}${c.subtitle ? ` (${c.subtitle})` : ""}\n  ${baseUrl}${c.href}`
+    )
+    .join("\n");
+
+  const ctaPath = kind === "adoption" ? "/profil/recherches" : "/profil/recherches";
+  const hello = firstName ? `Bonjour ${firstName},` : "Bonjour,";
+
+  const text = `${hello}
+
+${title} :
+
+${itemsText}
+
+Gérer cette alerte : ${baseUrl}/profil/recherches
+
+· Dorloter`;
+
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `${hello}<br><br>Voici les ${noun} qui matchent vos critères depuis votre dernier passage :${itemsHtml}`,
+      "Gérer mes alertes",
+      ctaPath
+    ),
+  };
+}
+
 /**
  * Digest hebdomadaire des nouveaux animaux à adopter dans le rayon de
  * notification de l'utilisateur.

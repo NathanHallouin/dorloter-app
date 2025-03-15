@@ -14,5 +14,7 @@ export async function register() {
   await Promise.all([
     import("@gamification/listeners"),
     import("@notifications/listeners"),
+    import("@veterinarians/listeners"),
+    import("@notifications/guetteur-listener"),
   ]);
 }

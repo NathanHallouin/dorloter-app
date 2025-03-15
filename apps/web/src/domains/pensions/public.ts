@@ -49,6 +49,7 @@ export {
   type RatingSummary,
   type PensionReviewWithAuthor,
 } from "./queries";
+export { getPensionMapPoints } from "./queries/map-points";
 
 // ─── Validation ─────────────────────────────────────────────────────────────
 export { pensionFormSchema, type PensionFormData } from "./validation";

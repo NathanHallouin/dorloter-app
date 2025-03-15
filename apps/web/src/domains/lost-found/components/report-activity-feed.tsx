@@ -4,12 +4,19 @@ import {
   Flag,
   MessageSquare,
   Sparkles,
+  Stethoscope,
   type LucideIcon,
 } from "lucide-react";
 
 export interface ActivityEvent {
   id: string;
-  kind: "created" | "sighting" | "match" | "resolved" | "shared";
+  kind:
+    | "created"
+    | "sighting"
+    | "match"
+    | "resolved"
+    | "shared"
+    | "vet_alerted";
   title: string;
   description?: string;
   at: Date;
@@ -46,6 +53,11 @@ const KIND_STYLES: Record<
     Icon: MessageSquare,
     iconBg: "bg-sable-100",
     iconText: "text-foreground",
+  },
+  vet_alerted: {
+    Icon: Stethoscope,
+    iconBg: "bg-blue-100",
+    iconText: "text-blue-700",
   },
 };
 

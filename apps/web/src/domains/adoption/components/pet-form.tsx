@@ -319,6 +319,89 @@ export function PetForm({ pet, photos = [] }: PetFormProps) {
         </div>
       </div>
 
+      {/* Section campagne « animal en besoin » — lien externe */}
+      {isEditing && (
+        <fieldset className="space-y-4 rounded-xl border border-coral-200/60 bg-coral-50/30 p-4 md:col-span-2">
+          <legend className="px-2 text-sm font-semibold text-foreground">
+            Campagne de collecte (optionnel)
+          </legend>
+          <p className="text-xs text-muted-foreground">
+            Si cet animal a besoin de soins lourds, mettez en avant la
+            campagne de collecte que vous gérez sur une plateforme externe
+            (HelloAsso, Leetchi, Ulule...). Dorloter affichera un encart
+            avec lien sortant. Aucun paiement transite par la plateforme.
+          </p>
+
+          <div className="space-y-2">
+            <Label htmlFor="campaignUrl">URL de la campagne</Label>
+            <Input
+              id="campaignUrl"
+              name="campaignUrl"
+              type="url"
+              defaultValue={pet?.campaignUrl ?? ""}
+              placeholder="https://helloasso.com/..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="campaignTitle">Titre court</Label>
+            <Input
+              id="campaignTitle"
+              name="campaignTitle"
+              defaultValue={pet?.campaignTitle ?? ""}
+              maxLength={120}
+              placeholder="Aidez-nous à payer l'opération de Rocky"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="campaignDescription">
+              Description (déductibilité, soins concernés…)
+            </Label>
+            <Textarea
+              id="campaignDescription"
+              name="campaignDescription"
+              defaultValue={pet?.campaignDescription ?? ""}
+              rows={3}
+              maxLength={2000}
+              placeholder="Précisez la nature des soins, l'urgence, l'avantage fiscal…"
+            />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="campaignGoalAmount">Objectif (€)</Label>
+              <Input
+                id="campaignGoalAmount"
+                name="campaignGoalAmount"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={pet?.campaignGoalAmount ?? ""}
+                placeholder="1500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="campaignCollectedAmount">
+                Déjà collecté (€)
+              </Label>
+              <Input
+                id="campaignCollectedAmount"
+                name="campaignCollectedAmount"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={pet?.campaignCollectedAmount ?? ""}
+                placeholder="720"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Mis à jour manuellement par le refuge (pas de synchro PSP).
+              </p>
+            </div>
+          </div>
+        </fieldset>
+      )}
+
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button type="submit" disabled={submitting}>

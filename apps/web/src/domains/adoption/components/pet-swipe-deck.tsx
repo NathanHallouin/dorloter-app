@@ -180,6 +180,16 @@ function SwipeCard({
   onSwipeLike: () => void;
   onSwipePass: () => void;
 }) {
+  // Motion v12 injecte des styles `user-select`, `touch-action` et
+  // `-webkit-touch-callout` côté client uniquement (drag handlers), ce
+  // qui produit un hydration mismatch. On évite en rendant un fallback
+  // statique tant que le composant n'est pas monté, puis on bascule sur
+  // motion.article qui a alors un seul cycle de rendu côté browser.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Si l'utilisateur a demandé "moins de mouvement" au système, on
   // désactive l'animation de rotation. Le drag continue à fonctionner
   // (essentiel à l'interaction) mais sans effet de tilt qui peut
@@ -204,6 +214,28 @@ function SwipeCard({
     }
   }
 
+  // Fallback statique côté serveur et avant mount : même structure
+  // visuelle, pas de drag, pas de MotionValues. Évite le hydration
+  // mismatch dû aux styles touch-action/user-select que motion injecte
+  // côté client.
+  if (!mounted) {
+    return (
+      <article className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+        <StaticCardContent
+          primaryPhotoUrl={primaryPhotoUrl}
+          pet={pet}
+          shelterName={shelterName}
+        />
+      </article>
+    );
+  }
+
+  // En Motion v12, mélanger `animate` / `whileTap` qui touchent au
+  // transform (scale, y) avec des MotionValues style (x, rotate) fait
+  // perdre l'arc : motion reprend la main sur l'intégralité du transform
+  // pendant l'animation/tap et n'y recompose pas les MotionValues du
+  // style. On garde l'entrée animée via `opacity` (non-transform) pour
+  // ne pas casser le rotate pendant le swipe.
   return (
     <motion.article
       className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-card shadow-lg"
@@ -212,9 +244,9 @@ function SwipeCard({
       dragElastic={0.7}
       style={{ x, rotate }}
       onDragEnd={handleDragEnd}
-      whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-      animate={{ scale: 1, y: 0 }}
-      initial={reduceMotion ? false : { scale: 0.95, y: 10 }}
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.18 }}
     >
       <div className="relative h-2/3 bg-sable-100">
         {primaryPhotoUrl ? (
@@ -268,6 +300,63 @@ function SwipeCard({
         <p className="mt-2 text-xs text-muted-foreground">{shelterName}</p>
       </div>
     </motion.article>
+  );
+}
+
+/**
+ * Contenu visuel d'une card (photo + infos), sans les stamps Oui/Pas pour
+ * moi qui dépendent des MotionValues. Réutilisé en fallback SSR.
+ */
+function StaticCardContent({
+  primaryPhotoUrl,
+  pet,
+  shelterName,
+}: {
+  primaryPhotoUrl: string | null;
+  pet: Pet;
+  shelterName: string;
+}) {
+  return (
+    <>
+      <div className="relative h-2/3 bg-sable-100">
+        {primaryPhotoUrl ? (
+          <Image
+            src={primaryPhotoUrl}
+            alt={pet.name}
+            fill
+            sizes="(max-width: 640px) 100vw, 400px"
+            className="object-cover"
+            draggable={false}
+            priority
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-7xl">
+            🐈
+          </div>
+        )}
+      </div>
+
+      <div className="h-1/3 p-5">
+        <div className="flex items-baseline gap-2">
+          <h3 className="text-xl font-bold">{pet.name}</h3>
+          {pet.ageCategory && (
+            <span className="text-sm text-muted-foreground">
+              · {ageLabel(pet.ageCategory)}
+            </span>
+          )}
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {[pet.breed, pet.color, sexLabel(pet.sex)]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        <p className="mt-2 line-clamp-2 text-sm text-foreground">
+          {pet.description ??
+            `Adorable chat${pet.breed ? ` ${pet.breed}` : ""} à adopter.`}
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">{shelterName}</p>
+      </div>
+    </>
   );
 }
 

@@ -3,7 +3,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@infra/db";
 import { shelters } from "@/server/db/schema";
 import { requireShelter } from "@infra/auth/session";
-import { getShelterStats } from "@adoption/public";
+import {
+  countPendingInboundTransfers,
+  getShelterStats,
+} from "@adoption/public";
 import { getShelterUnreadCount } from "@messaging/public";
 import { ShelterHeader } from "./_components/shelter-header";
 import { ShelterSidebar } from "./_components/shelter-sidebar";
@@ -16,7 +19,7 @@ export default async function ShelterLayout({
   const session = await requireShelter();
   const shelterId = session.user.shelterId;
 
-  const [shelter, stats, unreadMessages] = await Promise.all([
+  const [shelter, stats, unreadMessages, pendingTransfers] = await Promise.all([
     db
       .select({
         id: shelters.id,
@@ -28,6 +31,7 @@ export default async function ShelterLayout({
       .then((r) => r[0]),
     getShelterStats(shelterId),
     getShelterUnreadCount(shelterId),
+    countPendingInboundTransfers(shelterId),
   ]);
 
   if (!shelter) redirect("/dashboard");
@@ -44,6 +48,7 @@ export default async function ShelterLayout({
           counts={{
             applicationsPending: stats.applicationsPending,
             unreadMessages,
+            pendingTransfers,
           }}
         />
         <main id="main" className="min-w-0 flex-1">

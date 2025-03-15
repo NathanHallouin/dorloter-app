@@ -9,6 +9,7 @@ import { applicationFormSchema } from "@adoption/validation-application";
 import { publish } from "@infra/event-bus";
 import type { ApplicationStatusChangedEvent } from "../events";
 import { consumeRateLimit } from "@infra/rate-limit";
+import { scheduleAdoptionFollowups } from "../lib/schedule-followups";
 import type { ActionResponse } from "@/types";
 
 export async function createApplication(
@@ -165,12 +166,21 @@ export async function updateApplicationStatus(
     })
     .where(eq(applications.id, applicationId));
 
-  // Si acceptée : marquer le chat comme réservé
+  // Si acceptée : marquer le chat comme réservé et programmer le suivi
+  // post-adoption (J+15, J+90, J+365). L'unique index (application_id,
+  // stage) bloque les doublons si le statut repasse en acceptée.
   if (status === "acceptee") {
     await db
       .update(pets)
       .set({ status: "reserve", updatedAt: new Date() })
       .where(eq(pets.id, row.petId));
+
+    await scheduleAdoptionFollowups({
+      applicationId: row.applicationId,
+      userId: row.applicantUserId,
+      petId: row.petId,
+      shelterId: row.shelterId,
+    });
   }
 
   // Publier l'event — notifications écoute pour fanout email/push/in-app.

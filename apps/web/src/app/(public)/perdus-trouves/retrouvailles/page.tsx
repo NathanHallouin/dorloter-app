@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   Heart,
   HeartHandshake,
+  Map as MapIcon,
   MapPin,
   Plus,
   Sparkles,
@@ -142,6 +143,19 @@ export default async function RetrouvaillesPage() {
                 accent="text-prune-700"
               />
             </div>
+
+            {stats.total > 0 && (
+              <Link
+                href="/perdus-trouves/retrouvailles/carte"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "mt-6 inline-flex items-center gap-2 bg-white/80 backdrop-blur"
+                )}
+              >
+                <MapIcon className="h-4 w-4" />
+                Voir la carte des retrouvailles
+              </Link>
+            )}
           </div>
         </section>
 

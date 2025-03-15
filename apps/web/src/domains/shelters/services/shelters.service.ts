@@ -37,6 +37,8 @@ export interface ShelterDetail extends ShelterSummary {
   email: string | null;
   website: string | null;
   donationUrl: string | null;
+  donationLabel: string | null;
+  donationDescription: string | null;
   visitHours: string | null;
   location: { latitude: number; longitude: number } | null;
   /** Animaux réservés (en cours d'adoption). */
@@ -201,6 +203,8 @@ export async function getShelterBySlug(slug: string): Promise<ShelterDetail> {
     email: shelter.email,
     website: shelter.website,
     donationUrl: shelter.donationUrl,
+    donationLabel: shelter.donationLabel,
+    donationDescription: shelter.donationDescription,
     visitHours: shelter.visitHours,
     logoUrl: shelter.logoUrl,
     coverUrl: shelter.coverUrl,

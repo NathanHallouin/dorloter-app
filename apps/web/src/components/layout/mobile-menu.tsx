@@ -29,6 +29,7 @@ const PUBLIC_LINKS = [
   { href: "/refuges", label: "Refuges" },
   { href: "/pensions", label: "Pensions" },
   { href: "/veterinaires", label: "Vétérinaires" },
+  { href: "/carte", label: "Carte de France" },
 ];
 
 const ADMIN_LINKS = [

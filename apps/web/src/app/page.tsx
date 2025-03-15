@@ -2,11 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
+  BarChart3,
   Clock,
   Compass,
   Heart,
   Home as HomeIcon,
   Map,
+  Newspaper,
   PawPrint,
   Radio,
   Shield,
@@ -36,7 +38,23 @@ import { getGlobalShelterStats } from "@shelters/public";
 // pour ne pas matraquer la DB tout en gardant un sentiment "temps réel".
 export const revalidate = 300;
 
+async function safe<T>(
+  fn: () => Promise<T>,
+  fallback: T,
+  label: string
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[home] ${label} failed, using fallback`, err);
+    return fallback;
+  }
+}
+
 export default async function HomePage() {
+  // Promise.all + safe() : on garde le parallélisme pour la latence, mais
+  // un échec isolé (statement_timeout Supabase, etc.) ne fait plus tomber
+  // toute la home. Chaque source retombe sur une valeur neutre.
   const [
     adoption,
     reportStats,
@@ -46,13 +64,45 @@ export default async function HomePage() {
     testimonials,
     showcasePetsRaw,
   ] = await Promise.all([
-    getGlobalAdoptionStats(),
-    getGlobalReportStats(),
-    getGlobalPensionStats(),
-    getGlobalShelterStats(),
-    getReports({ status: "actif" }, 30),
-    getRecentTestimonials(6),
-    getPets({}, 12, 0),
+    safe(
+      () => getGlobalAdoptionStats(),
+      {
+        available: 0,
+        cats: 0,
+        dogs: 0,
+        adoptedTotal: 0,
+        adoptedThisMonth: 0,
+      },
+      "adoption"
+    ),
+    safe(
+      () => getGlobalReportStats(),
+      {
+        active: 0,
+        perdus: 0,
+        trouves: 0,
+        resolvedTotal: 0,
+        resolvedThisMonth: 0,
+      },
+      "reports"
+    ),
+    safe(
+      () => getGlobalPensionStats(),
+      { verified: 0, cats: 0, dogs: 0 },
+      "pensions"
+    ),
+    safe(
+      () => getGlobalShelterStats(),
+      { total: 0, verified: 0 },
+      "shelters"
+    ),
+    safe(() => getReports({ status: "actif" }, 30), [], "recentReports"),
+    safe(() => getRecentTestimonials(6), [], "testimonials"),
+    safe(
+      () => getPets({}, 12, 0),
+      { pets: [], total: 0 },
+      "showcasePets"
+    ),
   ]);
 
   // Galerie défilante : les 8 derniers animaux disponibles qui ont au moins
@@ -313,14 +363,23 @@ export default async function HomePage() {
                 temps disponible · et on vous propose les profils
                 d&apos;animaux qui colleront le mieux. Sans inscription.
               </p>
-              <Link
-                href="/adopter/quiz"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-coral-500 px-6 py-3 font-semibold text-white shadow-md shadow-coral-500/25 transition hover:bg-coral-600 hover:shadow-lg"
-              >
-                <Compass className="h-4 w-4" />
-                Démarrer le quiz
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/adopter/quiz"
+                  className="inline-flex items-center gap-2 rounded-full bg-coral-500 px-6 py-3 font-semibold text-white shadow-md shadow-coral-500/25 transition hover:bg-coral-600 hover:shadow-lg"
+                >
+                  <Compass className="h-4 w-4" />
+                  Démarrer le quiz
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/avant-d-adopter"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-coral-700 hover:underline"
+                >
+                  Le guide avant d&apos;adopter
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3 md:max-w-md md:justify-self-end">
               <QuizTeaserCard
@@ -386,6 +445,44 @@ export default async function HomePage() {
                   body="Du dépôt à la rencontre, vous savez où en est votre dossier."
                 />
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Découvrir : ponts vers les pages transparence / vitrine */}
+        <section className="border-t border-sable-200 bg-sable-50/40 px-4 py-14">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-7 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wider text-coral-600">
+                Aller plus loin
+              </p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Découvrir Dorloter
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+                Trois portes d&apos;entrée pour explorer la plateforme, comprendre
+                nos chiffres ou parler de nous.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <DiscoverCard
+                href="/carte"
+                icon={<Map className="h-5 w-5" />}
+                title="Carte de France"
+                description="Tous les refuges, pensions, vétos et signalements actifs sur une carte interactive filtrable."
+              />
+              <DiscoverCard
+                href="/stats"
+                icon={<BarChart3 className="h-5 w-5" />}
+                title="Les chiffres"
+                description="Tableau de bord public temps réel : adoptions, retrouvailles, écosystème souverain."
+              />
+              <DiscoverCard
+                href="/presse"
+                icon={<Newspaper className="h-5 w-5" />}
+                title="Espace presse"
+                description="Logos haute définition, palette, stats à jour et message à reprendre pour les journalistes."
+              />
             </div>
           </div>
         </section>
@@ -587,5 +684,36 @@ function FeatureCard({
       <p className="font-semibold text-foreground">{title}</p>
       <p className="mt-1 text-sm text-muted-foreground">{body}</p>
     </div>
+  );
+}
+
+function DiscoverCard({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex flex-col rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-coral-300/70 hover:shadow-md"
+    >
+      <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-coral-50 text-coral-600 transition-colors group-hover:bg-coral-100">
+        {icon}
+      </span>
+      <p className="font-semibold text-foreground">{title}</p>
+      <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">
+        {description}
+      </p>
+      <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-coral-600 transition-transform group-hover:translate-x-0.5">
+        Y aller
+        <ArrowRight className="h-3.5 w-3.5" />
+      </span>
+    </Link>
   );
 }

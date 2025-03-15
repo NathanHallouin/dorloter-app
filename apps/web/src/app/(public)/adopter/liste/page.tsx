@@ -7,6 +7,7 @@ import { PetCard } from "@adoption/public";
 import { PetCompareBar } from "@adoption/public";
 import { CatalogModeToggle } from "@adoption/public";
 import { getPets } from "@adoption/public";
+import { SaveSearchButton } from "@identity/public.client";
 import { db } from "@infra/db";
 import { petPhotos, favorites } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -143,6 +144,27 @@ export default async function AdopterListePage({
         <Suspense fallback={null}>
           <PetFilters />
         </Suspense>
+
+        <div className="mt-3 flex justify-end">
+          <Suspense fallback={null}>
+            <SaveSearchButton
+              kind="adoption"
+              isSignedIn={!!session}
+              whitelist={[
+                "species",
+                "sex",
+                "ageCategory",
+                "okWithCats",
+                "okWithDogs",
+                "okWithChildren",
+                "search",
+                "breed",
+                "color",
+              ]}
+              defaultName="Ma recherche d'adoption"
+            />
+          </Suspense>
+        </div>
 
         {catsList.length === 0 ? (
           <EmptyState

@@ -16,3 +16,39 @@ export function getMapStyle(): string {
   }
   return "https://tiles.openfreemap.org/styles/positron";
 }
+
+/**
+ * Catégorie d'un point affiché sur la carte France `/carte`. Sert à
+ * sélectionner le marqueur (couleur, icône) et à filtrer les layers.
+ */
+export type MapPointKind =
+  | "refuge"
+  | "pension"
+  | "veto"
+  | "report-perdu"
+  | "report-trouve";
+
+/**
+ * Représentation minimale d'un acteur ou signalement géolocalisé,
+ * sérialisée vers le client pour rendu MapLibre. Chaque domaine expose
+ * une `getMapPoints()` retournant ce type. Aucun champ DB sensible.
+ */
+export interface MapPoint {
+  id: string;
+  kind: MapPointKind;
+  lat: number;
+  lng: number;
+  title: string;
+  subtitle?: string | null;
+  href: string;
+  isVerified?: boolean;
+  isDemo?: boolean;
+}
+
+export const MAP_POINT_KIND_LABELS: Record<MapPointKind, string> = {
+  refuge: "Refuges",
+  pension: "Pensions",
+  veto: "Vétérinaires",
+  "report-perdu": "Animaux perdus",
+  "report-trouve": "Animaux trouvés",
+};

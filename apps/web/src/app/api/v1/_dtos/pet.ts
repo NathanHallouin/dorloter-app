@@ -39,7 +39,7 @@ export interface PetDto {
   okWithDogs: "oui" | "non" | "inconnu";
   okWithChildren: "oui" | "non" | "inconnu";
   specialNeeds: string | null;
-  status: "disponible" | "reserve" | "adopte" | "retire";
+  status: "pre_adoptable" | "disponible" | "reserve" | "adopte" | "retire";
   adoptionFee: number | null;
   photos: PetPhotoDto[];
   shelter: PetShelterDto | null;
@@ -76,7 +76,7 @@ export interface PetSummaryDto {
   color: string | null;
   sex: "male" | "femelle" | "inconnu";
   ageCategory: "chaton" | "jeune" | "adulte" | "senior" | null;
-  status: "disponible" | "reserve" | "adopte" | "retire";
+  status: "pre_adoptable" | "disponible" | "reserve" | "adopte" | "retire";
   adoptionFee: number | null;
   primaryPhoto: { url: string; blurDataUrl: string | null } | null;
   shelter: { id: string; slug: string; name: string } | null;

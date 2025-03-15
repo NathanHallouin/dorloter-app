@@ -48,7 +48,7 @@ export interface PetSummary {
   color: string | null;
   sex: "male" | "femelle" | "inconnu";
   ageCategory: "chaton" | "jeune" | "adulte" | "senior" | null;
-  status: "disponible" | "reserve" | "adopte" | "retire";
+  status: "pre_adoptable" | "disponible" | "reserve" | "adopte" | "retire";
   adoptionFee: string | null;
   primaryPhoto: { url: string; blurDataUrl: string | null } | null;
   shelter: { id: string; slug: string; name: string } | null;

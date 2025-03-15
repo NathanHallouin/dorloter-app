@@ -11,6 +11,7 @@ import { publish } from "@infra/event-bus";
 import type {
   ReportResolvedEvent,
   ReportMatchesDiscoveredEvent,
+  ReportPublishedEvent,
 } from "../events";
 import { consumeRateLimit } from "@infra/rate-limit";
 import { logEvent } from "@infra/logger";
@@ -139,6 +140,21 @@ export async function createReport(
     { reportId: report.id, type: report.type, hasPhotos: photoUrls.length > 0 },
     { userId: session.user.id }
   );
+
+  // Publier l'event de publication — les vétos du secteur sont notifiés
+  // par le listener veterinarians, indépendamment du matching.
+  if (report.location) {
+    publish<ReportPublishedEvent>({
+      type: "lost-found.report_published",
+      reportId: report.id,
+      reportType: report.type,
+      species: report.species,
+      reportOwnerUserId: report.userId,
+      petName: report.petName,
+      lat: report.location.y,
+      lng: report.location.x,
+    });
+  }
 
   const candidates = await refreshMatchesForReport(report);
 

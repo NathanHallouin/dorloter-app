@@ -1,45 +1,247 @@
 import type { MetadataRoute } from "next";
 import { db } from "@infra/db";
-import { pets, reports, shelters } from "@/server/db/schema";
+import {
+  pensions,
+  pets,
+  reports,
+  shelters,
+  veterinarians,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { CITIES } from "@shared/utils/cities";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dorloter.fr";
 
+async function safe<T>(fn: () => Promise<T>, fallback: T, label: string) {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[sitemap] ${label} failed, using fallback`, err);
+    return fallback;
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [availableCats, activeReports, allShelters] = await Promise.all([
-    db
-      .select({ id: pets.id, updatedAt: pets.updatedAt })
-      .from(pets)
-      .where(eq(pets.status, "disponible")),
-    db
-      .select({ id: reports.id, updatedAt: reports.updatedAt })
-      .from(reports)
-      .where(eq(reports.status, "actif")),
-    db
-      .select({ id: shelters.id, slug: shelters.slug, updatedAt: shelters.updatedAt })
-      .from(shelters),
+  const [
+    availablePets,
+    activeReports,
+    allShelters,
+    verifiedPensions,
+    verifiedVets,
+  ] = await Promise.all([
+    safe(
+      () =>
+        db
+          .select({ id: pets.id, updatedAt: pets.updatedAt })
+          .from(pets)
+          .where(eq(pets.status, "disponible")),
+      [],
+      "pets"
+    ),
+    safe(
+      () =>
+        db
+          .select({ id: reports.id, updatedAt: reports.updatedAt })
+          .from(reports)
+          .where(eq(reports.status, "actif")),
+      [],
+      "reports"
+    ),
+    safe(
+      () =>
+        db
+          .select({
+            id: shelters.id,
+            slug: shelters.slug,
+            updatedAt: shelters.updatedAt,
+          })
+          .from(shelters),
+      [],
+      "shelters"
+    ),
+    safe(
+      () =>
+        db
+          .select({
+            slug: pensions.slug,
+            updatedAt: pensions.updatedAt,
+          })
+          .from(pensions)
+          .where(eq(pensions.isVerified, true)),
+      [],
+      "pensions"
+    ),
+    safe(
+      () =>
+        db
+          .select({
+            slug: veterinarians.slug,
+            updatedAt: veterinarians.updatedAt,
+          })
+          .from(veterinarians)
+          .where(eq(veterinarians.isVerified, true)),
+      [],
+      "vets"
+    ),
   ]);
 
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${BASE_URL}/adopter`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE_URL}/adopter/liste`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
-    { url: `${BASE_URL}/adopter/villes`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
+    {
+      url: `${BASE_URL}/`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    // Adoption
+    {
+      url: `${BASE_URL}/adopter`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/adopter/liste`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/adopter/villes`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/adopter/quiz`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/adopter/compare`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/avant-d-adopter`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/temoignages`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/evenements`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    // Perdus / trouvés
     {
       url: `${BASE_URL}/perdus-trouves`,
       lastModified: now,
       changeFrequency: "hourly",
       priority: 0.9,
     },
-    { url: `${BASE_URL}/refuges`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    {
+      url: `${BASE_URL}/perdus-trouves/retrouvailles`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/perdus-trouves/retrouvailles/carte`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    // Acteurs
+    {
+      url: `${BASE_URL}/refuges`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/pensions`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/pensions/compare`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/veterinaires`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    // Découverte
+    {
+      url: `${BASE_URL}/carte`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/stats`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/presse`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    // Confiance et conformité
+    {
+      url: `${BASE_URL}/verification`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/charte-refuges`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/mentions-legales`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.2,
+    },
+    {
+      url: `${BASE_URL}/confidentialite`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.2,
+    },
+    {
+      url: `${BASE_URL}/cgu`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.2,
+    },
   ];
 
-  const catRoutes: MetadataRoute.Sitemap = availableCats.map((c) => ({
-    url: `${BASE_URL}/adopter/${c.id}`,
-    lastModified: c.updatedAt,
+  const petRoutes: MetadataRoute.Sitemap = availablePets.map((p) => ({
+    url: `${BASE_URL}/adopter/${p.id}`,
+    lastModified: p.updatedAt,
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
@@ -58,6 +260,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const pensionRoutes: MetadataRoute.Sitemap = verifiedPensions.map((p) => ({
+    url: `${BASE_URL}/pensions/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  const vetRoutes: MetadataRoute.Sitemap = verifiedVets.map((v) => ({
+    url: `${BASE_URL}/veterinaires/${v.slug}`,
+    lastModified: v.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
   const cityRoutes: MetadataRoute.Sitemap = CITIES.map((c) => ({
     url: `${BASE_URL}/adopter/ville/${c.slug}`,
     lastModified: now,
@@ -67,9 +283,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
-    ...catRoutes,
+    ...petRoutes,
     ...reportRoutes,
     ...shelterRoutes,
+    ...pensionRoutes,
+    ...vetRoutes,
     ...cityRoutes,
   ];
 }

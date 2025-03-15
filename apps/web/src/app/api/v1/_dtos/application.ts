@@ -17,7 +17,7 @@ export interface MyApplicationDto {
     breed: string | null;
     ageCategory: "chaton" | "jeune" | "adulte" | "senior" | null;
     sex: "male" | "femelle" | "inconnu";
-    status: "disponible" | "reserve" | "adopte" | "retire";
+    status: "pre_adoptable" | "disponible" | "reserve" | "adopte" | "retire";
     primaryPhotoUrl: string | null;
   };
 }
@@ -37,7 +37,7 @@ interface ApplicationRow {
     breed: string | null;
     ageCategory: "chaton" | "jeune" | "adulte" | "senior" | null;
     sex: "male" | "femelle" | "inconnu";
-    status: "disponible" | "reserve" | "adopte" | "retire";
+    status: "pre_adoptable" | "disponible" | "reserve" | "adopte" | "retire";
   };
   primaryPhotoUrl: string | null;
 }

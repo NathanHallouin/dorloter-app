@@ -106,3 +106,53 @@ export const verifications = pgTable("verifications", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// ─── Recherches sauvegardées (alertes adoption + perdus/trouvés) ──────────
+
+export const savedSearchKindEnum = pgEnum("saved_search_kind", [
+  "adoption",
+  "lost-found",
+]);
+
+/**
+ * Recherches sauvegardées par un utilisateur sur les listings publics
+ * (catalogue adoption, signalements perdus/trouvés). Un cron quotidien
+ * compare les paramètres aux nouvelles publications postérieures à
+ * `last_notified_at` et envoie un email digest si match.
+ *
+ * `params` jsonb contient les query params bruts du listing (forme
+ * normalisée par domaine). Pas de FK ni de contraintes typage côté DB
+ * pour éviter une migration à chaque évolution des filtres.
+ */
+export const savedSearches = pgTable(
+  "saved_searches",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: savedSearchKindEnum().notNull(),
+    name: varchar({ length: 120 }).notNull(),
+    params: jsonb().notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    /**
+     * Pour les recherches de type `lost-found` uniquement : si activé,
+     * l'utilisateur reçoit une notification push **immédiate** à la
+     * publication d'un nouveau signalement qui matche ses critères
+     * (mode « guetteur de quartier »). Indépendant du digest email.
+     */
+    pushEnabled: boolean("push_enabled").default(false).notNull(),
+    lastNotifiedAt: timestamp("last_notified_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("saved_searches_user_idx").on(table.userId, table.kind),
+    index("saved_searches_active_idx").on(table.isActive, table.kind),
+    index("saved_searches_push_idx").on(
+      table.kind,
+      table.isActive,
+      table.pushEnabled
+    ),
+  ]
+);

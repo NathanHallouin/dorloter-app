@@ -23,6 +23,12 @@ export const petFormSchema = z.object({
   okWithChildren: z.enum(["oui", "non", "inconnu"]).default("inconnu"),
   specialNeeds: z.string().optional(),
   adoptionFee: z.string().optional(),
+  // Campagne de collecte (lien externe)
+  campaignUrl: z.string().url().optional().or(z.literal("")),
+  campaignTitle: z.string().max(120).optional().or(z.literal("")),
+  campaignDescription: z.string().max(2000).optional().or(z.literal("")),
+  campaignGoalAmount: z.string().optional().or(z.literal("")),
+  campaignCollectedAmount: z.string().optional().or(z.literal("")),
 });
 
 export type PetFormData = z.infer<typeof petFormSchema>;

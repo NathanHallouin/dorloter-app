@@ -5,13 +5,19 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowLeft,
+  ArrowLeftRight,
   BarChart3,
+  CalendarCheck,
   ChevronDown,
+  FileText,
+  FolderOpen,
   Inbox,
   LayoutDashboard,
+  Mail,
   MessageCircle,
   PawPrint,
   Settings,
+  Tags,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -26,6 +32,7 @@ interface ShelterSidebarProps {
   counts: {
     applicationsPending: number;
     unreadMessages: number;
+    pendingTransfers: number;
   };
 }
 
@@ -47,8 +54,37 @@ export function ShelterSidebar({ counts }: ShelterSidebarProps) {
       icon: MessageCircle,
       count: counts.unreadMessages,
     },
+    { href: "/shelter-rdv", label: "Rendez-vous", icon: CalendarCheck },
+    {
+      href: "/shelter-transferts",
+      label: "Transferts",
+      icon: ArrowLeftRight,
+      count: counts.pendingTransfers,
+    },
+    {
+      href: "/shelter-evenements",
+      label: "Événements",
+      icon: CalendarCheck,
+    },
+    { href: "/shelter-newsletter", label: "Newsletter", icon: Mail },
+    { href: "/shelter-documents", label: "Documents", icon: FolderOpen },
     { href: "/shelter-stats", label: "Statistiques", icon: BarChart3 },
     { href: "/shelter-profil", label: "Profil du refuge", icon: Settings },
+    {
+      href: "/shelter-parametres-creneaux",
+      label: "Créneaux visite",
+      icon: CalendarCheck,
+    },
+    {
+      href: "/shelter-parametres-templates",
+      label: "Templates de réponses",
+      icon: FileText,
+    },
+    {
+      href: "/shelter-parametres-tags",
+      label: "Étiquettes",
+      icon: Tags,
+    },
   ];
 
   const activeLink = links.find((l) => isActive(pathname, l.href));

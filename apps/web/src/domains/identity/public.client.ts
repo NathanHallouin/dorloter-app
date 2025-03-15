@@ -10,8 +10,27 @@
  */
 
 export { updateProfile, deleteAccount } from "./actions/profile";
+export {
+  createSavedSearch,
+  deleteSavedSearch,
+  toggleSavedSearch,
+  toggleSavedSearchPush,
+  renameSavedSearch,
+} from "./actions/saved-searches";
+export {
+  describeParams,
+  paramsToQueryString,
+  type AdoptionSearchParams,
+  type LostFoundSearchParams,
+  type SavedSearchParams,
+} from "./lib/saved-search-params";
 export { ProfileForm } from "./components/profile-form";
 export { PushToggle } from "./components/push-toggle";
 export { DeleteAccountSection } from "./components/delete-account";
 export { DataExportSection } from "./components/data-export";
 export { TurnstileWidget } from "./components/turnstile-widget";
+export { SaveSearchButton } from "./components/save-search-button";
+export type {
+  SavedSearch,
+  SavedSearchKind,
+} from "./lib/saved-search-types";

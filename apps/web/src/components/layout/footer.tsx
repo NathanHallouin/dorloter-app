@@ -35,6 +35,24 @@ export function Footer() {
                   Adopter
                 </Link>
                 <Link
+                  href="/avant-d-adopter"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Avant d&apos;adopter
+                </Link>
+                <Link
+                  href="/temoignages"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Témoignages
+                </Link>
+                <Link
+                  href="/evenements"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Événements
+                </Link>
+                <Link
                   href="/perdus-trouves"
                   className="text-muted-foreground hover:text-coral-500"
                 >
@@ -57,6 +75,12 @@ export function Footer() {
                   className="text-muted-foreground hover:text-coral-500"
                 >
                   Vétérinaires
+                </Link>
+                <Link
+                  href="/carte"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Carte de France
                 </Link>
               </div>
             </div>
@@ -115,6 +139,12 @@ export function Footer() {
                   className="text-muted-foreground hover:text-coral-500"
                 >
                   Espace presse
+                </Link>
+                <Link
+                  href="/stats"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Chiffres
                 </Link>
               </div>
             </div>

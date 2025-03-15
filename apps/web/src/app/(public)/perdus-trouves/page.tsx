@@ -19,12 +19,15 @@ import {
 } from "lucide-react";
 import { Input } from "@shared/ui/input";
 import { eq, sql } from "drizzle-orm";
+import { auth } from "@infra/auth/auth";
+import { headers } from "next/headers";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { buttonVariants } from "@shared/ui/button";
 import { ReportCard } from "@lost-found/public";
 import { ReportMap } from "@lost-found/public";
 import { RadiusFilter } from "@lost-found/public";
+import { SaveSearchButton } from "@identity/public.client";
 import { db } from "@infra/db";
 import { reports as reportsTable } from "@/server/db/schema";
 import {
@@ -96,6 +99,10 @@ export default async function PerdusTrouvesPage({ searchParams }: PageProps) {
 
   const sinceKey = since && since in SINCE_OPTIONS ? since : undefined;
   const sinceDays = sinceKey ? SINCE_OPTIONS[sinceKey] : undefined;
+
+  const session = await auth.api
+    .getSession({ headers: await headers() })
+    .catch(() => null);
 
   const reports = await getReports(
     {
@@ -217,6 +224,23 @@ export default async function PerdusTrouvesPage({ searchParams }: PageProps) {
             </div>
 
             <div className="flex shrink-0 flex-wrap gap-2">
+              <SaveSearchButton
+                kind="lost-found"
+                isSignedIn={!!session}
+                whitelist={[
+                  "type",
+                  "species",
+                  "sex",
+                  "chipped",
+                  "q",
+                  "lat",
+                  "lng",
+                  "radius",
+                  "since",
+                ]}
+                defaultName="Veille perdus / trouvés"
+                label="Recevoir une alerte"
+              />
               <Link
                 href="/perdus-trouves/retrouvailles"
                 className={buttonVariants({ variant: "outline" })}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { db } from "@infra/db";
 import { petPhotos } from "@/server/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
-import { AlertCircle, Inbox, Plus, Search } from "lucide-react";
+import { AlertCircle, Inbox, Plus, Search, Upload } from "lucide-react";
 import { requireShelter } from "@infra/auth/session";
 import {
   getPetsByShelter,
@@ -15,6 +15,12 @@ import { buttonVariants } from "@shared/ui/button";
 import { Input } from "@shared/ui/input";
 import { EmptyState } from "@shared/ui/empty-state";
 import { placeholderPets } from "@shared/utils/placeholder-images";
+import {
+  getTagsForPets,
+  getTagsForShelter,
+  TAG_COLOR_CLASSES,
+} from "@shelters/public";
+import { PublishPetButton } from "./publish-button";
 
 const fallbackPhotos = Object.values(placeholderPets);
 
@@ -22,13 +28,20 @@ export const metadata: Metadata = {
   title: "Mes animaux · Refuge",
 };
 
-type StatusFilter = "all" | "disponible" | "reserve" | "adopte" | "retire";
+type StatusFilter =
+  | "all"
+  | "pre_adoptable"
+  | "disponible"
+  | "reserve"
+  | "adopte"
+  | "retire";
 
 interface PageProps {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; tag?: string }>;
 }
 
 const STATUS_LABELS: Record<string, string> = {
+  pre_adoptable: "En observation",
   disponible: "Disponible",
   reserve: "Réservé",
   adopte: "Adopté",
@@ -36,6 +49,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
+  pre_adoptable: "bg-amber-100 text-amber-800",
   disponible: "bg-green-100 text-green-800",
   reserve: "bg-lavande-100 text-lavande-800",
   adopte: "bg-coral-100 text-coral-800",
@@ -44,6 +58,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 const TABS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "Tous" },
+  { value: "pre_adoptable", label: "En observation" },
   { value: "disponible", label: "Disponibles" },
   { value: "reserve", label: "Réservés" },
   { value: "adopte", label: "Adoptés" },
@@ -55,17 +70,22 @@ export default async function ShelterCatsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const status = (params.status ?? "all") as StatusFilter;
   const search = (params.q ?? "").trim();
+  const tagFilter = (params.tag ?? "").trim() || undefined;
 
   const allPets = await getPetsByShelter(session.user.shelterId);
 
-  const photoMap = await getPetPrimaryPhotos(allPets.map((p) => p.id));
-  const applicationsMap = await getPendingApplicationsCountForPets(
-    allPets.map((p) => p.id)
-  );
+  const petIds = allPets.map((p) => p.id);
+  const [photoMap, applicationsMap, petTagsMap, allTags] = await Promise.all([
+    getPetPrimaryPhotos(petIds),
+    getPendingApplicationsCountForPets(petIds),
+    getTagsForPets(petIds),
+    getTagsForShelter(session.user.shelterId),
+  ]);
 
   // Compteurs par statut (toujours sur l'ensemble, pas sur le filtre)
   const counts: Record<StatusFilter, number> = {
     all: allPets.length,
+    pre_adoptable: 0,
     disponible: 0,
     reserve: 0,
     adopte: 0,
@@ -83,6 +103,10 @@ export default async function ShelterCatsPage({ searchParams }: PageProps) {
       const hay = `${pet.name} ${pet.breed ?? ""}`.toLowerCase();
       if (!hay.includes(searchLower)) return false;
     }
+    if (tagFilter) {
+      const tags = petTagsMap.get(pet.id) ?? [];
+      if (!tags.some((t) => t.id === tagFilter)) return false;
+    }
     return true;
   });
 
@@ -97,13 +121,22 @@ export default async function ShelterCatsPage({ searchParams }: PageProps) {
               : "Aucun animal publié pour le moment."}
           </p>
         </div>
-        <Link
-          href="/shelter-animaux/new"
-          className={buttonVariants({ size: "default" })}
-        >
-          <Plus className="mr-1 h-4 w-4" />
-          Ajouter un animal
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/shelter-animaux/import"
+            className={buttonVariants({ variant: "outline", size: "default" })}
+          >
+            <Upload className="mr-1 h-4 w-4" />
+            Importer CSV
+          </Link>
+          <Link
+            href="/shelter-animaux/new"
+            className={buttonVariants({ size: "default" })}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Ajouter un animal
+          </Link>
+        </div>
       </header>
 
       {allPets.length > 0 && (
@@ -175,6 +208,55 @@ export default async function ShelterCatsPage({ searchParams }: PageProps) {
         </div>
       )}
 
+      {/* Filtre étiquettes */}
+      {allPets.length > 0 && allTags.length > 0 && (
+        <div className="mb-5 flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-card p-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Étiquettes :
+          </span>
+          {allTags.map((t) => {
+            const active = tagFilter === t.id;
+            const cl = TAG_COLOR_CLASSES[t.color];
+            const linkParams = new URLSearchParams();
+            if (search) linkParams.set("q", search);
+            if (status !== "all") linkParams.set("status", status);
+            if (!active) linkParams.set("tag", t.id);
+            const qs = linkParams.toString();
+            const href = qs ? `/shelter-animaux?${qs}` : "/shelter-animaux";
+            return (
+              <Link
+                key={t.id}
+                href={href}
+                aria-pressed={active}
+                className={`inline-flex items-center rounded-full border-2 px-2 py-0.5 text-[11px] font-bold transition ${cl.bg} ${cl.text} ${active ? "border-foreground/40 shadow-sm" : "border-transparent opacity-70 hover:opacity-100"}`}
+              >
+                {t.name}
+              </Link>
+            );
+          })}
+          {tagFilter && (
+            <Link
+              href="/shelter-animaux"
+              className="text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              effacer le filtre
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Banner explicatif sur l'onglet observation */}
+      {status === "pre_adoptable" && counts.pre_adoptable > 0 && (
+        <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          Les fiches en observation sont <strong>masquées du catalogue
+          public</strong> ainsi que des candidatures. Pratique pour les
+          animaux fraîchement arrivés, en quarantaine, en évaluation
+          comportementale ou dont la fiche n&apos;est pas encore prête.
+          Cliquez « Publier » quand l&apos;animal est prêt à recevoir des
+          adoptants.
+        </div>
+      )}
+
       {/* Résultats */}
       {allPets.length === 0 ? (
         <EmptyState
@@ -203,48 +285,73 @@ export default async function ShelterCatsPage({ searchParams }: PageProps) {
             const pendingApps = applicationsMap.get(pet.id) ?? 0;
             const incomplete = isIncomplete(pet, photo);
             return (
-              <Link
+              <div
                 key={pet.id}
-                href={`/shelter-animaux/${pet.id}/edit`}
                 className="flex items-center gap-4 rounded-xl border border-border bg-card p-3 transition-colors hover:border-coral-300 hover:bg-sable-50/50"
               >
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
-                  <Image
-                    src={
-                      photo ||
-                      fallbackPhotos[
-                        pet.name.charCodeAt(0) % fallbackPhotos.length
-                      ]!
-                    }
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="64px"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-foreground">{pet.name}</h3>
-                    {incomplete && (
-                      <span
-                        title="Fiche incomplète : ajoutez une photo ou une description."
-                        className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800"
-                      >
-                        <AlertCircle className="h-3 w-3" />
-                        À compléter
-                      </span>
-                    )}
+                <Link
+                  href={`/shelter-animaux/${pet.id}/edit`}
+                  className="flex min-w-0 flex-1 items-center gap-4"
+                >
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                    <Image
+                      src={
+                        photo ||
+                        fallbackPhotos[
+                          pet.name.charCodeAt(0) % fallbackPhotos.length
+                        ]!
+                      }
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {pet.species === "chat" ? "Chat" : "Chien"}
-                    {pet.breed ? ` · ${pet.breed}` : ""} ·{" "}
-                    {pet.sex === "male"
-                      ? "Mâle"
-                      : pet.sex === "femelle"
-                        ? "Femelle"
-                        : "Sexe inconnu"}
-                  </p>
-                </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold text-foreground">
+                        {pet.name}
+                      </h3>
+                      {incomplete && (
+                        <span
+                          title="Fiche incomplète : ajoutez une photo ou une description."
+                          className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800"
+                        >
+                          <AlertCircle className="h-3 w-3" />
+                          À compléter
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {pet.species === "chat" ? "Chat" : "Chien"}
+                      {pet.breed ? ` · ${pet.breed}` : ""} ·{" "}
+                      {pet.sex === "male"
+                        ? "Mâle"
+                        : pet.sex === "femelle"
+                          ? "Femelle"
+                          : "Sexe inconnu"}
+                    </p>
+                    {(() => {
+                      const petTags = petTagsMap.get(pet.id) ?? [];
+                      if (petTags.length === 0) return null;
+                      return (
+                        <ul className="mt-1.5 flex flex-wrap gap-1">
+                          {petTags.map((t) => {
+                            const cl = TAG_COLOR_CLASSES[t.color];
+                            return (
+                              <li
+                                key={t.id}
+                                className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-bold ${cl.bg} ${cl.text}`}
+                              >
+                                {t.name}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      );
+                    })()}
+                  </div>
+                </Link>
                 <div className="flex shrink-0 items-center gap-2">
                   {pendingApps > 0 && (
                     <span
@@ -258,11 +365,15 @@ export default async function ShelterCatsPage({ searchParams }: PageProps) {
                   <Badge className={STATUS_BADGE[pet.status] ?? ""}>
                     {STATUS_LABELS[pet.status] ?? pet.status}
                   </Badge>
-                  <span className="hidden text-xs text-muted-foreground sm:inline">
-                    Modifier →
-                  </span>
+                  {(pet.status === "pre_adoptable" ||
+                    pet.status === "disponible") && (
+                    <PublishPetButton
+                      petId={pet.id}
+                      currentStatus={pet.status}
+                    />
+                  )}
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

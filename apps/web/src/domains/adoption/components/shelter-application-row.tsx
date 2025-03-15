@@ -3,11 +3,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Mail, Phone, Home, Baby, PawPrint } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Home,
+  Baby,
+  PawPrint,
+  Calendar,
+  CheckCircle2,
+  Circle,
+  CircleSlash,
+} from "lucide-react";
 import { Button } from "@shared/ui/button";
 import { Textarea } from "@shared/ui/textarea";
 import { ApplicationStatusBadge } from "./application-status";
 import { updateApplicationStatus } from "@adoption/actions/applications";
+import type { FollowupRow } from "@adoption/public";
+import {
+  TemplateSelector,
+  type ResponseTemplate,
+} from "@shelters/public.client";
 import type { Application, Pet } from "@/types";
 
 interface Applicant {
@@ -22,6 +37,9 @@ interface Props {
   pet: Pet;
   applicant: Applicant;
   catPhotoUrl: string | null;
+  templates?: ResponseTemplate[];
+  shelterName?: string | null;
+  followups?: FollowupRow[];
 }
 
 export function ShelterApplicationRow({
@@ -29,6 +47,9 @@ export function ShelterApplicationRow({
   pet,
   applicant,
   catPhotoUrl,
+  templates = [],
+  shelterName = null,
+  followups = [],
 }: Props) {
   const [status, setStatus] = useState(application.status);
   const [shelterNotes, setShelterNotes] = useState(application.shelterNotes ?? "");
@@ -198,11 +219,23 @@ export function ShelterApplicationRow({
 
           {mode !== "idle" && (
             <div className="space-y-2 rounded-md border border-border bg-background p-3">
-              <label className="block text-sm font-medium">
-                Message à l&apos;adoptant (optionnel)
-              </label>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-sm font-medium">
+                  Message à l&apos;adoptant (optionnel)
+                </label>
+                <TemplateSelector
+                  templates={templates}
+                  kind={mode === "accept" ? "acceptation" : "refus"}
+                  context={{
+                    applicantName: applicant.name,
+                    petName: pet.name,
+                    shelterName,
+                  }}
+                  onApply={setShelterNotes}
+                />
+              </div>
               <Textarea
-                rows={3}
+                rows={5}
                 value={shelterNotes}
                 onChange={(e) => setShelterNotes(e.target.value)}
                 placeholder={
@@ -237,9 +270,87 @@ export function ShelterApplicationRow({
               <p className="whitespace-pre-wrap">{shelterNotes}</p>
             </Section>
           )}
+
+          {status === "acceptee" && followups.length > 0 && (
+            <Section title="Suivi post-adoption">
+              <FollowupsTimeline followups={followups} />
+            </Section>
+          )}
         </div>
       )}
     </article>
+  );
+}
+
+const STAGE_META: Record<
+  "j15" | "j90" | "j365",
+  { label: string; description: string }
+> = {
+  j15: {
+    label: "J+15",
+    description: "Email d'adaptation à l'adoptant",
+  },
+  j90: {
+    label: "J+90",
+    description: "Invitation à publier un témoignage public",
+  },
+  j365: {
+    label: "J+365",
+    description: "Anniversaire de l'adoption, invitation à parrainer",
+  },
+};
+
+function FollowupsTimeline({ followups }: { followups: FollowupRow[] }) {
+  return (
+    <ol className="space-y-2">
+      {followups.map((f) => {
+        const meta = STAGE_META[f.stage];
+        const due = new Date(f.dueAt);
+        const sent = f.sentAt ? new Date(f.sentAt) : null;
+        return (
+          <li
+            key={f.id}
+            className="flex items-start gap-3 rounded-md border border-border bg-background p-3"
+          >
+            <span className="mt-0.5 shrink-0">
+              {f.status === "sent" ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              ) : f.status === "skipped" ? (
+                <CircleSlash className="h-4 w-4 text-rose-500" />
+              ) : (
+                <Circle className="h-4 w-4 text-muted-foreground" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-sm font-semibold text-foreground">
+                  {meta.label}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {meta.description}
+                </span>
+              </div>
+              <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                {f.status === "sent" && sent
+                  ? `Envoyé le ${sent.toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}`
+                  : f.status === "skipped"
+                    ? "Ignoré"
+                    : `Prévu le ${due.toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}`}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 

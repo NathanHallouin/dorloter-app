@@ -3,6 +3,7 @@ import Link from "next/link";
 import { eq } from "drizzle-orm";
 import {
   Bell,
+  BellPlus,
   Building2,
   ChevronRight,
   FileHeart,
@@ -79,6 +80,12 @@ export default async function ProfilPage() {
             icon={<Bell className="h-4 w-4" />}
             title="Préférences de notifications"
             subtitle="Choisir ce que vous recevez par push et par email"
+          />
+          <SettingsLink
+            href="/profil/recherches"
+            icon={<BellPlus className="h-4 w-4" />}
+            title="Recherches enregistrées"
+            subtitle="Recevoir un email dès qu'un nouvel animal correspond"
           />
           <SettingsLink
             href="/parametres/signalements"

@@ -10,14 +10,22 @@ import { Separator } from "@shared/ui/separator";
 import { DemoBadge } from "@shared/ui/demo-badge";
 import { getPetWithDetails } from "@adoption/public";
 import { FavoriteButton } from "@adoption/public";
+import {
+  countSponsorsForPet,
+  isSponsorOfPet,
+  SponsorButton,
+} from "@adoption/public";
+import { getCurrentSession } from "@infra/auth/session";
 import { PetShare } from "@adoption/public";
 import { PetPhotoGallery } from "@adoption/public";
 import { PetCompatibilityPills } from "@adoption/public";
 import { PetCard } from "@adoption/public";
+import { PetCampaignBlock } from "@adoption/public";
 import { getSimilarPets } from "@adoption/public";
 import { ContactShelterButton } from "@messaging/public";
 import { TestimonialDisplay } from "@adoption/public";
 import { TestimonialForm } from "@adoption/public";
+import { getTagsForPet, TAG_COLOR_CLASSES } from "@shelters/public";
 import {
   getTestimonialContextForCat,
   getTestimonialForCat,
@@ -102,8 +110,10 @@ export default async function CatDetailPage({
 
   const primaryPhoto = pet.photos.find((p) => p.isPrimary) ?? pet.photos[0];
 
+  const session = await getCurrentSession();
+
   // Témoignage public (si publié) + contexte utilisateur (peut-il témoigner ?)
-  const [testimonial, testimonialCtx, similar] = await Promise.all([
+  const [testimonial, testimonialCtx, similar, publicTags, sponsorCount, userIsSponsor] = await Promise.all([
     getTestimonialForCat(pet.id),
     getTestimonialContextForCat(pet.id),
     getSimilarPets(pet.id, {
@@ -111,6 +121,9 @@ export default async function CatDetailPage({
       ageCategory: pet.ageCategory,
       shelterId: pet.shelterId,
     }),
+    getTagsForPet(pet.id).then((tags) => tags.filter((t) => t.isPublic)),
+    countSponsorsForPet(pet.id),
+    session ? isSponsorOfPet(session.user.id, pet.id) : Promise.resolve(false),
   ]);
 
   const jsonLd = {
@@ -207,6 +220,21 @@ export default async function CatDetailPage({
                     <Badge variant="outline">{pet.color}</Badge>
                   )}
                 </div>
+                {publicTags.length > 0 && (
+                  <ul className="mt-2 flex flex-wrap gap-1.5">
+                    {publicTags.map((t) => {
+                      const cl = TAG_COLOR_CLASSES[t.color];
+                      return (
+                        <li
+                          key={t.id}
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold ${cl.bg} ${cl.text}`}
+                        >
+                          {t.name}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
                 <PetCompatibilityPills
                   okWithCats={pet.okWithCats}
                   okWithDogs={pet.okWithDogs}
@@ -215,7 +243,16 @@ export default async function CatDetailPage({
                   className="mt-3"
                 />
               </div>
-              <FavoriteButton petId={pet.id} />
+              <div className="flex flex-col items-end gap-2">
+                <FavoriteButton petId={pet.id} />
+                <SponsorButton
+                  petId={pet.id}
+                  petName={pet.name}
+                  initialIsSponsor={userIsSponsor}
+                  initialCount={sponsorCount}
+                  isSignedIn={!!session}
+                />
+              </div>
             </div>
 
             {pet.description && (
@@ -229,6 +266,21 @@ export default async function CatDetailPage({
                     {pet.description}
                   </p>
                 </div>
+              </>
+            )}
+
+            {/* Campagne « animal en besoin » — lien externe vers la plateforme du refuge */}
+            {pet.campaignUrl && (
+              <>
+                <Separator className="my-6" />
+                <PetCampaignBlock
+                  url={pet.campaignUrl}
+                  title={pet.campaignTitle}
+                  description={pet.campaignDescription}
+                  goalAmount={pet.campaignGoalAmount}
+                  collectedAmount={pet.campaignCollectedAmount}
+                  petName={pet.name}
+                />
               </>
             )}
 
@@ -361,6 +413,12 @@ export default async function CatDetailPage({
             <Link href={`/candidater/${pet.id}`}>
               <Button className="w-full" size="lg">
                 Candidater pour {pet.name}
+              </Button>
+            </Link>
+
+            <Link href={`/adopter/${pet.id}/rdv`}>
+              <Button className="w-full" variant="outline" size="lg">
+                Réserver une visite
               </Button>
             </Link>
 

@@ -42,6 +42,90 @@ export {
   getShelterAdmins,
   getPendingInvitations,
 } from "./queries/admins";
+export { getShelterMapPoints } from "./queries/map-points";
+export {
+  getTemplatesForShelter,
+  getTemplatesByKind,
+  getTemplateById,
+  type ResponseTemplate,
+  type ResponseTemplateKind,
+} from "./queries/templates";
+export {
+  getVisitSlotsForShelter,
+  getUpcomingBookingsForShelter,
+  getBookingsBetween,
+  getBookingById,
+  getBookingsForUser,
+  getBookingsDueForReminder,
+  type VisitSlot,
+  type VisitBooking,
+} from "./queries/visits";
+export {
+  computeAvailability,
+  groupByDay,
+  formatMinutes,
+  formatRange,
+  getIsoDayOfWeek,
+  DAY_LABELS_ISO,
+  DAY_LABELS_SHORT_ISO,
+  HALF_HOURS_FROM_8_TO_19,
+  type AvailabilitySlot,
+} from "./lib/visit-slots";
+export {
+  getTagsForShelter,
+  getTagsForPet,
+  getTagsForPets,
+  type ShelterTag,
+} from "./queries/tags";
+export {
+  getEventsForShelter,
+  getEventById,
+  listPublicEvents,
+  getSheltersWithUpcomingEvents,
+  type PublicEventsFilters,
+} from "./queries/events";
+export {
+  EVENT_TYPES,
+  EVENT_TYPE_LABELS,
+  EVENT_TYPE_CLASSES,
+  type ShelterEvent,
+  type PublicEvent,
+  type ShelterEventType,
+} from "./lib/event-types";
+export {
+  getNewslettersForShelter,
+  countFollowersForShelter,
+} from "./queries/newsletters";
+export {
+  NEWSLETTER_KINDS,
+  NEWSLETTER_LABELS,
+  type ShelterNewsletter,
+  type ShelterNewsletterKind,
+} from "./lib/newsletter-types";
+export {
+  getDocumentsForShelter,
+  getPublicDocumentsForShelter,
+} from "./queries/documents";
+export {
+  DOCUMENT_KINDS,
+  DOCUMENT_KIND_LABELS,
+  formatBytes,
+  type ShelterDocument,
+  type DocumentKind,
+  type DocumentVisibility,
+} from "./lib/document-types";
+export {
+  TAG_COLORS,
+  TAG_COLOR_CLASSES,
+  TAG_COLOR_LABELS,
+  type TagColor,
+} from "./lib/tag-colors";
+export {
+  TEMPLATE_VARIABLES,
+  renderTemplate,
+  buildTemplateContext,
+  type TemplateContext,
+} from "./lib/template-variables";
 
 // ─── Validation ─────────────────────────────────────────────────────────────
 export { shelterFormSchema } from "./validation";

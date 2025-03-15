@@ -25,17 +25,25 @@ export function RecentTestimonialsSection({ testimonials }: Props) {
   return (
     <section className="border-y border-sable-200 bg-linear-to-b from-coral-50/30 via-white to-lavande-50/30 px-4 py-14">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-wider text-coral-600">
-            La suite de l&apos;histoire
-          </p>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Ils ont trouvé leur compagnon
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Quelques nouvelles d&apos;animaux qui ont quitté leur refuge ·
-            envoyées par leurs nouvelles familles.
-          </p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-coral-600">
+              La suite de l&apos;histoire
+            </p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Ils ont trouvé leur compagnon
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Quelques nouvelles d&apos;animaux qui ont quitté leur refuge ·
+              envoyées par leurs nouvelles familles.
+            </p>
+          </div>
+          <Link
+            href="/temoignages"
+            className="text-sm font-semibold text-coral-600 hover:underline"
+          >
+            Tous les témoignages →
+          </Link>
         </div>
 
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -182,6 +182,11 @@ export async function updatePet(
       indoorOnly: data.indoorOnly,
       specialNeeds: data.specialNeeds,
       adoptionFee: data.adoptionFee,
+      campaignUrl: data.campaignUrl || null,
+      campaignTitle: data.campaignTitle || null,
+      campaignDescription: data.campaignDescription || null,
+      campaignGoalAmount: data.campaignGoalAmount || null,
+      campaignCollectedAmount: data.campaignCollectedAmount || null,
       updatedAt: new Date(),
     })
     .where(eq(pets.id, petId));
@@ -195,7 +200,7 @@ export async function updatePet(
 
 export async function updatePetStatus(
   petId: string,
-  status: "disponible" | "reserve" | "adopte" | "retire"
+  status: "pre_adoptable" | "disponible" | "reserve" | "adopte" | "retire"
 ): Promise<ActionResponse> {
   const session = await requireShelterAdmin();
   if (!session) return { success: false, error: "Non autorisé" };

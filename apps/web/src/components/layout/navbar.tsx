@@ -33,6 +33,7 @@ export async function Navbar() {
             { href: "/refuges", label: "Refuges" },
             { href: "/pensions", label: "Pensions" },
             { href: "/veterinaires", label: "Vétérinaires" },
+            { href: "/carte", label: "Carte" },
           ].map((link) => (
             <Link
               key={link.href}

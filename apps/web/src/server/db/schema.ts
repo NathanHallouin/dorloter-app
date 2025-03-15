@@ -57,8 +57,17 @@ import {
   sessions,
   accounts,
   verifications,
+  savedSearches,
+  savedSearchKindEnum,
 } from "@/domains/identity/schema";
-export { users, sessions, accounts, verifications };
+export {
+  users,
+  sessions,
+  accounts,
+  verifications,
+  savedSearches,
+  savedSearchKindEnum,
+};
 
 // ─── Tables métier ──────────────────────────────────────────────────────────
 
@@ -70,8 +79,35 @@ import {
   shelters,
   shelterFollows,
   shelterInvitations,
+  shelterResponseTemplates,
+  shelterVisitSlots,
+  shelterVisitBookings,
+  shelterTags,
+  shelterEvents,
+  shelterNewsletters,
+  shelterDocuments,
 } from "@/domains/shelters/schema";
-export { shelters, shelterFollows, shelterInvitations };
+export {
+  shelters,
+  shelterFollows,
+  shelterInvitations,
+  shelterResponseTemplates,
+  shelterVisitSlots,
+  shelterVisitBookings,
+  shelterTags,
+  shelterEvents,
+  shelterNewsletters,
+  shelterDocuments,
+};
+export {
+  responseTemplateKindEnum,
+  shelterVisitBookingStatusEnum,
+  shelterTagColorEnum,
+  shelterEventTypeEnum,
+  shelterNewsletterKindEnum,
+  shelterDocumentKindEnum,
+  shelterDocumentVisibilityEnum,
+} from "@/domains/shelters/schema";
 
 // Tables pensions + pension_photos extraites vers `src/domains/pensions/schema.ts`.
 export {
@@ -89,9 +125,16 @@ import {
   veterinarians,
   vetPhotos,
   vetReportAccessLog,
+  vetReportAlerts,
   vetInvitations,
 } from "@/domains/veterinarians/schema";
-export { veterinarians, vetPhotos, vetReportAccessLog, vetInvitations };
+export {
+  veterinarians,
+  vetPhotos,
+  vetReportAccessLog,
+  vetReportAlerts,
+  vetInvitations,
+};
 
 // Tables pets, petPhotos extraites vers `src/domains/adoption/schema.ts`.
 import {
@@ -135,6 +178,31 @@ export { resolutionCredits } from "@/domains/gamification/schema";
 
 // Table testimonials extraite vers `src/domains/adoption/schema.ts`.
 export { testimonials } from "@/domains/adoption/schema";
+
+// Suivi post-adoption (workflow J+15, J+90, J+365).
+export {
+  adoptionFollowups,
+  adoptionFollowupStageEnum,
+  adoptionFollowupStatusEnum,
+} from "@/domains/adoption/schema";
+
+// Assignations pet ↔ shelter_tags (M2M).
+export { petTagAssignments } from "@/domains/adoption/schema";
+
+// Carnet médical animal (vaccins, vermifuge, consultations…).
+export {
+  petMedicalEvents,
+  medicalEventTypeEnum,
+} from "@/domains/adoption/schema";
+
+// Parrainages symboliques par les utilisateurs.
+export { petSponsorships } from "@/domains/adoption/schema";
+
+// Transferts inter-refuges.
+export {
+  petTransfers,
+  petTransferStatusEnum,
+} from "@/domains/adoption/schema";
 
 // ─── Messagerie temps réel ──────────────────────────────────────────────────
 // Tables extraites vers `src/domains/messaging/schema.ts` (Phase 2 du

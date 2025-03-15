@@ -5,8 +5,13 @@ import { ShelterApplicationRow } from "@adoption/public";
 import { requireShelter } from "@infra/auth/session";
 import {
   getApplicationsForShelter,
+  getFollowupsForApplications,
   getPrimaryPhotosForPets,
 } from "@adoption/public";
+import {
+  getShelterById,
+  getTemplatesForShelter,
+} from "@shelters/public";
 
 export const metadata: Metadata = {
   title: "Candidatures reçues · Refuge",
@@ -29,7 +34,11 @@ export default async function ShelterCandidaturesPage({
   const session = await requireShelter();
   const { filter = "all" } = await searchParams;
 
-  const all = await getApplicationsForShelter(session.user.shelterId);
+  const [all, shelter, templates] = await Promise.all([
+    getApplicationsForShelter(session.user.shelterId),
+    getShelterById(session.user.shelterId),
+    getTemplatesForShelter(session.user.shelterId),
+  ]);
 
   const filtered = all.filter((row) => {
     const s = row.application.status;
@@ -39,9 +48,13 @@ export default async function ShelterCandidaturesPage({
     return true;
   });
 
-  const photoMap = await getPrimaryPhotosForPets(
-    filtered.map((r) => r.pet.id)
-  );
+  const acceptedIds = filtered
+    .filter((r) => r.application.status === "acceptee")
+    .map((r) => r.application.id);
+  const [photoMap, followupMap] = await Promise.all([
+    getPrimaryPhotosForPets(filtered.map((r) => r.pet.id)),
+    getFollowupsForApplications(acceptedIds),
+  ]);
 
   const counts = {
     all: all.length,
@@ -92,6 +105,9 @@ export default async function ShelterCandidaturesPage({
               pet={pet}
               applicant={applicant}
               catPhotoUrl={photoMap.get(pet.id) ?? null}
+              templates={templates}
+              shelterName={shelter?.name ?? null}
+              followups={followupMap.get(application.id) ?? []}
             />
           ))}
         </div>

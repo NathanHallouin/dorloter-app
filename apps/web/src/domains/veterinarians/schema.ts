@@ -124,6 +124,37 @@ export const vetReportAccessLog = pgTable(
 );
 
 /**
+ * Trace des alertes envoyées à un cabinet véto suite à un signalement
+ * perdu/trouvé dans son rayon. Permet :
+ *   - idempotence (ne pas re-notifier le même véto pour le même signalement)
+ *   - compteur « X vétos alertés » sur la fiche signalement
+ *   - audit RGPD (qui a été prévenu, par quel canal)
+ */
+export const vetReportAlerts = pgTable(
+  "vet_report_alerts",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    vetId: uuid("vet_id")
+      .notNull()
+      .references(() => veterinarians.id, { onDelete: "cascade" }),
+    reportId: uuid("report_id").notNull(),
+    /** Distance véto ↔ signalement au moment de l'alerte (mètres). */
+    distanceMeters: integer("distance_meters").notNull(),
+    /** Canaux effectivement déclenchés (email, push, in-app). */
+    emailSent: boolean("email_sent").default(false).notNull(),
+    pushSent: boolean("push_sent").default(false).notNull(),
+    sentAt: timestamp("sent_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("vet_report_alerts_vet_report_unique").on(
+      table.vetId,
+      table.reportId
+    ),
+    index("vet_report_alerts_report_idx").on(table.reportId),
+  ]
+);
+
+/**
  * Invitations à rejoindre l'équipe d'un cabinet (autres vétérinaires
  * salariés ou collaborateurs). Même pattern que `shelterInvitations`.
  */

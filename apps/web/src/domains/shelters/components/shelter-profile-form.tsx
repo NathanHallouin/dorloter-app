@@ -150,19 +150,62 @@ export function ShelterProfileForm({ shelter }: { shelter: Shelter }) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="donationUrl">Lien de don</Label>
-          <Input
-            id="donationUrl"
-            name="donationUrl"
-            type="url"
-            defaultValue={shelter.donationUrl ?? ""}
-            placeholder="https://helloasso.com/…"
-          />
-          <p className="text-xs text-muted-foreground">
-            HelloAsso, votre site, une cagnotte… Un bouton &quot;Soutenir&quot;
-            apparaîtra sur votre page.
-          </p>
+        <div className="space-y-4 rounded-xl border border-coral-200/60 bg-coral-50/30 p-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">
+              Soutenir le refuge
+            </h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Dorloter ne collecte pas de dons. On affiche un encart qui
+              redirige vers votre plateforme de collecte (HelloAsso, Stripe,
+              virement, etc.).
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="donationUrl">Lien de don</Label>
+            <Input
+              id="donationUrl"
+              name="donationUrl"
+              type="url"
+              defaultValue={shelter.donationUrl ?? ""}
+              placeholder="https://helloasso.com/…"
+            />
+            <p className="text-xs text-muted-foreground">
+              URL de votre cagnotte ou page de collecte externe.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="donationLabel">Libellé du bouton (optionnel)</Label>
+            <Input
+              id="donationLabel"
+              name="donationLabel"
+              defaultValue={shelter.donationLabel ?? ""}
+              maxLength={80}
+              placeholder="HelloAsso, Notre cagnotte, Virement direct…"
+            />
+            <p className="text-xs text-muted-foreground">
+              Affiché sur le bouton. Sans valeur, on affiche « Faire un don ».
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="donationDescription">
+              Message personnalisé (optionnel)
+            </Label>
+            <Textarea
+              id="donationDescription"
+              name="donationDescription"
+              defaultValue={shelter.donationDescription ?? ""}
+              rows={3}
+              maxLength={500}
+              placeholder="Comment l'argent est utilisé, déductibilité fiscale, etc."
+            />
+            <p className="text-xs text-muted-foreground">
+              500 caractères max. Affiché au-dessus du bouton.
+            </p>
+          </div>
         </div>
       </section>
 

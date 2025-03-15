@@ -19,6 +19,56 @@ export {
 } from "./actions/applications";
 export { toggleFavorite } from "./actions/favorites";
 export {
+  createMedicalEvent,
+  updateMedicalEvent,
+  deleteMedicalEvent,
+  type MedicalEventInput,
+} from "./actions/medical";
+export {
+  importPetsFromCsv,
+  type ImportRow,
+  type ImportReport,
+} from "./actions/import";
+export {
+  parseCSV,
+  suggestMapping,
+  normalizeValue,
+  PET_FIELDS,
+  PET_FIELD_LABELS,
+  type PetField,
+} from "./lib/csv-import";
+export { PetCampaignBlock } from "./components/pet-campaign-block";
+export { SponsorButton } from "./components/sponsor-button";
+export {
+  countSponsorsForPet,
+  countSponsorsForPets,
+  isSponsorOfPet,
+  getSponsoredPetsForUser,
+  type SponsorshipSummary,
+} from "./queries/sponsorships";
+export { sponsorPet, unsponsorPet } from "./actions/sponsorships";
+export {
+  initiateTransfer,
+  acceptTransfer,
+  declineTransfer,
+  cancelTransfer,
+} from "./actions/transfers";
+export {
+  getTransfersForShelter,
+  getTransferById,
+  getTransferHistoryForPet,
+  countPendingInboundTransfers,
+  listShelterTransferTargets,
+} from "./queries/transfers";
+export {
+  TRANSFER_STATUSES,
+  TRANSFER_STATUS_LABELS,
+  TRANSFER_STATUS_CLASSES,
+  type PetTransfer,
+  type PetTransferWithContext,
+  type PetTransferStatus,
+} from "./lib/transfer-types";
+export {
   submitTestimonial,
   getTestimonialForCat,
   getTestimonialContextForCat,
@@ -26,6 +76,13 @@ export {
   unpublishTestimonial,
   type RecentTestimonial,
 } from "./actions/testimonials";
+export {
+  listTestimonials,
+  getSheltersWithTestimonials,
+  type PublicTestimonial,
+  type TestimonialFilters,
+  type TestimonialListResult,
+} from "./queries/testimonials";
 
 // ─── Services (logique métier — appelés par Server Actions ET API v1) ──────
 export {
@@ -74,6 +131,33 @@ export {
   getPendingApplicationsCountForPets,
   getGlobalAdoptionStats,
 } from "./queries/stats";
+export {
+  getShelterAdvancedStats,
+  type ShelterAdvancedStats,
+  type HardToPlacePet,
+} from "./queries/shelter-advanced-stats";
+export {
+  getFollowupsForApplication,
+  getFollowupsForApplications,
+  type FollowupRow,
+} from "./queries/followups";
+export {
+  getMedicalEventsForPet,
+  getMedicalEventById,
+  getUpcomingRemindersForShelter,
+} from "./queries/medical";
+export {
+  getAdoptedPetsForUser,
+  isAdopterOfPet,
+  type AdoptedPetSummary,
+} from "./queries/adopted-pets";
+export {
+  MEDICAL_EVENT_TYPES,
+  MEDICAL_EVENT_LABELS,
+  MEDICAL_EVENT_COLOR_CLASSES,
+  type MedicalEventType,
+  type MedicalEvent,
+} from "./lib/medical-event-types";
 export { getUserFavorites } from "./actions/favorites";
 
 // ─── Validation ─────────────────────────────────────────────────────────────

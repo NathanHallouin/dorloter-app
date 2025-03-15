@@ -34,7 +34,26 @@ export interface ReportMatchesDiscoveredEvent extends DomainEvent {
   }>;
 }
 
-/** Rappel 7j — signalement toujours actif. */
+/**
+ * Émis juste après la création d'un signalement (perdu ou trouvé), avec
+ * tous les éléments dont les listeners ont besoin pour notifier les
+ * intervenants externes (vétos du secteur notamment). Les coordonnées
+ * sont incluses pour permettre les requêtes spatiales sans recharger.
+ */
+export interface ReportPublishedEvent extends DomainEvent {
+  type: "lost-found.report_published";
+  reportId: string;
+  reportType: "perdu" | "trouve";
+  species: "chat" | "chien";
+  reportOwnerUserId: string;
+  petName: string | null;
+  /** Latitude WGS84 du signalement. */
+  lat: number;
+  /** Longitude WGS84 du signalement. */
+  lng: number;
+}
+
+/** Rappel 7j · signalement toujours actif. */
 export interface ReportStaleEvent extends DomainEvent {
   type: "lost-found.report_stale";
   reportId: string;

@@ -31,6 +31,7 @@ import {
   type SightingMarker,
 } from "@lost-found/public";
 import { getCurrentSession } from "@infra/auth/session";
+import { getVetAlertSummaryForReport } from "@veterinarians/public";
 import { ReportContentDialog } from "@moderation/public";
 import { TrackVisit } from "@/components/pwa/track-visit";
 import { DemoBadge } from "@shared/ui/demo-badge";
@@ -75,10 +76,11 @@ export default async function ReportDetailPage({ params }: PageProps) {
   const report = await getReportWithPhotos(id);
   if (!report) notFound();
 
-  const [matches, sightings, session] = await Promise.all([
+  const [matches, sightings, session, vetAlertSummary] = await Promise.all([
     getMatchesForReport(id),
     getSightingsForReport(id),
     getCurrentSession(),
+    getVetAlertSummaryForReport(id),
   ]);
   const isOwner = session?.user.id === report.userId;
 
@@ -142,7 +144,8 @@ export default async function ReportDetailPage({ params }: PageProps) {
       resolvedAt: reportResolvedAt,
     },
     sightings,
-    matches
+    matches,
+    vetAlertSummary
   );
 
   const topBar = (
@@ -509,7 +512,8 @@ function buildActivityFeed(
   matches: Array<{
     match: { id: string; createdAt: Date | string };
     other: { petName: string | null; type: "perdu" | "trouve" };
-  }>
+  }>,
+  vetAlertSummary: { count: number; firstAlertedAt: Date | null }
 ): ActivityEvent[] {
   const events: ActivityEvent[] = [];
 
@@ -548,6 +552,17 @@ function buildActivityFeed(
         ? `Correspondance avec ${m.other.petName} (${m.other.type === "perdu" ? "perdu" : "trouvé"})`
         : `Correspondance avec un signalement ${m.other.type === "perdu" ? "perdu" : "trouvé"}`,
       at: new Date(m.match.createdAt),
+    });
+  }
+
+  if (vetAlertSummary.count > 0 && vetAlertSummary.firstAlertedAt) {
+    events.push({
+      id: `vet-alerted-${report.id}`,
+      kind: "vet_alerted",
+      title: `${vetAlertSummary.count} cabinet${vetAlertSummary.count > 1 ? "s" : ""} vétérinaire${vetAlertSummary.count > 1 ? "s" : ""} alerté${vetAlertSummary.count > 1 ? "s" : ""}`,
+      description:
+        "Les vétos du secteur ont été prévenus automatiquement. Ils peuvent croiser la fiche avec une consultation suspecte.",
+      at: new Date(vetAlertSummary.firstAlertedAt),
     });
   }
 
