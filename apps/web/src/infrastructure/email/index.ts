@@ -872,3 +872,57 @@ ${photo}<span style="display:inline-block;vertical-align:middle">
     ),
   };
 }
+
+export function fosterFamilyCandidatureEmailTemplate(params: {
+  adminName: string;
+  candidateName: string;
+}): { subject: string; html: string; text: string } {
+  const { adminName, candidateName } = params;
+  const hello = `Bonjour ${adminName.split(" ")[0] ?? adminName},`;
+  const intro = `${candidateName} a déposé une candidature pour devenir famille d'accueil de votre refuge.`;
+  const text = `${hello}\n\n${intro}\n\nValidez ou refusez la candidature : ${baseUrl}/shelter-familles-accueil\n\n· Dorloter`;
+  return {
+    subject: "Nouvelle candidature famille d'accueil · Dorloter",
+    text,
+    html: card(
+      "Nouvelle candidature famille d'accueil",
+      `${hello}<br><br>${intro}`,
+      "Voir la candidature",
+      "/shelter-familles-accueil"
+    ),
+  };
+}
+
+export function fosterFamilyDecidedEmailTemplate(params: {
+  userName: string;
+  decision: "validee" | "refusee";
+  note: string | null;
+}): { subject: string; html: string; text: string } {
+  const { userName, decision, note } = params;
+  const hello = `Bonjour ${userName.split(" ")[0] ?? userName},`;
+  const validated = decision === "validee";
+  const title = validated
+    ? "Votre candidature famille d'accueil est validée"
+    : "Votre candidature famille d'accueil";
+  const body = validated
+    ? `Bienvenue parmi les familles d'accueil. Le refuge pourra désormais vous proposer des animaux à héberger temporairement.`
+    : `Le refuge n'a pas donné suite à votre candidature pour cette fois.`;
+  const noteBlock = note
+    ? `\n\nMessage du refuge :\n${note}`
+    : "";
+  const text = `${hello}\n\n${body}${noteBlock}\n\nMes placements : ${baseUrl}/dashboard\n\n· Dorloter`;
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `${hello}<br><br>${body}${
+        note
+          ? `<br><br><em style="display:block;border-left:3px solid #e6d5a8;padding-left:10px;color:#6b5e4f">${note.replace(/\n/g, "<br>")}</em>`
+          : ""
+      }`,
+      "Mon espace",
+      "/dashboard"
+    ),
+  };
+}

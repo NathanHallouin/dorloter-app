@@ -59,6 +59,12 @@ export function Footer() {
                   Actualités
                 </Link>
                 <Link
+                  href="/familles-accueil"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Devenir famille d&apos;accueil
+                </Link>
+                <Link
                   href="/perdus-trouves"
                   className="text-muted-foreground hover:text-coral-500"
                 >

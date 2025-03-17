@@ -17,6 +17,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import { getSponsoredPetsForUser } from "@adoption/public";
+import {
+  getActiveFosterFamiliesForUser,
+  getActivePlacementsForUser,
+  FOSTER_PLACEMENT_STATUS_CLASSES,
+  FOSTER_PLACEMENT_STATUS_LABELS,
+} from "@shelters/public";
 import Image from "next/image";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -67,6 +73,12 @@ export default async function DashboardPage() {
 
   // Animaux parrainés
   const sponsoredPets = await getSponsoredPetsForUser(session.user.id);
+
+  // Statuts famille d'accueil
+  const [fosterFamilies, fosterPlacements] = await Promise.all([
+    getActiveFosterFamiliesForUser(session.user.id),
+    getActivePlacementsForUser(session.user.id),
+  ]);
 
   // Compteur animaux adoptés (candidatures acceptées)
   const acceptedApps = await db
@@ -243,6 +255,96 @@ export default async function DashboardPage() {
               );
             })}
           </ul>
+        </div>
+      )}
+
+      {fosterFamilies.length > 0 && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="inline-flex items-center gap-2 text-xl font-semibold">
+              <PawIcon className="h-5 w-5 text-coral-500" />
+              Famille d&apos;accueil
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {fosterFamilies.map((f) => (
+              <div
+                key={f.id}
+                className="rounded-xl border border-border bg-card p-4 text-sm"
+              >
+                <p className="text-foreground">
+                  Vous êtes FA active pour{" "}
+                  <Link
+                    href={`/refuges/${f.shelterSlug}`}
+                    className="font-semibold text-coral-700 hover:underline"
+                  >
+                    {f.shelterName}
+                  </Link>{" "}
+                  · capacité {f.maxCapacity} · statut{" "}
+                  <span className="font-medium">{f.status}</span>
+                </p>
+              </div>
+            ))}
+
+            {fosterPlacements.length > 0 ? (
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {fosterPlacements.map((p) => {
+                  const cl = FOSTER_PLACEMENT_STATUS_CLASSES[p.status];
+                  return (
+                    <li
+                      key={p.id}
+                      className="flex items-start gap-3 rounded-xl border border-border bg-card p-3"
+                    >
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-sable-100">
+                        {p.petPrimaryPhotoUrl ? (
+                          <Image
+                            src={p.petPrimaryPhotoUrl}
+                            alt=""
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full items-center justify-center text-2xl">
+                            {p.petSpecies === "chat" ? "🐈" : "🐕"}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <strong className="text-foreground">
+                            {p.petName}
+                          </strong>
+                          <span
+                            className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${cl.bg} ${cl.text}`}
+                          >
+                            {FOSTER_PLACEMENT_STATUS_LABELS[p.status]}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Depuis le{" "}
+                          {new Date(p.startDate).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "long",
+                          })}
+                          {p.expectedEndDate &&
+                            ` · prévu jusqu'au ${new Date(p.expectedEndDate).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {p.shelterName}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="rounded-xl border border-dashed border-border bg-card p-4 text-center text-xs text-muted-foreground">
+                Aucun placement en cours. Le refuge vous proposera un animal
+                quand un cas se présentera.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </PageContainer>

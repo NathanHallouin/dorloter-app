@@ -127,6 +127,42 @@ export {
   type TemplateContext,
 } from "./lib/template-variables";
 
+// ─── Familles d'accueil ─────────────────────────────────────────────────────
+export {
+  getFosterFamiliesForShelter,
+  getFosterFamilyById,
+  getActiveFosterFamiliesForUser,
+  countPendingFosterCandidaturesForShelter,
+  getFosterFamilyForUserAndShelter,
+  getActivePlacementsForShelter,
+  getAllPlacementsForShelter,
+  getActivePlacementsForFosterFamily,
+  getActivePlacementsForUser,
+  getPlacementById,
+  getPetsAvailableForFosterPlacement,
+} from "./queries/foster-families";
+export {
+  applyAsFosterFamily,
+  validateFosterFamily,
+  rejectFosterFamily,
+  setFosterFamilyStatus,
+  createFosterPlacement,
+  endFosterPlacement,
+  cancelFosterPlacement,
+} from "./actions/foster-families";
+export {
+  FOSTER_FAMILY_STATUS_LABELS,
+  FOSTER_FAMILY_STATUS_CLASSES,
+  FOSTER_PLACEMENT_STATUS_LABELS,
+  FOSTER_PLACEMENT_STATUS_CLASSES,
+  type FosterFamily,
+  type FosterFamilyWithUser,
+  type FosterFamilyStatus,
+  type FosterPlacement,
+  type FosterPlacementWithContext,
+  type FosterPlacementStatus,
+} from "./lib/foster-family-types";
+
 // ─── Actualités refuge ──────────────────────────────────────────────────────
 export {
   listPublishedNewsPosts,

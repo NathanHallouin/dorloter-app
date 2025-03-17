@@ -115,6 +115,29 @@ export type {
   ResponseTemplateKind,
 } from "./lib/template-types";
 
+// ─── Familles d'accueil (client-safe) ───────────────────────────────────────
+export {
+  FOSTER_FAMILY_STATUS_LABELS,
+  FOSTER_FAMILY_STATUS_CLASSES,
+  FOSTER_PLACEMENT_STATUS_LABELS,
+  FOSTER_PLACEMENT_STATUS_CLASSES,
+  type FosterFamily,
+  type FosterFamilyWithUser,
+  type FosterFamilyStatus,
+  type FosterPlacement,
+  type FosterPlacementWithContext,
+  type FosterPlacementStatus,
+} from "./lib/foster-family-types";
+export {
+  applyAsFosterFamily,
+  validateFosterFamily,
+  rejectFosterFamily,
+  setFosterFamilyStatus,
+  createFosterPlacement,
+  endFosterPlacement,
+  cancelFosterPlacement,
+} from "./actions/foster-families";
+
 // ─── Actualités refuge (client-safe) ────────────────────────────────────────
 export {
   NEWS_POST_TYPES,

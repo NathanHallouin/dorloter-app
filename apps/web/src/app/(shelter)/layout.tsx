@@ -7,6 +7,7 @@ import {
   countPendingInboundTransfers,
   getShelterStats,
 } from "@adoption/public";
+import { countPendingFosterCandidaturesForShelter } from "@shelters/public";
 import { getShelterUnreadCount } from "@messaging/public";
 import { ShelterHeader } from "./_components/shelter-header";
 import { ShelterSidebar } from "./_components/shelter-sidebar";
@@ -19,7 +20,13 @@ export default async function ShelterLayout({
   const session = await requireShelter();
   const shelterId = session.user.shelterId;
 
-  const [shelter, stats, unreadMessages, pendingTransfers] = await Promise.all([
+  const [
+    shelter,
+    stats,
+    unreadMessages,
+    pendingTransfers,
+    pendingFosterCandidatures,
+  ] = await Promise.all([
     db
       .select({
         id: shelters.id,
@@ -32,6 +39,7 @@ export default async function ShelterLayout({
     getShelterStats(shelterId),
     getShelterUnreadCount(shelterId),
     countPendingInboundTransfers(shelterId),
+    countPendingFosterCandidaturesForShelter(shelterId),
   ]);
 
   if (!shelter) redirect("/dashboard");
@@ -49,6 +57,7 @@ export default async function ShelterLayout({
             applicationsPending: stats.applicationsPending,
             unreadMessages,
             pendingTransfers,
+            pendingFosterCandidatures,
           }}
         />
         <main id="main" className="min-w-0 flex-1">

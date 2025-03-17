@@ -87,6 +87,7 @@ import {
   shelterNewsletters,
   shelterDocuments,
   shelterNewsPosts,
+  fosterFamilies,
 } from "@/domains/shelters/schema";
 export {
   shelters,
@@ -100,6 +101,7 @@ export {
   shelterNewsletters,
   shelterDocuments,
   shelterNewsPosts,
+  fosterFamilies,
 };
 export {
   responseTemplateKindEnum,
@@ -111,6 +113,7 @@ export {
   shelterDocumentVisibilityEnum,
   shelterNewsPostTypeEnum,
   shelterNewsPostStatusEnum,
+  fosterFamilyStatusEnum,
 } from "@/domains/shelters/schema";
 
 // Tables pensions + pension_photos extraites vers `src/domains/pensions/schema.ts`.
@@ -206,6 +209,12 @@ export { petSponsorships } from "@/domains/adoption/schema";
 export {
   petTransfers,
   petTransferStatusEnum,
+} from "@/domains/adoption/schema";
+
+// Placements en famille d'accueil.
+export {
+  petFosterPlacements,
+  petFosterPlacementStatusEnum,
 } from "@/domains/adoption/schema";
 
 // ─── Messagerie temps réel ──────────────────────────────────────────────────

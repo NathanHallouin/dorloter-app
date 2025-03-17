@@ -11,6 +11,7 @@ import {
   ChevronDown,
   FileText,
   FolderOpen,
+  Home,
   Inbox,
   LayoutDashboard,
   Mail,
@@ -34,6 +35,7 @@ interface ShelterSidebarProps {
     applicationsPending: number;
     unreadMessages: number;
     pendingTransfers: number;
+    pendingFosterCandidatures: number;
   };
 }
 
@@ -61,6 +63,12 @@ export function ShelterSidebar({ counts }: ShelterSidebarProps) {
       label: "Transferts",
       icon: ArrowLeftRight,
       count: counts.pendingTransfers,
+    },
+    {
+      href: "/shelter-familles-accueil",
+      label: "Familles d'accueil",
+      icon: Home,
+      count: counts.pendingFosterCandidatures,
     },
     {
       href: "/shelter-evenements",

@@ -463,3 +463,69 @@ export const shelterNewsPosts = pgTable(
     index("shelter_news_posts_type_idx").on(table.type, table.publishedAt),
   ]
 );
+
+// ─── Familles d'accueil ───────────────────────────────────────────────────
+
+export const fosterFamilyStatusEnum = pgEnum("foster_family_status", [
+  "candidature",
+  "active",
+  "pause",
+  "refusee",
+  "archive",
+]);
+
+/**
+ * Famille d'accueil rattachée à un refuge. Un user Dorloter peut être
+ * FA pour un ou plusieurs refuges. Le workflow : candidature → validation
+ * par un shelter_admin → active → placements possibles.
+ *
+ * Pause = FA temporairement indisponible (vacances, travaux), reste
+ * active mais ne reçoit pas de propositions.
+ *
+ * Pas de FK unique sur (user_id, shelter_id) : la même personne peut
+ * recandidater après un refus ou un archivage.
+ */
+export const fosterFamilies = pgTable(
+  "foster_families",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    shelterId: uuid("shelter_id")
+      .notNull()
+      .references(() => shelters.id, { onDelete: "cascade" }),
+    status: fosterFamilyStatusEnum().default("candidature").notNull(),
+    acceptsCats: boolean("accepts_cats").default(true).notNull(),
+    acceptsDogs: boolean("accepts_dogs").default(true).notNull(),
+    /** Nombre maximum d'animaux hébergés simultanément. */
+    maxCapacity: integer("max_capacity").default(1).notNull(),
+    hasGarden: boolean("has_garden").default(false).notNull(),
+    hasOtherPets: boolean("has_other_pets").default(false).notNull(),
+    otherPetsDescription: text("other_pets_description"),
+    hasChildren: boolean("has_children").default(false).notNull(),
+    childrenAges: text("children_ages"),
+    experience: text(),
+    motivation: text().notNull(),
+    address: text(),
+    location: geometry({ type: "point", srid: 4326, mode: "xy" }),
+    phone: varchar({ length: 20 }),
+    shelterNotes: text("shelter_notes"),
+    validatedAt: timestamp("validated_at"),
+    validatedByUserId: uuid("validated_by_user_id").references(
+      () => users.id,
+      { onDelete: "set null" }
+    ),
+    rejectedReason: text("rejected_reason"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("foster_families_user_idx").on(table.userId),
+    index("foster_families_shelter_status_idx").on(
+      table.shelterId,
+      table.status
+    ),
+    index("foster_families_location_idx").using("gist", table.location),
+  ]
+);

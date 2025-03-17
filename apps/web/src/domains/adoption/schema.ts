@@ -15,7 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "@/server/db/schema";
 import { sexEnum } from "@infra/db/enums";
-import { shelters, shelterTags } from "@shelters/schema";
+import { shelters, shelterTags, fosterFamilies } from "@shelters/schema";
 
 // ─── Enums adoption ────────────────────────────────────────────────────────
 
@@ -409,5 +409,63 @@ export const testimonials = pgTable(
   (table) => [
     uniqueIndex("testimonials_user_pet_idx").on(table.userId, table.petId),
     index("testimonials_pet_idx").on(table.petId, table.isPublished),
+  ]
+);
+
+// ─── Placements en famille d'accueil ──────────────────────────────────────
+
+export const petFosterPlacementStatusEnum = pgEnum(
+  "pet_foster_placement_status",
+  ["planifie", "en_cours", "termine", "annule"]
+);
+
+/**
+ * Placement temporaire d'un animal chez une famille d'accueil rattachée
+ * au refuge propriétaire. Le pet reste dans le système du refuge
+ * (`pets.shelter_id` inchangé) — seul l'état physique de l'animal change.
+ *
+ * Un pet peut avoir plusieurs placements dans le temps (placement,
+ * retour refuge, replacement chez une autre FA). À un instant t, un
+ * seul placement actif (`planifie` ou `en_cours`) attendu — non
+ * contraint en DB pour laisser l'app gérer les transitions.
+ */
+export const petFosterPlacements = pgTable(
+  "pet_foster_placements",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    petId: uuid("pet_id")
+      .notNull()
+      .references(() => pets.id, { onDelete: "cascade" }),
+    fosterFamilyId: uuid("foster_family_id")
+      .notNull()
+      .references(() => fosterFamilies.id, { onDelete: "cascade" }),
+    shelterId: uuid("shelter_id")
+      .notNull()
+      .references(() => shelters.id, { onDelete: "cascade" }),
+    status: petFosterPlacementStatusEnum().default("planifie").notNull(),
+    startDate: date("start_date").notNull(),
+    expectedEndDate: date("expected_end_date"),
+    actualEndDate: date("actual_end_date"),
+    /** Motif du placement (sociabilisation, post-op, manque de place…). */
+    reason: text(),
+    shelterNotes: text("shelter_notes"),
+    /** Note finale rédigée par la FA à la fin du placement. */
+    fosterFeedback: text("foster_feedback"),
+    createdByUserId: uuid("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("pet_foster_placements_pet_idx").on(table.petId, table.status),
+    index("pet_foster_placements_foster_idx").on(
+      table.fosterFamilyId,
+      table.status
+    ),
+    index("pet_foster_placements_shelter_idx").on(
+      table.shelterId,
+      table.status
+    ),
   ]
 );
