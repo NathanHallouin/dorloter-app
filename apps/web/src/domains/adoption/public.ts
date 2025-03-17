@@ -152,6 +152,12 @@ export {
   type AdoptedPetSummary,
 } from "./queries/adopted-pets";
 export {
+  buildWeeklyDigestRecipients,
+  getRecentNearbyPets,
+  type DigestPet,
+  type DigestRecipient,
+} from "./queries/nearby-digest";
+export {
   MEDICAL_EVENT_TYPES,
   MEDICAL_EVENT_LABELS,
   MEDICAL_EVENT_COLOR_CLASSES,

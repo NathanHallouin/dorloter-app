@@ -815,6 +815,7 @@ export function weeklyDigestEmailTemplate(params: {
   pets: Array<{
     id: string;
     name: string;
+    species?: "chat" | "chien";
     photoUrl: string | null;
     shelterName: string | null;
     distanceKm: number;
@@ -823,7 +824,20 @@ export function weeklyDigestEmailTemplate(params: {
 }): { subject: string; html: string; text: string } {
   const { pets, userName } = params;
   const plural = pets.length > 1;
-  const title = `${pets.length} ${plural ? "nouveaux chats" : "nouveau chat"} à adopter près de chez vous`;
+  const speciesSet = new Set(pets.map((p) => p.species).filter(Boolean));
+  const noun =
+    speciesSet.size === 1
+      ? speciesSet.has("chien")
+        ? plural
+          ? "nouveaux chiens"
+          : "nouveau chien"
+        : plural
+          ? "nouveaux chats"
+          : "nouveau chat"
+      : plural
+        ? "nouveaux animaux"
+        : "nouveau compagnon";
+  const title = `${pets.length} ${noun} à adopter près de chez vous`;
 
   const catsHtml = pets
     .map((c) => {
