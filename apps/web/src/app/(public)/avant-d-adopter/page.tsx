@@ -325,6 +325,14 @@ export default async function AvantDAdopterPage() {
               partenaires et des cabinets vétérinaires (France métropolitaine,
               2025-2026). Vérifiez avec votre véto local et votre refuge.
             </p>
+            <div className="mt-4">
+              <Link
+                href="/adopter/coute-combien"
+                className="inline-flex items-center gap-2 rounded-full bg-coral-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-coral-600"
+              >
+                Calculer une estimation personnalisée
+              </Link>
+            </div>
           </Section>
 
           {/* Matériel */}

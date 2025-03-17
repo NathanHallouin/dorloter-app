@@ -29,6 +29,20 @@ export {
 export type { FollowupRow } from "./lib/followup-types";
 
 export {
+  calculateCosts,
+  COST_LABELS,
+  type CostInput,
+  type CostResult,
+  type CostBreakdown,
+  type Species as CostSpecies,
+  type ChienSize,
+  type CatSize,
+  type LifeStage,
+  type CareLevel,
+  type Region as CostRegion,
+} from "./lib/cost-calculator";
+
+export {
   parseCSV,
   suggestMapping,
   normalizeValue,
