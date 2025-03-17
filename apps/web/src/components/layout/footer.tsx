@@ -65,6 +65,12 @@ export function Footer() {
                   Devenir famille d&apos;accueil
                 </Link>
                 <Link
+                  href="/devenir-benevole"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Devenir bénévole
+                </Link>
+                <Link
                   href="/perdus-trouves"
                   className="text-muted-foreground hover:text-coral-500"
                 >

@@ -20,6 +20,7 @@ import {
   PawPrint,
   Settings,
   Tags,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -36,6 +37,7 @@ interface ShelterSidebarProps {
     unreadMessages: number;
     pendingTransfers: number;
     pendingFosterCandidatures: number;
+    pendingVolunteerCandidatures: number;
   };
 }
 
@@ -69,6 +71,12 @@ export function ShelterSidebar({ counts }: ShelterSidebarProps) {
       label: "Familles d'accueil",
       icon: Home,
       count: counts.pendingFosterCandidatures,
+    },
+    {
+      href: "/shelter-planning",
+      label: "Planning bénévoles",
+      icon: Users,
+      count: counts.pendingVolunteerCandidatures,
     },
     {
       href: "/shelter-evenements",

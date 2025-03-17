@@ -529,3 +529,143 @@ export const fosterFamilies = pgTable(
     index("foster_families_location_idx").using("gist", table.location),
   ]
 );
+
+// ─── Bénévoles refuge (planning + créneaux) ───────────────────────────────
+
+export const shelterVolunteerStatusEnum = pgEnum("shelter_volunteer_status", [
+  "candidature",
+  "active",
+  "pause",
+  "refusee",
+  "archive",
+]);
+
+/**
+ * Bénévole rattaché à un refuge. Un user peut être bénévole pour
+ * plusieurs refuges (entrées distinctes). Workflow : candidature →
+ * shelter_admin valide → active → s'inscrit à des créneaux.
+ *
+ * `totalHours` agrégé en lecture (cumul du temps réel des créneaux
+ * check-out moins check-in). Pas dénormalisé en colonne dédiée pour
+ * éviter une race condition à chaque check-out.
+ */
+export const shelterVolunteers = pgTable(
+  "shelter_volunteers",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    shelterId: uuid("shelter_id")
+      .notNull()
+      .references(() => shelters.id, { onDelete: "cascade" }),
+    status: shelterVolunteerStatusEnum().default("candidature").notNull(),
+    /** Compétences ou disponibilités libres (multilignes accepté). */
+    skills: text(),
+    availability: text(),
+    motivation: text().notNull(),
+    phone: varchar({ length: 20 }),
+    shelterNotes: text("shelter_notes"),
+    validatedAt: timestamp("validated_at"),
+    validatedByUserId: uuid("validated_by_user_id").references(
+      () => users.id,
+      { onDelete: "set null" }
+    ),
+    rejectedReason: text("rejected_reason"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("shelter_volunteers_user_idx").on(table.userId),
+    index("shelter_volunteers_shelter_status_idx").on(
+      table.shelterId,
+      table.status
+    ),
+  ]
+);
+
+export const shelterShiftStatusEnum = pgEnum("shelter_shift_status", [
+  "ouvert",
+  "complet",
+  "annule",
+  "termine",
+]);
+
+/**
+ * Créneau ponctuel (balade chiens, soins chats, accueil public, etc.)
+ * Un refuge le publie, les bénévoles validés s'y inscrivent dans la
+ * limite de la capacité. Le statut est dérivé de l'inscription en
+ * temps réel mais aussi stocké pour les filtres rapides.
+ */
+export const shelterShifts = pgTable(
+  "shelter_shifts",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    shelterId: uuid("shelter_id")
+      .notNull()
+      .references(() => shelters.id, { onDelete: "cascade" }),
+    title: varchar({ length: 255 }).notNull(),
+    description: text(),
+    startsAt: timestamp("starts_at").notNull(),
+    endsAt: timestamp("ends_at").notNull(),
+    capacity: integer().default(1).notNull(),
+    status: shelterShiftStatusEnum().default("ouvert").notNull(),
+    createdByUserId: uuid("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("shelter_shifts_shelter_starts_idx").on(
+      table.shelterId,
+      table.startsAt
+    ),
+    index("shelter_shifts_status_starts_idx").on(table.status, table.startsAt),
+  ]
+);
+
+export const shelterShiftSignupStatusEnum = pgEnum(
+  "shelter_shift_signup_status",
+  ["inscrit", "confirme", "annule", "absent", "termine"]
+);
+
+/**
+ * Inscription d'un bénévole à un créneau. `checkInAt`/`checkOutAt`
+ * remplis par le shelter_admin lors de la séance (clic dans le panel
+ * refuge), et servent à calculer les heures comptabilisées pour le
+ * bénévole. Pas d'unique (volunteer + shift) : on bloque l'inscription
+ * doublon côté action.
+ */
+export const shelterShiftSignups = pgTable(
+  "shelter_shift_signups",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    shiftId: uuid("shift_id")
+      .notNull()
+      .references(() => shelterShifts.id, { onDelete: "cascade" }),
+    volunteerId: uuid("volunteer_id")
+      .notNull()
+      .references(() => shelterVolunteers.id, { onDelete: "cascade" }),
+    shelterId: uuid("shelter_id")
+      .notNull()
+      .references(() => shelters.id, { onDelete: "cascade" }),
+    status: shelterShiftSignupStatusEnum().default("inscrit").notNull(),
+    checkInAt: timestamp("check_in_at"),
+    checkOutAt: timestamp("check_out_at"),
+    notes: text(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("shelter_shift_signups_uniq").on(
+      table.shiftId,
+      table.volunteerId
+    ),
+    index("shelter_shift_signups_shift_idx").on(table.shiftId, table.status),
+    index("shelter_shift_signups_volunteer_idx").on(
+      table.volunteerId,
+      table.status
+    ),
+  ]
+);

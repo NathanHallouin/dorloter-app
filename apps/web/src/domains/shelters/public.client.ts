@@ -115,6 +115,39 @@ export type {
   ResponseTemplateKind,
 } from "./lib/template-types";
 
+// ─── Bénévoles refuge (client-safe) ─────────────────────────────────────────
+export {
+  VOLUNTEER_STATUS_LABELS,
+  VOLUNTEER_STATUS_CLASSES,
+  SHIFT_STATUS_LABELS,
+  SHIFT_STATUS_CLASSES,
+  SHIFT_SIGNUP_STATUS_LABELS,
+  signupHours,
+  type Volunteer,
+  type VolunteerWithUser,
+  type VolunteerStatus,
+  type Shift,
+  type ShiftWithSignups,
+  type ShiftStatus,
+  type ShiftSignup,
+  type ShiftSignupWithContext,
+  type ShiftSignupStatus,
+} from "./lib/volunteer-types";
+export {
+  applyAsVolunteer,
+  validateVolunteer,
+  rejectVolunteer,
+  setVolunteerStatus,
+  upsertShift,
+  cancelShift,
+  deleteShift,
+  signUpToShift,
+  cancelMySignup,
+  checkInSignup,
+  checkOutSignup,
+  markSignupAbsent,
+} from "./actions/volunteers";
+
 // ─── Familles d'accueil (client-safe) ───────────────────────────────────────
 export {
   FOSTER_FAMILY_STATUS_LABELS,

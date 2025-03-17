@@ -893,6 +893,58 @@ export function fosterFamilyCandidatureEmailTemplate(params: {
   };
 }
 
+export function volunteerCandidatureEmailTemplate(params: {
+  adminName: string;
+  candidateName: string;
+}): { subject: string; html: string; text: string } {
+  const { adminName, candidateName } = params;
+  const hello = `Bonjour ${adminName.split(" ")[0] ?? adminName},`;
+  const intro = `${candidateName} souhaite devenir bénévole de votre refuge.`;
+  const text = `${hello}\n\n${intro}\n\nGérez la candidature : ${baseUrl}/shelter-planning\n\n· Dorloter`;
+  return {
+    subject: "Nouvelle candidature bénévole · Dorloter",
+    text,
+    html: card(
+      "Nouvelle candidature bénévole",
+      `${hello}<br><br>${intro}`,
+      "Voir la candidature",
+      "/shelter-planning"
+    ),
+  };
+}
+
+export function volunteerDecidedEmailTemplate(params: {
+  userName: string;
+  decision: "validee" | "refusee";
+  note: string | null;
+}): { subject: string; html: string; text: string } {
+  const { userName, decision, note } = params;
+  const hello = `Bonjour ${userName.split(" ")[0] ?? userName},`;
+  const validated = decision === "validee";
+  const title = validated
+    ? "Votre candidature bénévole est validée"
+    : "Votre candidature bénévole";
+  const body = validated
+    ? `Bienvenue dans l'équipe bénévole. Vous pouvez désormais vous inscrire aux créneaux proposés par le refuge.`
+    : `Le refuge n'a pas donné suite à votre candidature pour cette fois.`;
+  const noteBlock = note ? `\n\nMessage du refuge :\n${note}` : "";
+  const text = `${hello}\n\n${body}${noteBlock}\n\nMon planning : ${baseUrl}/mon-planning\n\n· Dorloter`;
+  return {
+    subject: `${title} · Dorloter`,
+    text,
+    html: card(
+      title,
+      `${hello}<br><br>${body}${
+        note
+          ? `<br><br><em style="display:block;border-left:3px solid #e6d5a8;padding-left:10px;color:#6b5e4f">${note.replace(/\n/g, "<br>")}</em>`
+          : ""
+      }`,
+      "Mon planning",
+      "/mon-planning"
+    ),
+  };
+}
+
 export function fosterFamilyDecidedEmailTemplate(params: {
   userName: string;
   decision: "validee" | "refusee";

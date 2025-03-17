@@ -169,6 +169,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    {
+      url: `${BASE_URL}/devenir-benevole`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
     // Perdus / trouvés
     {
       url: `${BASE_URL}/perdus-trouves`,
