@@ -400,3 +400,66 @@ export const shelterInvitations = pgTable(
     index("shelter_invitations_email_idx").on(table.email),
   ]
 );
+
+// ─── Actualités / blog refuge ─────────────────────────────────────────────
+
+export const shelterNewsPostTypeEnum = pgEnum("shelter_news_post_type", [
+  "adoption",
+  "evenement",
+  "urgence",
+  "temoignage",
+  "autre",
+]);
+
+export const shelterNewsPostStatusEnum = pgEnum("shelter_news_post_status", [
+  "brouillon",
+  "en_attente_modo",
+  "publie",
+  "refuse",
+  "archive",
+]);
+
+/**
+ * Articles publiés par les refuges : témoignages d'adoption, comptes-rendus
+ * d'événement, appels à l'aide, actualités générales. Affichés sur
+ * `/actualites` et dans un flux RSS public.
+ *
+ * Workflow modération : refuges `is_verified=true` publient direct (status
+ * `publie`, `publishedAt` rempli). Les autres passent par `en_attente_modo`
+ * et sont validés/refusés par un platform_admin.
+ *
+ * `body` stocké en markdown léger (titres, gras, italique, listes, liens).
+ * Le rendu HTML est calculé côté server avec sanitization stricte.
+ */
+export const shelterNewsPosts = pgTable(
+  "shelter_news_posts",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    shelterId: uuid("shelter_id")
+      .notNull()
+      .references(() => shelters.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: shelterNewsPostTypeEnum().default("autre").notNull(),
+    status: shelterNewsPostStatusEnum().default("brouillon").notNull(),
+    slug: varchar({ length: 255 }).notNull(),
+    title: varchar({ length: 255 }).notNull(),
+    excerpt: varchar({ length: 500 }),
+    body: text().notNull(),
+    coverUrl: text("cover_url"),
+    publishedAt: timestamp("published_at"),
+    rejectedReason: text("rejected_reason"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("shelter_news_posts_slug_idx").on(table.slug),
+    index("shelter_news_posts_shelter_idx").on(
+      table.shelterId,
+      table.publishedAt
+    ),
+    index("shelter_news_posts_status_idx").on(table.status, table.publishedAt),
+    index("shelter_news_posts_type_idx").on(table.type, table.publishedAt),
+  ]
+);

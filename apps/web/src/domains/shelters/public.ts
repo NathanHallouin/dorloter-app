@@ -127,6 +127,40 @@ export {
   type TemplateContext,
 } from "./lib/template-variables";
 
+// ─── Actualités refuge ──────────────────────────────────────────────────────
+export {
+  listPublishedNewsPosts,
+  getNewsPostBySlug,
+  getNewsPostsForShelter,
+  getNewsPostById,
+  isSlugAvailable,
+  getNewsPostsAwaitingModeration,
+  countNewsPostsAwaitingModeration,
+  getSheltersWithNewsPosts,
+} from "./queries/news-posts";
+export {
+  upsertNewsPost,
+  deleteNewsPost,
+  archiveNewsPost,
+  approveNewsPost,
+  rejectNewsPost,
+} from "./actions/news-posts";
+export {
+  NEWS_POST_TYPES,
+  NEWS_POST_TYPE_LABELS,
+  NEWS_POST_TYPE_CLASSES,
+  NEWS_POST_STATUS_LABELS,
+  type NewsPost,
+  type NewsPostWithShelter,
+  type NewsPostType,
+  type NewsPostStatus,
+} from "./lib/news-post-types";
+export {
+  renderNewsMarkdown,
+  slugify as slugifyNews,
+  extractExcerpt,
+} from "./lib/news-markdown";
+
 // ─── Validation ─────────────────────────────────────────────────────────────
 export { shelterFormSchema } from "./validation";
 

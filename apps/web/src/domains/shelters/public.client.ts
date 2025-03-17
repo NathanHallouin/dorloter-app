@@ -114,3 +114,22 @@ export type {
   ResponseTemplate,
   ResponseTemplateKind,
 } from "./lib/template-types";
+
+// ─── Actualités refuge (client-safe) ────────────────────────────────────────
+export {
+  NEWS_POST_TYPES,
+  NEWS_POST_TYPE_LABELS,
+  NEWS_POST_TYPE_CLASSES,
+  NEWS_POST_STATUS_LABELS,
+  type NewsPost,
+  type NewsPostWithShelter,
+  type NewsPostType,
+  type NewsPostStatus,
+} from "./lib/news-post-types";
+export {
+  upsertNewsPost,
+  deleteNewsPost,
+  archiveNewsPost,
+  approveNewsPost,
+  rejectNewsPost,
+} from "./actions/news-posts";

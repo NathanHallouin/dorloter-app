@@ -5,6 +5,7 @@ import {
   pets,
   reports,
   shelters,
+  shelterNewsPosts,
   veterinarians,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -28,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     allShelters,
     verifiedPensions,
     verifiedVets,
+    publishedNewsPosts,
   ] = await Promise.all([
     safe(
       () =>
@@ -82,6 +84,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           .where(eq(veterinarians.isVerified, true)),
       [],
       "vets"
+    ),
+    safe(
+      () =>
+        db
+          .select({
+            slug: shelterNewsPosts.slug,
+            updatedAt: shelterNewsPosts.updatedAt,
+          })
+          .from(shelterNewsPosts)
+          .where(eq(shelterNewsPosts.status, "publie")),
+      [],
+      "news"
     ),
   ]);
 
@@ -139,6 +153,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${BASE_URL}/evenements`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/actualites`,
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.6,
@@ -281,6 +301,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }));
 
+  const newsRoutes: MetadataRoute.Sitemap = publishedNewsPosts.map((p) => ({
+    url: `${BASE_URL}/actualites/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "monthly" as const,
+    priority: 0.55,
+  }));
+
   return [
     ...staticRoutes,
     ...petRoutes,
@@ -289,5 +316,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pensionRoutes,
     ...vetRoutes,
     ...cityRoutes,
+    ...newsRoutes,
   ];
 }

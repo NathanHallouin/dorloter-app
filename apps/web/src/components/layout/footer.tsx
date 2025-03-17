@@ -53,6 +53,12 @@ export function Footer() {
                   Événements
                 </Link>
                 <Link
+                  href="/actualites"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Actualités
+                </Link>
+                <Link
                   href="/perdus-trouves"
                   className="text-muted-foreground hover:text-coral-500"
                 >

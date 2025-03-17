@@ -86,6 +86,7 @@ import {
   shelterEvents,
   shelterNewsletters,
   shelterDocuments,
+  shelterNewsPosts,
 } from "@/domains/shelters/schema";
 export {
   shelters,
@@ -98,6 +99,7 @@ export {
   shelterEvents,
   shelterNewsletters,
   shelterDocuments,
+  shelterNewsPosts,
 };
 export {
   responseTemplateKindEnum,
@@ -107,6 +109,8 @@ export {
   shelterNewsletterKindEnum,
   shelterDocumentKindEnum,
   shelterDocumentVisibilityEnum,
+  shelterNewsPostTypeEnum,
+  shelterNewsPostStatusEnum,
 } from "@/domains/shelters/schema";
 
 // Tables pensions + pension_photos extraites vers `src/domains/pensions/schema.ts`.
