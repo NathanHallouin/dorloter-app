@@ -64,7 +64,7 @@ export default async function VolunteerShelterPage({
   return (
     <>
       <Navbar />
-      <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6 md:py-12">
+      <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6 md:py-12">
         <Link
           href="/devenir-benevole"
           className="mb-6 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-coral-600"

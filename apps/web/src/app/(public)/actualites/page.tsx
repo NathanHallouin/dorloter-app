@@ -67,7 +67,7 @@ export default async function NewsListPage({
   return (
     <>
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-6 md:py-14">
+      <main id="main" className="mx-auto w-full max-w-6xl px-4 py-10 md:px-6 md:py-14">
         <header className="mb-8">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-coral-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-coral-700">
             <Sparkles className="h-3 w-3" />

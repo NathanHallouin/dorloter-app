@@ -284,9 +284,10 @@ function ShiftRow({
             variant="ghost"
             onClick={remove}
             disabled={isPending}
+            aria-label="Supprimer le créneau"
             className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -397,8 +398,9 @@ function SignupRow({ signup }: { signup: ShiftSignupWithContext }) {
                 variant="ghost"
                 onClick={doAbsent}
                 disabled={isPending}
+                aria-label="Marquer comme absent"
               >
-                <UserX className="h-3 w-3" />
+                <UserX className="h-3 w-3" aria-hidden="true" />
               </Button>
             </>
           )}
@@ -690,8 +692,9 @@ function ActiveVolunteerRow({ volunteer }: { volunteer: VolunteerWithUser }) {
             variant="ghost"
             onClick={archive}
             disabled={isPending}
+            aria-label="Archiver ce bénévole"
           >
-            <Archive className="h-3.5 w-3.5" />
+            <Archive className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -800,8 +803,14 @@ function ShiftDialog({
           <h2 className="text-lg font-semibold text-foreground">
             {shift ? "Modifier le créneau" : "Nouveau créneau"}
           </h2>
-          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={onClose}
+            aria-label="Fermer la fenêtre"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 

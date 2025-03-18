@@ -30,7 +30,7 @@ export default async function MyPlanningPage() {
   return (
     <>
       <Navbar />
-      <main className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6 md:py-12">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6 md:py-12">
         <header className="mb-8">
           <h1 className="inline-flex items-center gap-2 text-3xl font-bold text-foreground md:text-4xl">
             <Calendar className="h-7 w-7 text-coral-500" />

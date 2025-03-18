@@ -141,6 +141,12 @@ export function Footer() {
                   CGU
                 </Link>
                 <Link
+                  href="/accessibilite"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  Accessibilité
+                </Link>
+                <Link
                   href="/charte-refuges"
                   className="text-muted-foreground hover:text-coral-500"
                 >

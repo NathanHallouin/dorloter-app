@@ -93,7 +93,7 @@ export default async function AffichePage({
       />
 
       {/* Feuille à imprimer */}
-      <main className="affiche-page">
+      <main id="main" className="affiche-page">
         <style>{`
           @page {
             size: ${meta.widthMm}mm ${meta.heightMm}mm;

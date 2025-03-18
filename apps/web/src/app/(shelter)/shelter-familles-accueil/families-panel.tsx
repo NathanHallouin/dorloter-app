@@ -743,8 +743,14 @@ function PlacementDialog({
             <Sparkles className="h-5 w-5 text-coral-500" />
             Placer un animal chez {family.userName}
           </h2>
-          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={onClose}
+            aria-label="Fermer la fenêtre"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 

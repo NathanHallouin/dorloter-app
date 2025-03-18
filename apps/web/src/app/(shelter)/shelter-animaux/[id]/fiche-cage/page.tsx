@@ -110,7 +110,7 @@ export default async function FicheCagePage({
         }))}
       />
 
-      <main className="fiche-cage-page">
+      <main id="main" className="fiche-cage-page">
         <style>{`
           @page {
             size: ${meta.widthMm}mm ${meta.heightMm}mm;
