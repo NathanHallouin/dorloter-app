@@ -147,6 +147,12 @@ export function Footer() {
                   Accessibilité
                 </Link>
                 <Link
+                  href="/api"
+                  className="text-muted-foreground hover:text-coral-500"
+                >
+                  API publique
+                </Link>
+                <Link
                   href="/charte-refuges"
                   className="text-muted-foreground hover:text-coral-500"
                 >
