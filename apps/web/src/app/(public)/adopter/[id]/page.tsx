@@ -23,6 +23,7 @@ import { PetCard } from "@adoption/public";
 import { PetCampaignBlock } from "@adoption/public";
 import { getSimilarPets } from "@adoption/public";
 import { ContactShelterButton } from "@messaging/public";
+import { TripEstimateWidget } from "@/components/shared/trip-estimate-widget";
 import { TestimonialDisplay } from "@adoption/public";
 import { TestimonialForm } from "@adoption/public";
 import { getTagsForPet, TAG_COLOR_CLASSES } from "@shelters/public";
@@ -496,6 +497,12 @@ export default async function CatDetailPage({
                   </span>
                 )}
               </Link>
+            )}
+            {pet.shelter && (
+              <TripEstimateWidget
+                targetType="shelter"
+                targetId={pet.shelter.id}
+              />
             )}
           </div>
 

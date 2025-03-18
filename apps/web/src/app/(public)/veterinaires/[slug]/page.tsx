@@ -14,6 +14,7 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { PageContainer } from "@/components/layout/page-container";
+import { TripEstimateWidget } from "@/components/shared/trip-estimate-widget";
 import { DemoBadge } from "@shared/ui/demo-badge";
 import { getVeterinarianBySlug } from "@veterinarians/public";
 
@@ -231,6 +232,8 @@ export default async function VetDetailPage({ params }: Props) {
                 . Ne remplace pas la source officielle.
               </p>
             </section>
+
+            <TripEstimateWidget targetType="vet" targetId={vet.id} />
           </aside>
         </div>
       </PageContainer>

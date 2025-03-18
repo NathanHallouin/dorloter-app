@@ -29,6 +29,7 @@ import { FollowButton } from "@shelters/public";
 import { ShareLinkButton } from "@/components/shared/share-link-button";
 import { ContactShelterButton } from "@messaging/public";
 import { LocationView } from "@/components/map/location-view";
+import { TripEstimateWidget } from "@/components/shared/trip-estimate-widget";
 import { PetCard } from "@adoption/public";
 import {
   getShelterById,
@@ -429,6 +430,12 @@ export default async function ShelterDetailPage({
                     height={220}
                     markerColor="coral"
                   />
+                  <div className="mt-3">
+                    <TripEstimateWidget
+                      targetType="shelter"
+                      targetId={shelter.id}
+                    />
+                  </div>
                 </section>
               )}
             </aside>

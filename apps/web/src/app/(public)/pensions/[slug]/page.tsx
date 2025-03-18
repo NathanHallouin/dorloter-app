@@ -18,6 +18,7 @@ import {
   PensionReviewsSection,
 } from "@pensions/public";
 import { LocationView } from "@/components/map/location-view";
+import { TripEstimateWidget } from "@/components/shared/trip-estimate-widget";
 import { placeholderCovers } from "@shared/utils/placeholder-images";
 import { getCurrentSession } from "@infra/auth/session";
 
@@ -246,6 +247,7 @@ export default async function PensionPage({ params }: Props) {
               latitude={pension.location.y}
               longitude={pension.location.x}
             />
+            <TripEstimateWidget targetType="pension" targetId={pension.id} />
           </section>
         )}
 
