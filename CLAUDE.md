@@ -14,88 +14,71 @@ Domaine : `dorloter.fr`. Projet solo, développeur fullstack freelance basé en 
 
 ## Stack technique
 
-- **Framework** : Next.js 16 (App Router, Turbopack par défaut)
-- **Langage** : TypeScript (strict mode)
-- **ORM** : Drizzle ORM v1 beta (PostgreSQL + PostGIS) + drizzle-kit
-- **Base de données** : PostgreSQL 16 + extension PostGIS
-- **Auth** : Better Auth (successeur officiel de Auth.js/NextAuth, sessions en base, compatible Next.js 16 proxy)
-- **UI** : Tailwind CSS v4 (config CSS-first via `@theme`, moteur Rust/Lightning CSS) + shadcn/ui
+Monorepo polyglotte (`apps/`). L'API est un service NestJS séparé ; les fronts la consomment via `/api/v1`.
+
+**API · `apps/api`** (le backend principal)
+- **Framework** : le service API (contrôleurs · monolithe modulaire)
+- **Langage** : C# (NestJS 10)
+- **ORM** : Entity Framework Core 10, mappé sur le schéma `dorloter_api` existant (pas de migrations EF)
+- **PostGIS** : PostGIS via Npgsql (matching en SQL natif `ST_DWithin`/`ST_Distance` sur `::geography`)
+- **Auth** : JWT (access 15 min + refresh 30 j opaque, rotation) · hash scrypt compatible Better Auth (import des comptes existants sans reset)
+- **Migrations schéma** : `DatabaseMigrator` au démarrage (fichiers `.sql` embarqués · compatible avec un schéma déjà géré par Flyway)
+- **Validation** : DataAnnotations (sur les paramètres de record)
+- **OpenAPI** : Microsoft.AspNetCore.OpenApi, servi sur `/api/v1/openapi`
+- **Tests** : xUnit + Testcontainers (PostGIS)
+
+**Fronts**
+- **web · `apps/web`** : React 19 + Vite + TypeScript + React Router + TanStack Query · SPA, consomme `/api/v1`
+- **mobile · `apps/mobile`** : Expo / React Native + client `openapi-fetch` typé (`packages/api-client`, généré depuis l'OpenAPI)
+
+**Commun**
+- **Base de données** : PostgreSQL 16 + PostGIS (schéma `dorloter_api`)
+- **UI** (fronts) : Tailwind CSS v4 (config CSS-first via `@theme`) + shadcn/ui
 - **Cartographie** : MapLibre GL JS via react-map-gl
 - **Upload images** : S3-compatible (MinIO en dev, Scaleway Object Storage en prod)
-- **Validation** : Zod v3.25+ (intégré à Drizzle via drizzle-orm/zod)
 - **Notifications** : Web Push API (service worker) + email via Resend ou Brevo
-- **Tests** : Vitest (unit) + Playwright (e2e)
-- **Infra** : Docker Compose (dev), VPS Hetzner ou Scaleway (prod)
+- **Infra** : Docker Compose (dev), VPS Hetzner ou Scaleway (prod), Caddy (reverse proxy + HTTPS)
 - **CI** : GitHub Actions
 
 ## Architecture du projet
 
-Organisation modulaire (monolithe à bounded contexts). Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) pour la philosophie complète, les règles d'import et le graphe de dépendances.
+Monorepo (`apps/`). L'API est un service NestJS séparé (monolithe modulaire à bounded contexts) ; les fronts la consomment via `/api/v1`.
 
 ```
-src/
-├── app/                          # Next.js routes · orchestration pure
-│   ├── (public)/                 # Pages sans auth (adopter, perdus-trouves, refuges)
-│   ├── (app)/                    # Pages avec auth user (dashboard, candidater, signaler)
-│   ├── (shelter)/                # Pages refuge admin (shelter-animaux, candidatures, stats)
-│   ├── (admin)/                  # Pages plateforme admin (modération, users)
-│   ├── (auth)/                   # Login / register / password flows
-│   ├── api/                      # Routes API (cron, upload, auth handler, SSE messages)
-│   ├── layout.tsx                # Root layout + metadata Dorloter
-│   ├── manifest.ts               # PWA manifest
-│   └── instrumentation.ts        # Next.js register() · bootstrap listeners event-bus
+apps/
+├── api/                   # API REST NestJS (le service API) · port 8080
+│   ├── src/apps/api/
+│   │   ├── Modules/              # Bounded contexts : 1 dossier par domaine
+│   │   │   ├── Identity/         # users, accounts, refresh tokens, auth (JWT)
+│   │   │   ├── Adoption/         # pets, photos, favorites, applications,
+│   │   │   │                     #   back-office refuge, familles d'accueil (foster)
+│   │   │   ├── Shelters/         # refuges, follows, équipes (membres + permissions)
+│   │   │   ├── LostFound/        # reports, matching PostGIS, report_matches
+│   │   │   ├── Pensions/         # pensions pro, bookings, reviews
+│   │   │   ├── Veterinarians/    # annuaire vétérinaires
+│   │   │   ├── Notifications/    # notifications + device tokens
+│   │   │   ├── Gamification/     # crédits de résolution
+│   │   │   ├── Moderation/       # content reports (réservé platform_admin)
+│   │   │   └── Messaging/        # conversations / messages (polling)
+│   │   │   # chaque module : Domain/ (entités, enums) + Application/ (services, *.cs en
+│   │   │   #   namespace .Services) + Infrastructure/ (configs EF) + Web/ (contrôleurs, DTOs)
+│   │   │   #   + <Module>Module.cs (enregistrement DI : Add<Module>Module())
+│   │   ├── Shared/               # ApiResponse / PageResponse, DomainException / ErrorCode,
+│   │   │                         #   CursorCodec, DbEnum (+ converters JSON/EF), GeoPoints, ITimestamped
+│   │   ├── Infrastructure/       # Persistence (DorloterDbContext, DatabaseMigrator),
+│   │   │                         #   Security (JwtService, scrypt encoder, CurrentUser), Web (exception handler)
+│   │   └── Migrations/           # .sql embarqués (schéma dorloter_api), appliqués au démarrage
+│   └── tests/                    # xUnit + Testcontainers (PostGIS)
 │
-├── domains/                      # Bounded contexts métier
-│   ├── adoption/                 # pets, applications, favorites, testimonials
-│   ├── lost-found/               # reports, matching, résolution
-│   ├── shelters/                 # refuges, follows, invitations
-│   ├── pensions/                 # pensions pro agréées (SIRET + agrément)
-│   ├── identity/                 # users, sessions, profil, admin users
-│   ├── messaging/                # conversations, messages, bus SSE
-│   ├── moderation/               # content reports, vérif refuges
-│   ├── notifications/            # emit + listeners cross-domain
-│   └── gamification/             # crédits résolution, badges
-│   # chaque domaine = schema.ts + actions/ + queries/ + components/
-│   # + public.ts (+ public.client.ts si besoin) + events.ts + listeners.ts
-│
-├── infrastructure/               # Plomberie · zéro métier
-│   ├── db/                       # Clients Drizzle (app + admin), enums partagés
-│   ├── auth/                     # Better Auth + session helpers
-│   ├── storage/                  # S3 client
-│   ├── email/                    # Resend wrapper + templates
-│   ├── push/                     # Web Push VAPID
-│   ├── event-bus/                # Pub/sub in-process typé
-│   ├── logger/                   # JSON structured
-│   ├── rate-limit/               # In-memory rate limiting
-│   ├── cron/                     # Auth pour routes cron
-│   └── nsfw/                     # Classification image safety
-│
-├── shared/                       # Primitives zéro métier
-│   ├── ui/                       # Composants shadcn/ui
-│   └── utils/                    # cn, geo, cities, map, placeholder-images
-│
-├── server/db/                    # Barrel global du schéma (re-export depuis domains/*/schema)
-│   ├── schema.ts                 # Re-exports pour drizzle-kit (vue unique)
-│   ├── relations.ts              # Drizzle relations
-│   └── migrations/               # Migrations Drizzle-kit
-│
-├── components/                   # Composants transversaux
-│   ├── layout/                   # navbar, footer, page-container, bottom-nav
-│   ├── map/                      # location-picker, location-view (cross-domain)
-│   ├── pwa/                      # service-worker-register, install-prompt
-│   └── shared/                   # share-link-button (générique)
-│
-├── hooks/                        # Hooks React cross-domain
-└── types/                        # Types TS partagés (inférés Drizzle + ActionResponse)
+├── web/                          # Front SPA · React 19 + Vite (port 5173) · consomme /api/v1
+└── mobile/                       # Expo / React Native · client packages/api-client
+
+packages/api-client/             # Client openapi-fetch typé (généré depuis l'OpenAPI via `bun api:types`)
 ```
 
-**Règles de frontière** (appliquées par dependency-cruiser + CI · voir `.dependency-cruiser.cjs`) :
-- `shared/` n'importe rien d'`infrastructure/`, `domains/`, `app/`
-- `infrastructure/` n'importe rien de `domains/` ou `app/`
-- `domains/X` ne peut importer d'un autre domaine que via `public.ts`, `public.client.ts`, `events.ts`, `schema.ts`
-- Un client component qui appelle un server action d'un autre domaine passe par `@<domain>/public.client` (séparation server/client-bundle, cf. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md))
+**Frontières inter-modules (API)** : un module n'accède à un autre QUE via son API publique exposée au niveau du package racine du module (ex. `ShelterDirectory`, `ShelterMembership`, `UserDirectory`), jamais via ses entités internes.
 
-**Path aliases** : `@shared/*`, `@infra/*`, `@adoption/*`, `@shelters/*`, `@pensions/*`, `@lost-found/*`, `@messaging/*`, `@moderation/*`, `@notifications/*`, `@identity/*`, `@gamification/*`.
+**Contrat d'API stable** : enveloppe `{ data }` (objet) / `{ data, pagination }` (liste paginée cursor) / `{ error: { code, message, details? } }`. Codes d'erreur stables (`ErrorCode`), routes sous `/api/v1`. Ce contrat est partagé par les 2 clients (web SPA, mobile).
 
 ## Modèle de données
 
@@ -239,7 +222,9 @@ Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un u
 - `is_read` : boolean, default false
 - `created_at` : timestamp
 
-### Tables auth (gérées par Better Auth)
+### Tables auth
+
+Le schéma `dorloter_api` (API) contient `users`, `accounts` et `auth_refresh_tokens`. L'auth de l'API est en **JWT** (access + refresh opaque en base, table `auth_refresh_tokens`), pas en sessions. Le hash `accounts.password` est au format **scrypt de Better Auth** · l'API le lit et l'écrit à l'identique (interop des comptes importés). Les tables `sessions` / `verifications` ci-dessous sont l'héritage de Better Auth (ancien front Next.js, retiré) · l'API ne les utilise pas.
 
 **users**
 - `id` : UUID (pk)
@@ -304,7 +289,7 @@ Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un u
 
 ### Algo de matching perdu/trouvé
 
-Le matching dans `server/queries/matching.ts` calcule un score (0-100) entre un signalement "perdu" et les signalements "trouvé" actifs, basé sur :
+Le matching (API · `Modules/LostFound` : `MatchScore` pour le scoring pur, `MatchingService` + `ReportSpatialQueries` pour le géo en SQL natif PostGIS) calcule un score (0-100) entre un signalement "perdu" et les signalements "trouvé" actifs, basé sur :
 
 - **Distance géographique** (40 pts max) : ST_Distance entre les deux points. < 1 km = 40 pts, 1-5 km = 30 pts, 5-15 km = 20 pts, 15-30 km = 10 pts, > 30 km = 0 pts.
 - **Couleur du pelage** (25 pts max) : correspondance exacte = 25 pts, partielle (ex. "noir et blanc" vs "noir") = 15 pts.
@@ -318,7 +303,7 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 
 ### Générales
 - TypeScript strict (`"strict": true`, `"noUncheckedIndexedAccess": true`)
-- ESLint + Prettier, config Next.js par défaut étendue
+- ESLint + Prettier (fronts TypeScript)
 - Imports absolus via `@/` mappé sur `src/`
 - Nommage fichiers : kebab-case (`pet-card.tsx`, pas `CatCard.tsx`)
 - Nommage composants : PascalCase à l'export
@@ -330,27 +315,22 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - Selon le contexte, préférer `:` (définition), `,` (incise courte), `.` (deux phrases) plutôt que `·` si la lisibilité y gagne.
 - Exception unique : placeholders typographiques "donnée absente" dans des tableaux/listes. Préférer chaîne vide ou `—` standalone uniquement si aucun autre signe ne convient (et demander à l'utilisateur avant d'introduire un cadratin).
 
-### Server Actions
-- Toujours valider les inputs avec Zod (via `drizzle-orm/zod` pour les schémas dérivés du schema DB) avant toute opération
-- Retourner un objet `{ success: boolean, data?: T, error?: string }`
-- Ne jamais exposer d'erreurs techniques au client
-- Toujours vérifier la session Better Auth et le rôle en début d'action
-- Utiliser `revalidatePath` après mutation
-- Les actions qui modifient des données refuge vérifient que l'utilisateur est bien `shelter_admin` du refuge concerné
+### API (`apps/api`)
+- Contrôleurs fins : valider l'entrée (DataAnnotations sur les records de requête · attributs sur le PARAMÈTRE du record, jamais `[property:]`), déléguer la logique aux services (`Application/`, namespace `.Services`)
+- Toujours renvoyer l'enveloppe via `ApiResponse.Of(...)` / `PageResponse.OfNextCursor(...)`. Erreurs métier via `DomainException` (`NotFound`/`Forbidden`/`Conflict`/...) · jamais d'erreur technique exposée (le gestionnaire global formate `{ error: { code, message } }`)
+- Auth : routes protégées par défaut (FallbackPolicy) · `[AllowAnonymous]` sur les actions PUBLIQUES individuelles (jamais au niveau classe si la classe a aussi des actions protégées). `CurrentUser.RequireUserId()` pour l'utilisateur courant
+- Autorisation refuge par PERMISSION via `ShelterMembership.RequireAccessAsync(...)` (PAS par rôle JWT : un membre invité a `role=user` mais des permissions d'équipe). Réservé plateforme : `[Authorize(Roles = "platform_admin")]`
+- DB : Kysely via `DorloterDbContext` (mappé sur les tables existantes du schéma `dorloter_api`, sans migrations EF). Enums métier via `DbEnum` (`[EnumValue("valeur_fr")]` + `[JsonConverter(typeof(DbEnumJsonConverter))]` + `DbEnumConverter.For<T>()`)
+- PostGIS : construire les points via `GeoPoints.Of(lng, lat)` (SRID 4326). Matching/proximité en SQL natif (`FromSqlRaw`/`SqlQueryRaw`) avec cast `::geography` (mètres géodésiques)
+- Pagination obligatoire sur les listings : cursor keyset (`createdAt DESC, id DESC` via `CursorCodec`)
+- `created_at`/`updated_at` : interface `ITimestamped` (stampés par le DbContext), pas à la main
 
-### Requêtes base de données
-- Les requêtes SELECT vont dans `server/queries/`, les mutations dans `server/actions/`
-- Utiliser les requêtes préparées Drizzle pour les requêtes fréquentes
-- Requêtes PostGIS : toujours passer par les helpers dans `lib/geo.ts`
-- Ne jamais faire de requête DB dans un composant client
-- Pagination obligatoire sur les listings (pets, reports) : cursor-based de préférence
 
-### Composants
-- Server Components par défaut, `"use client"` uniquement quand nécessaire (interactivité, hooks)
+### Composants (fronts)
 - Props typées avec interface dédiée, pas de `any`
-- Les formulaires utilisent `useActionState` (React 19) + Server Actions
-- Composants de formulaire dans le même dossier que leur domaine (`components/adoption/pet-form.tsx`)
-- Les cartes (pet-card, report-card) doivent être optimisées : `next/image` pour les photos, lazy loading
+- **apps/web (Vite SPA)** : consomme l'API via le client typé (`packages/api-client`) + TanStack Query ; routing React Router
+- **apps/mobile (Expo)** : même client typé ; React Native
+- Composants de formulaire dans le même dossier que leur domaine
 
 ### Style
 - Tailwind CSS v4 uniquement : configuration via `@theme` dans le CSS (pas de `tailwind.config.js`)
@@ -358,7 +338,7 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - Composants shadcn/ui comme base, customisés via Tailwind
 - Palette : tons chaleureux (ambre, terre, crème) avec accent teal pour les actions · l'app doit donner envie d'adopter
 - Dark mode supporté via Tailwind `dark:`
-- Plugin Vite `@tailwindcss/vite` pour l'intégration Next.js 16 + Turbopack
+- Plugin `@tailwindcss/vite` côté `apps/web` (Vite)
 
 ### Cartographie
 - MapLibre GL JS via `react-map-gl` (wrapper React)
@@ -377,41 +357,46 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 ## Commandes
 
 ```bash
-# Dev
-bun dev                     # Next.js dev server (Turbopack)
-bun db:push                 # Push schema Drizzle → PostgreSQL
-bun db:generate             # Générer migration
-bun db:migrate              # Appliquer migrations
-bun db:studio               # Drizzle Studio (UI admin DB)
-bun db:seed                 # Seed données de test (refuges, animaux, signalements)
-docker compose up -d        # PostgreSQL + PostGIS + MinIO
+# Base de données + stockage (à la racine)
+docker compose up -d                          # PostgreSQL + PostGIS (port 5438) + MinIO
+bun db:seed                                   # seed données de test (via apps/web/Drizzle)
 
-# Tests
-bun test                    # Vitest unit tests
-bun test:e2e                # Playwright e2e
+# API · apps/api (port 8080)
+cd apps/api
+bun dev         # lance l'API (migre le schéma au démarrage)
+bun run test                                   # tests xUnit + Testcontainers (PostGIS, nécessite Docker)
+bun run build -c Release                       # build
 
-# Build
-bun run build               # Build production
-bun lint                    # ESLint
-bun typecheck               # tsc --noEmit
+# Front SPA · apps/web (port 5173)
+cd apps/web
+bun dev                                       # Vite dev (proxy /api → localhost:8080)
+bun run build                                 # typecheck + build prod
+bun run typecheck                             # tsc --noEmit
+
+# Mobile · apps/mobile
+cd apps/mobile && bun start                   # Expo
+
+# Client API typé (depuis l'OpenAPI · API lancée sur :8080)
+bun api:types                                 # régénère packages/api-client/src/types.gen.ts
 ```
 
 ## Variables d'environnement
 
 ```env
-DATABASE_URL=postgresql://dorloter:dorloter@localhost:5432/dorloter
-BETTER_AUTH_SECRET=... # généré (openssl rand -base64 32)
-BETTER_AUTH_URL=http://localhost:3000
-S3_ENDPOINT=http://localhost:9000
-S3_ACCESS_KEY=minioadmin
-S3_SECRET_KEY=minioadmin
-S3_BUCKET=dorloter-photos
-S3_PUBLIC_URL=http://localhost:9000/dorloter-photos
-NEXT_PUBLIC_MAPTILER_KEY=... # ou autre provider de tuiles
-VAPID_PUBLIC_KEY=... # Web Push (généré avec web-push generate-vapid-keys)
-VAPID_PRIVATE_KEY=...
-RESEND_API_KEY=... # ou Brevo, pour les emails transactionnels
+# API (apps/api) · en dev, les défauts sont dans appsettings.json (DB sur :5438)
+ConnectionStrings__Default=Host=localhost;Port=5438;Database=miaou;Username=miaou;Password=miaou;Search Path=dorloter_api,public
+Dorloter__Security__Jwt__Secret=...            # >= 32 octets (openssl rand -base64 48)
+Dorloter__Security__Jwt__Issuer=dorloter-api
+Dorloter__Security__CorsAllowedOrigins=http://localhost:5173
+# Optionnels : ConnectionStrings__Migrations (rôle DDL), Dorloter__Database__AutoMigrate=false
+
+# Fronts (apps/web Vite SPA + apps/mobile)
+VITE_API_PROXY=http://localhost:8080            # apps/web · cible du proxy /api en dev
+VITE_MAPTILER_KEY=...                           # apps/web · cartographie (ou OpenFreeMap sans clé)
+EXPO_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1   # apps/mobile
 ```
+
+> **À reloger** (services portés par l'ancien front Next, retiré · PAS encore couverts par l'API) : uploads d'images (S3/MinIO), gifs, Web Push (VAPID), emails transactionnels (Resend/Brevo). L'auth, elle, est passée en JWT côté API.
 
 ## Roadmap MVP
 

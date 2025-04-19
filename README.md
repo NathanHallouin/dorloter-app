@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dorloter
 
-## Getting Started
+Plateforme d'adoption et de retrouvailles d'animaux (adoption, perdus/trouvés, pensions). Voir [CLAUDE.md](CLAUDE.md) pour le détail du produit et de l'architecture.
 
-First, run the development server:
+Le projet est un monorepo :
+
+- `apps/api` · API REST **NestJS (le service API)** (port `8080`, schéma PostgreSQL `dorloter_api`)
+- `apps/web` · front **React + Vite** (port `5173`) qui consomme l'API
+
+## Prérequis
+
+- **Docker** + Docker Compose (PostgreSQL/PostGIS + MinIO)
+- **NestJS 10 SDK** pour l'API (https://dot.net)
+- **Bun** (ou Node 20+) pour le front
+
+## Démarrage (3 étapes)
+
+Lancer dans cet ordre : base de données, puis API, puis front.
+
+### 1. Base de données (+ stockage MinIO)
+
+À la racine du repo :
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+docker compose up -d
+```
+
+Démarre :
+
+- **PostgreSQL 16 + PostGIS** sur `localhost:5438` (base `miaou`, user/mdp `miaou` / `miaou`)
+- **MinIO** (stockage S3) sur `localhost:9000`, console sur `localhost:9001` (`minioadmin` / `minioadmin`)
+
+### 2. API 
+
+```bash
+cd apps/api
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- L'API écoute sur **http://localhost:8080** (base des routes : `/api/v1`).
+- Les **migrations de schéma** (`dorloter_api`) sont appliquées automatiquement au démarrage (`DatabaseMigrator` ; compatible avec un schéma déjà géré par Flyway, qu'il ne rejoue pas).
+- Connexion DB par défaut : `Host=localhost;Port=5438;Database=miaou;Username=miaou;Password=miaou` (surchargeable via `ConnectionStrings__Default`).
+- Vérifier que c'est lancé : `curl http://localhost:8080/api/v1/health`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Front (Vite)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Dans un autre terminal :
 
-## Learn More
+```bash
+cd apps/web
+bun install      # première fois seulement
+bun dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+- Le front est servi sur **http://localhost:5173**.
+- En dev, Vite **proxifie `/api` vers `http://localhost:8080`** (pas de souci de CORS). La cible est configurable via `VITE_API_PROXY` (voir `apps/web/.env.example`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Comptes de test
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Des comptes de démonstration (adoptants, équipe refuge avec rôles, pensions, vétérinaire) sont listés dans **[COMPTES-TEST.md](COMPTES-TEST.md)** · mot de passe commun : `motdepasse12`.
 
-## Deploy on Vercel
+## Tests & build
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# API : tests d'intégration (Testcontainers PostGIS, nécessite Docker)
+cd apps/api && bun run test
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Front : typecheck + build de production
+cd apps/web && bun run build
+```
+
+## Arrêter
+
+```bash
+docker compose down        # stoppe la base et MinIO (les données sont conservées)
+docker compose down -v     # + supprime les volumes (réinitialise la base)
+```
