@@ -150,7 +150,7 @@ export async function uploadVoice({
 }): Promise<VoiceUploadResult> {
   const apiBaseUrl =
     (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
-    "http://localhost:3000/api/v1";
+    "http://localhost:8080/api/v1";
 
   const form = new FormData();
   // RN supporte FormData avec un descripteur { uri, name, type }.

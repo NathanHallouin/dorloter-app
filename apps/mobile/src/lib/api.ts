@@ -13,7 +13,7 @@ import { getAuthToken } from "@/lib/auth";
 
 const apiBaseUrl =
   (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
-  "http://localhost:3000/api/v1";
+  "http://localhost:8080/api/v1";
 
 export const api = createApiClient({
   baseUrl: apiBaseUrl,
