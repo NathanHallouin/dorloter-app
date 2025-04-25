@@ -1,6 +1,18 @@
-# Architecture Dorloter — proposition d'évolution
+# Architecture Dorloter · proposition d'évolution (contexte historique)
 
-Document de réflexion sur l'évolution de l'architecture logicielle de Dorloter, du **MVP monolithique** actuel vers une **structure modulaire professionnelle** qui tienne la route à mesure que les domaines s'ajoutent (TNR, vet network, encadrement adoption…) sans tomber dans la sur-ingénierie.
+> **Contexte** : ce document de réflexion a été écrit alors que Dorloter était
+> un monolithe **Next.js / Drizzle / Better Auth** (Server Actions). Ce stack a
+> depuis été retiré : l'architecture cible décrite ici (monolithe modulaire à
+> bounded contexts, frontières par contrats publics, communication inter-modules
+> contrôlée) a en pratique été **réalisée dans l'API** (`apps/api`,
+> le service API), avec un `<Module>Module.cs` par bounded context et une API
+> publique de module exposée au niveau du package racine. Les principes de ce
+> document restent pertinents ; en revanche les détails d'implémentation
+> (Server Actions, Drizzle, `next/cache`, dependency-cruiser TS, structure
+> `src/domains/*`) reflètent l'ancien front et ne décrivent plus le code actuel.
+> Source de vérité du stack : **[CLAUDE.md](../CLAUDE.md)**.
+
+Document de réflexion sur l'évolution de l'architecture logicielle de Dorloter, du **MVP monolithique** (à l'époque Next.js) vers une **structure modulaire professionnelle** qui tienne la route à mesure que les domaines s'ajoutent (TNR, vet network, encadrement adoption…) sans tomber dans la sur-ingénierie.
 
 **Principe directeur** : le bon niveau d'ambition pour un projet solo-dev qui ambitionne de grossir, c'est le **monolithe modulaire** avec des frontières claires et des règles de dépendances strictes, **pas** les microservices (qui seraient un désastre opérationnel à ton échelle).
 

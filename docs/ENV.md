@@ -1,6 +1,20 @@
 # Configuration des variables d'environnement
 
-Guide pas-à-pas pour remplir `.env.local` (dev) et `.env.production` (prod).
+> **Stack actuelle** : ce guide a été rédigé pour l'ancien front Next.js (auth
+> Better Auth, ORM Drizzle, runtime Bun), désormais retiré. Le stack en vigueur
+> est : **API** (`apps/api`, auth **JWT**), **front SPA React + Vite**
+> (`apps/web`), **mobile Expo** (`apps/mobile`). Les variables réellement
+> utilisées aujourd'hui sont décrites dans **[CLAUDE.md](../CLAUDE.md)** (section
+> « Variables d'environnement ») : `ConnectionStrings__Default`,
+> `Dorloter__Security__Jwt__Secret`, `Dorloter__Security__Jwt__Issuer`,
+> `Dorloter__Security__CorsAllowedOrigins` côté API ; `VITE_API_PROXY`,
+> `VITE_MAPTILER_KEY` côté web ; `EXPO_PUBLIC_API_BASE_URL` côté mobile.
+> Les sections ci-dessous sur l'object storage (S3/MinIO), la cartographie,
+> le Web Push, l'email et les backups restent valables sur le principe ; seuls
+> les noms de variables et les commandes liées à Better Auth / Drizzle / Bun
+> ont changé.
+
+Guide pas-à-pas pour remplir la configuration en dev et en prod.
 
 ## TL;DR
 
@@ -43,8 +57,8 @@ Le projet utilise trois rôles Postgres distincts pour la défense en profondeur
 | Variable | Dev | Prod | Rôle |
 |---|---|---|---|
 | `DATABASE_URL` | `miaou_app:miaou_app@localhost:5438` | `miaou_app:<pass>@postgres:5432` | App publique (CRUD restreint : pas d'UPDATE sur `users.role`, `shelters.is_verified`, etc.) |
-| `DATABASE_URL_ADMIN` | `miaou_admin:miaou_admin@localhost:5438` | `miaou_admin:<pass>@postgres:5432` | Server Actions platform_admin (écritures privilégiées) |
-| `DATABASE_URL_MIGRATIONS` | `miaou:miaou@localhost:5438` | `miaou:<pass>@postgres:5432` | Superuser — migrations Drizzle uniquement |
+| `DATABASE_URL_ADMIN` | `miaou_admin:miaou_admin@localhost:5438` | `miaou_admin:<pass>@postgres:5432` | Opérations platform_admin (écritures privilégiées) |
+| `DATABASE_URL_MIGRATIONS` | `miaou:miaou@localhost:5438` | `miaou:<pass>@postgres:5432` | Rôle DDL · migrations SQL embarquées de l'API (appliquées au démarrage). Côté NestJS : `ConnectionStrings__Migrations` |
 
 Générer les mots de passe prod :
 
@@ -56,13 +70,16 @@ openssl rand -base64 24    # MIAOU_ADMIN_PASSWORD
 
 > En prod, les `miaou_app` / `miaou_admin` sont créés par `bun prod:init-roles` qui lit ces variables et les applique via `ALTER ROLE`.
 
-### 2. Better Auth
+### 2. Authentification (JWT, API)
+
+> Historiquement géré par Better Auth (variables `BETTER_AUTH_*`,
+> `NEXT_PUBLIC_APP_URL`). L'auth est désormais en **JWT** côté API.
 
 | Variable | Obligatoire | Comment |
 |---|---|---|
-| `BETTER_AUTH_SECRET` | ✅ | `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | ✅ | `http://localhost:3000` en dev, `https://dorloter.fr` en prod |
-| `NEXT_PUBLIC_APP_URL` | ✅ | Même valeur que `BETTER_AUTH_URL` |
+| `Dorloter__Security__Jwt__Secret` | ✅ | >= 32 octets, `openssl rand -base64 48` |
+| `Dorloter__Security__Jwt__Issuer` | ✅ | `dorloter-api` |
+| `Dorloter__Security__CorsAllowedOrigins` | ✅ | origine du front, ex. `http://localhost:5173` en dev, `https://dorloter.fr` en prod |
 
 ### 3. Object Storage (photos)
 

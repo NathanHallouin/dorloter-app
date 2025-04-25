@@ -1,12 +1,21 @@
-# Services & API REST — pattern et conventions
+# Services & API REST · pattern et conventions (historique)
 
-Document de référence pour les contributeurs : comment factoriser la
-logique métier en **services** réutilisables par les **Server Actions**
-(web) et les **routes `/api/v1/*`** (mobile).
+Document de référence rédigé pour l'ancien stack **Next.js / TypeScript**
+(Server Actions web + routes `/api/v1/*` adossées à des services de domaine).
 
-> **Statut** : adoption en cours. La couche infra (`@infra/api/*`) est
-> prête, le domaine `adoption.pets.getPetWithDetails` sert de pilote.
-> Migration des autres domaines à faire incrémentalement — voir §7.
+> **Statut** : **caduc dans ses détails d'implémentation.** L'API est désormais
+> un service **NestJS / le service API** (`apps/api`) : contrôleurs fins +
+> services applicatifs (namespace `.Services`), erreurs métier via
+> `DomainException` / `ErrorCode`, enveloppe `ApiResponse.Of(...)` /
+> `PageResponse.OfNextCursor(...)`, OpenAPI servi sur `/api/v1/openapi`, client
+> mobile généré dans `packages/api-client` (`bun api:types`). Tous les exemples
+> de code ci-dessous (TypeScript, `withApi`, Zod, `revalidatePath`, Drizzle,
+> Better Auth, Vitest/Playwright) reflètent l'ancien front retiré. **Ce qui
+> reste valable**, en revanche, ce sont les **conventions de contrat d'API**
+> (versioning `/api/v1`, formats `{ data }` / `{ data, pagination }` /
+> `{ error: { code, message } }`, pagination cursor, codes d'erreur stables,
+> DTO ≠ entité) : elles sont effectivement appliquées par l'API. Source de
+> vérité du stack : **[CLAUDE.md](../CLAUDE.md)**.
 
 ---
 

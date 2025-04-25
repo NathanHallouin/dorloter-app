@@ -21,8 +21,8 @@ Trois principes structurent les choix V2 :
 2. **Pragmatisme** · chaque feature doit apporter une valeur immédiate et
    mesurable. Pas de surcouche technique « parce que c'est cool ».
 3. **Frugalité** · on tire au maximum sur les briques déjà en place
-   (Postgres + Next.js + Better Auth + Resend + Web Push). Tant que la base
-   utilisateurs n'a pas trouvé son public, **zéro coût externe ajouté**.
+   (Postgres/PostGIS + API + auth JWT + Resend + Web Push). Tant que la
+   base utilisateurs n'a pas trouvé son public, **zéro coût externe ajouté**.
 
 ---
 
@@ -776,10 +776,10 @@ crowdfunding existantes pour les frais lourds d'un animal précis.
 
 ### 9.2 · Performances continues
 
-- Surveillance p95 sur les pages clés (déjà tracking via Vercel
-  Analytics).
+- Surveillance p95 sur les pages clés (analytics auto-hébergé type
+  Plausible, cf. souveraineté EU).
 - Cap sur le nombre de requêtes DB par page (objectif < 10).
-- `unstable_cache` + `safe()` fallback sur toutes les pages publiques
+- Mise en cache HTTP + fallback gracieux sur toutes les pages publiques
   agrégeant des stats (`/`, `/stats`, `/carte`, sitemap).
 
 ### 9.3 · Sauvegardes et résilience
@@ -876,7 +876,8 @@ Ce qui **n'est pas** dans cette V2 :
   génère pas de reçus fiscaux. Les refuges gèrent leur collecte via
   HelloAsso, Dons solidaires, Stripe, virement direct, etc. Dorloter
   se limite à aiguiller le donateur vers la plateforme du refuge.
-- **Microservices** : on reste sur le monolithe Next.js modulaire actuel.
+- **Microservices** : on reste sur le monolithe modulaire actuel (API
+  à bounded contexts).
 - **Cache Redis** : pas nécessaire avant d'avoir > 10k utilisateurs actifs.
 - **Service de search externe** (Algolia, Meili) : Postgres full-text
   suffit.

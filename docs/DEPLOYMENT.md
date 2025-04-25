@@ -2,20 +2,33 @@
 
 Guide complet pour passer de rien à une prod qui tourne, puis pour la maintenir au quotidien.
 
+> **Stack actuelle** : ce guide a été écrit pour l'ancien front Next.js (runtime
+> Bun, ORM Drizzle, auth Better Auth) désormais retiré. La cible de prod
+> aujourd'hui est : **Caddy** (TLS edge) qui sert la **SPA React/Vite statique**
+> (`apps/web` buildé) et proxifie `/api/v1` vers l'**API** (`apps/api`),
+> plus **Postgres/PostGIS** et **MinIO**, le tout dans un seul
+> `docker-compose.prod.yml`. L'auth est en **JWT**, les migrations sont des
+> fichiers SQL embarqués dans l'API, appliqués au démarrage (pas de
+> `drizzle-kit migrate`). Les sections opérationnelles ci-dessous (provisioning
+> VPS, hardening, DNS, Caddy, backups, monitoring, CI/CD par SSH) restent
+> globalement valables ; seuls le build (Bun/Next remplacé par
+> `bun run publish` + `vite build`), les commandes de migration et les variables
+> Better Auth/Drizzle ont changé. Source de vérité : **[CLAUDE.md](../CLAUDE.md)**.
+
 ## 0. Ce qui est déjà prêt côté code
 
 Avant de commencer, l'app est livrée avec :
 
-- **[Dockerfile](../Dockerfile)** multi-stage Bun + Next.js standalone
-- **[docker-compose.prod.yml](../docker-compose.prod.yml)** : Postgres + MinIO + app + Caddy
-- **[Caddyfile](../Caddyfile)** : reverse proxy + HTTPS Let's Encrypt auto
-- **[scripts/deploy.sh](../scripts/deploy.sh)** : déploiement idempotent (build, migrate, restart)
-- **[scripts/backup.sh](../scripts/backup.sh)** : backup quotidien PG + MinIO → bucket S3
-- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** : lint + typecheck + build Docker sur chaque PR
+- **Dockerfile** API (`bun run publish`) + build statique du front Vite servi par Caddy
+- **docker-compose.prod.yml** : Postgres/PostGIS + MinIO + API + Caddy
+- **Caddyfile** : reverse proxy + HTTPS Let's Encrypt auto (SPA statique + proxy `/api/v1`)
+- **scripts/deploy.sh** : déploiement idempotent (build, migrate, restart)
+- **scripts/backup.sh** : backup quotidien PG + MinIO vers bucket S3
+- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** : build + tests sur chaque PR
 - **[.github/workflows/deploy.yml](../.github/workflows/deploy.yml)** : déploiement auto à chaque push sur `main`
-- Security headers (CSP, HSTS, Referrer-Policy, Permissions-Policy) via [next.config.ts](../next.config.ts)
-- 5 endpoints cron protégés par `CRON_SECRET` (voir §8)
-- `/api/health` pour monitoring externe
+- Security headers (CSP, HSTS, Referrer-Policy, Permissions-Policy) servis par Caddy
+- Endpoints cron protégés par `CRON_SECRET` (voir §8)
+- `/api/v1/health` pour monitoring externe
 
 ## 1. Provisioning VPS
 
@@ -109,7 +122,7 @@ Voir **[docs/ENV.md](./ENV.md)** pour le détail de chaque variable. Générer t
 
 ```bash
 cat <<EOF >> .env.production
-BETTER_AUTH_SECRET=$(openssl rand -base64 32)
+Dorloter__Security__Jwt__Secret=$(openssl rand -base64 48)
 POSTGRES_SUPERUSER_PASSWORD=$(openssl rand -base64 24)
 MIAOU_APP_PASSWORD=$(openssl rand -base64 24)
 MIAOU_ADMIN_PASSWORD=$(openssl rand -base64 24)
@@ -122,7 +135,7 @@ EOF
 Puis éditer à la main :
 - `DOMAIN`, `ACME_EMAIL`
 - Clés VAPID (`bun x web-push generate-vapid-keys`)
-- `NEXT_PUBLIC_MAPTILER_KEY`
+- `VITE_MAPTILER_KEY` (front)
 - `RESEND_API_KEY`, `RESEND_FROM_EMAIL`
 - `S3_BACKUP_*` (bucket OVH ou équivalent)
 
@@ -130,16 +143,15 @@ Puis éditer à la main :
 
 ```bash
 cd /opt/miaou
-bun prod:build     # ~3-5 min le premier coup
-bun prod:up        # démarre tout
-bun prod:migrate   # migrations Drizzle
-bun prod:init-roles # crée miaou_app / miaou_admin + grants
+docker compose -f docker-compose.prod.yml build   # ~3-5 min le premier coup (API + front Vite)
+docker compose -f docker-compose.prod.yml up -d   # démarre tout ; l'API applique les migrations SQL au démarrage
+bun prod:init-roles                               # crée miaou_app / miaou_admin + grants
 ```
 
 Caddy obtient automatiquement les certificats Let's Encrypt au premier hit HTTPS. Attendre ~10s puis tester :
 
 ```bash
-curl -s https://dorloter.fr/api/health
+curl -s https://dorloter.fr/api/v1/health
 # {"status":"ok","services":{"database":{...},"storage":{...}}}
 ```
 
@@ -293,7 +305,7 @@ df -h /var/lib/docker
 du -sh /opt/miaou/backups
 
 # Health app
-curl -s https://dorloter.fr/api/health | jq
+curl -s https://dorloter.fr/api/v1/health | jq
 ```
 
 ## 5. Incident : que faire si...
@@ -302,6 +314,6 @@ curl -s https://dorloter.fr/api/health | jq
 |---|---|---|
 | Site renvoie 502/503 | `docker compose logs app \| tail -50` | `bun prod:up --force-recreate app` |
 | Certificat TLS expiré | `docker compose logs caddy \| grep -i error` | Vérifier que le port 80 est ouvert (ACME HTTP-01) |
-| DB pleine | `docker compose exec postgres df -h` | Purger les sessions expirées, backup + vacuum |
+| DB pleine | `docker compose exec postgres df -h` | Purger les refresh tokens expirés, backup + vacuum |
 | MinIO refuse connexions | `docker compose logs minio` | Vérifier disque, `docker compose restart minio` |
-| Secret fuité (git, logs) | — | Rotation immédiate : nouveau secret dans `.env.production`, `bun prod:up --force-recreate`, invalider les sessions existantes (`DELETE FROM sessions`) |
+| Secret fuité (git, logs) | · | Rotation immédiate : nouveau secret dans `.env.production`, `docker compose -f docker-compose.prod.yml up -d --force-recreate`, invalider les refresh tokens existants (`DELETE FROM auth_refresh_tokens` ; la rotation du `Jwt__Secret` invalide aussi tous les access tokens en cours) |

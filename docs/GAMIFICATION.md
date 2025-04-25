@@ -71,7 +71,7 @@ Scope minimal pour valider que l'approche engage sans tomber dans les travers :
    - Sur les cartes de signalement / messages : mini-badge à côté du nom de l'auteur si palier Héros ou Sentinelle atteint
 5. **Admin-users** : colonne "Retrouvailles" ajoutée à la liste, tri possible
 
-**Effort estimé** : 1–2 jours dev (1 migration, 1 server action, 1 composant `UserBadge`, UI sur 3–4 emplacements).
+**Effort estimé** : 1-2 jours dev (1 migration SQL, 1 service/endpoint API, 1 composant `UserBadge`, UI sur 3-4 emplacements).
 
 ## Schéma DB suggéré
 
@@ -95,7 +95,7 @@ CREATE TABLE resolution_credits (
 );
 ```
 
-La résolution d'un signalement déclenche l'insertion de lignes dans `resolution_credits` pour chaque user concerné, puis un update de `users.resolved_count` via trigger ou server action.
+La résolution d'un signalement déclenche l'insertion de lignes dans `resolution_credits` pour chaque user concerné, puis un update de `users.resolved_count` via trigger SQL ou service applicatif (API).
 
 ## Mesurer le succès
 

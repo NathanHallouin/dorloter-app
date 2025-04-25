@@ -1,4 +1,17 @@
-# Hébergement professionnel & API partagée web/mobile
+# Hébergement professionnel & API partagée web/mobile (proposition historique)
+
+> **Contexte** : ce document proposait, à l'époque du monolithe **Next.js**, de
+> se doter d'une **API commune web + mobile**. Cette direction a depuis été
+> **réalisée**, mais différemment de ce qui est esquissé ici : l'API est un
+> service **NestJS / le service API** dédié (`apps/api`, routes `/api/v1`,
+> OpenAPI sur `/api/v1/openapi`), l'auth est en **JWT** (et non plus Better Auth
+> avec plugin `bearer`), le front web est une **SPA React + Vite** (`apps/web`)
+> et le mobile **Expo** consomme le client typé `packages/api-client`
+> (openapi-fetch). Les sections « conventions d'API », « stack mobile »,
+> « hébergement de production » et « souveraineté EU » restent largement
+> valables. En revanche tout ce qui concerne Server Actions, Better Auth,
+> Drizzle, Zod côté serveur, ou « faire émerger l'API depuis Next.js » est
+> **caduc**. Source de vérité du stack : **[CLAUDE.md](../CLAUDE.md)**.
 
 Document de proposition pour faire évoluer Dorloter d'une app Next.js mono-cible vers un produit **web + mobile** propre, avec une **API commune**, sans casser l'existant ni sortir du périmètre solo-dev.
 

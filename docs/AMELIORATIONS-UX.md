@@ -215,14 +215,14 @@ Sur les signalements, ne pas afficher le téléphone en clair → bouton « Cont
 
 ### 7.1. Images responsive et `loading="lazy"`
 
-- `next/image` avec tailles précises sur chaque card → économise des Mo
+- `<img srcset>` avec tailles précises sur chaque card → économise des Mo
 - Format AVIF ou WebP servi automatiquement
-- Placeholder `blur` généré au build (déjà supporté par Next.js)
+- Placeholder `blur` (LQIP) généré au build
 - Photos dans S3 stockées en plusieurs tailles (thumbnail 320px, medium 800px, full 1920px) — génération à l'upload, pas à la volée
 
 ### 7.2. Skeleton loaders, jamais de spinner plein écran
 
-À chaque navigation, afficher la structure de la page avec des blocs gris animés. Plus rapide perçu que le spinner. Next.js 16 + React Server Components + `loading.tsx` rendent ça trivial.
+À chaque navigation, afficher la structure de la page avec des blocs gris animés. Plus rapide perçu que le spinner. Avec React Router (loaders + Suspense) et les états `isPending` de TanStack Query, c'est trivial à mettre en place dans la SPA Vite.
 
 ### 7.3. PWA solide pour la version web
 

@@ -1,6 +1,17 @@
-# Système de messagerie temps réel — design
+# Système de messagerie · design (historique)
 
-Messagerie 1-to-1 entre particuliers et refuges, en **temps réel** avec réactions aux messages, indicateurs de frappe et accusés de lecture.
+> **Contexte** : ce document décrit un design **temps réel SSE** conçu pour
+> l'ancien monolithe **Next.js** (event bus in-process Node + Server Actions).
+> L'implémentation retenue dans l'**API** (`apps/api`, module `Messaging`)
+> est plus simple : conversations / messages en **polling** (rafraîchissement
+> côté client toutes les ~5 s, cf. `docs/COMPTES-TEST.md`). Les sections sur les
+> **flux utilisateur**, le **modèle de données** (conversations, messages,
+> réactions) et les **règles métier** restent pertinentes ; en revanche tout ce
+> qui concerne SSE, `EventSource`, l'event bus Node, les Server Actions et le
+> « process Next.js » décrit un mécanisme non retenu. Source de vérité du
+> stack : **[CLAUDE.md](../CLAUDE.md)**.
+
+Messagerie 1-to-1 entre particuliers et refuges, avec réactions aux messages, indicateurs de frappe et accusés de lecture.
 
 ## Objectifs
 
