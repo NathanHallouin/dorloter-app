@@ -1,28 +1,37 @@
+# Contexte de build Docker (build context = racine du monorepo, ex. image web).
 node_modules
-.next
-.next-dev
+**/node_modules
 .git
 .github
 .vscode
 .idea
 .claude
+
+# Artefacts de build / cache
+**/dist
+**/bin
+**/obj
+**/.turbo
+**/.vite
+.turbo
+
+# Env & secrets
 .env.local
 .env.production
 .env*.local
+
+# Logs & divers
 **/*.log
 npm-debug.log*
-Dockerfile
-.dockerignore
-docker-compose.yml
-docker-compose.prod.yml
-Caddyfile
 backups
-apps/web/tests/e2e/playwright-report
-apps/web/tests/e2e/test-results
-tests/e2e/playwright-report
-tests/e2e/test-results
-**/Dockerfile
 coverage
-*.md
+*.tsbuildinfo
 .DS_Store
-tsconfig.tsbuildinfo
+
+# Fichiers infra inutiles dans une image (chemins racine uniquement :
+# apps/web/Caddyfile.static est requis par le runtime de l'image web).
+**/Dockerfile
+.dockerignore
+/docker-compose*.yml
+/Caddyfile
+/Caddyfile.cutover

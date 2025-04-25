@@ -1,50 +1,50 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Caddy — reverse proxy + HTTPS automatique.
+# Caddy edge : reverse proxy + HTTPS automatique.
 #
-# Pour un domaine public (ex. miaou.fr) : Let's Encrypt via ACME HTTP-01.
-# Pour un domaine .localhost : Caddy utilise son CA interne (cert auto-signé,
-# à accepter une fois dans le navigateur). Le comportement dépend juste de
-# la variable d'env DOMAIN — pas de config à toucher pour switch dev ↔ prod.
+# Topologie :
+#   - SPA Vite (statique) servie par le conteneur `web` (Caddy interne :80).
+#   - Coeur d'API : NestJS (`api:8080`) sous /api/v1/*.
+#   - Images : MinIO sur cdn.{$DOMAIN}.
 #
-# Pré-requis côté DNS (OVH → zone DNS du domaine) :
-#   miaou.fr       A     <IP publique du VPS>
-#   cdn.miaou.fr   A     <IP publique du VPS>
+# Domaine public : Let's Encrypt via ACME HTTP-01. Domaine .localhost : CA
+# interne de Caddy. Le comportement depend de la variable d'env DOMAIN.
 #
-# Ajoutez dans /etc/hosts pour tester en local (optionnel, si DOMAIN=miaou.localhost) :
-#   127.0.0.1  miaou.localhost cdn.miaou.localhost
+# DNS (zone du domaine) :
+#   {$DOMAIN}       A  <IP publique du VPS>
+#   cdn.{$DOMAIN}   A  <IP publique du VPS>
 # ─────────────────────────────────────────────────────────────────────────────
-
 {
-	# Email pour Let's Encrypt. Ignoré pour .localhost.
-	email {$ACME_EMAIL:admin@miaou.cat}
+	# Email pour Let's Encrypt. Ignore pour .localhost.
+	email {$ACME_EMAIL:admin@dorloter.fr}
 }
 
-# ─── App Next.js ─────────────────────────────────────────────────────────────
 {$DOMAIN} {
-	# SSE messaging : désactive buffering + encode, stream direct client
-	@sse path /api/messages/stream
-	handle @sse {
-		reverse_proxy app:3000 {
-			flush_interval -1
-			transport http {
-				read_timeout 3600s
-				write_timeout 3600s
-			}
-		}
-	}
-
 	encode zstd gzip
 
-	# Timeouts généreux pour les Server Actions qui uploadent des photos
-	# ou envoient des emails en synchrone.
-	reverse_proxy app:3000 {
-		transport http {
-			read_timeout 120s
-			write_timeout 120s
-		}
+	# TODO(cutover) : uploads et gifs ne sont pas encore portes sur l'API
+	# (ils etaient servis par l'ancien front Next.js, retire). On repond 501
+	# explicite tant que ces endpoints n'existent pas, plutot qu'un 404 ambigu.
+	# Cote produit : flux d'upload utilise uniquement par l'app mobile (presign
+	# S3) ; la SPA web n'en depend pas.
+	handle /api/v1/uploads/* {
+		respond "Not Implemented: uploads a porter sur l'API" 501
+	}
+	handle /api/v1/gifs/* {
+		respond "Not Implemented: gifs a porter sur l'API" 501
 	}
 
-	# Headers de sécurité (defense-in-depth)
+	# Coeur du domaine : API.
+	handle /api/v1/* {
+		reverse_proxy api:8080
+	}
+
+	# Front SPA (statique). Le fallback routing client (index.html) est gere
+	# par le Caddy interne du conteneur web.
+	handle {
+		reverse_proxy web:80
+	}
+
+	# Headers de securite (defense-in-depth).
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
@@ -60,18 +60,16 @@
 	}
 }
 
-# ─── CDN images (MinIO public bucket) ────────────────────────────────────────
+# ─── CDN images (bucket public MinIO) ────────────────────────────────────────
 cdn.{$DOMAIN} {
 	encode zstd gzip
 
 	reverse_proxy minio:9000 {
-		# Retire les en-têtes de la console MinIO qui fuient l'IP interne.
 		header_down -Server
 	}
 
 	header {
-		# Cache agressif côté client : les URLs de photos sont immuables
-		# (chaque upload a un nom unique).
+		# Cache agressif : les URLs de photos sont immuables (nom unique par upload).
 		Cache-Control "public, max-age=31536000, immutable"
 		X-Content-Type-Options "nosniff"
 		-Server
