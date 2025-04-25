@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Front React (Vite, sans Next.js) consommant l'API Java Dorloter.",
+  "description": "Front React (Vite SPA) consommant l'API Dorloter via /api/v1.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

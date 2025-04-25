@@ -27,8 +27,8 @@ fi
 export COMPOSE_PROJECT_NAME=miaou-prod
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
 
-echo "📦 Build image app (sur le VPS)…"
-$COMPOSE build app
+echo "📦 Build images web (SPA Vite) + api  (sur le VPS)…"
+$COMPOSE build web api
 
 echo "🗄  Services d'infra up (postgres + minio)…"
 $COMPOSE up -d postgres minio
@@ -47,21 +47,17 @@ for i in {1..30}; do
   fi
 done
 
-echo "🔄 Migrations Drizzle…"
-# `run --rm` lance un container éphémère avec la nouvelle image — ne touche
-# pas au container app courant tant que la migration n'a pas abouti.
-$COMPOSE run --rm \
-  -e DATABASE_URL="${DATABASE_URL_MIGRATIONS:-$DATABASE_URL}" \
-  app bun x drizzle-kit migrate
-
-echo "🔐 Grants PG (si nouvelle colonne a été ajoutée)…"
+echo "🔐 Grants PG (rôles miaou_app / miaou_admin)…"
 ./scripts/prod-init-roles.sh
 
-echo "🚀 Recreate app + caddy avec la nouvelle image…"
-$COMPOSE up -d --force-recreate --no-deps app caddy
+# Les migrations de schéma sont appliquées par l'API au démarrage
+# (DatabaseMigrator, fichiers .sql embarqués) via le rôle DDL
+# ConnectionStrings__Migrations. Pas d'étape de migration séparée ici.
+echo "🚀 Recreate web + api + caddy avec les nouvelles images…"
+$COMPOSE up -d --force-recreate --no-deps web api caddy
 
 echo "🧹 Nettoyage des images Docker orphelines…"
 docker image prune -f --filter "until=168h" > /dev/null || true
 
 echo "✅ Déploiement terminé — $(date -Iseconds)"
-echo "   Healthcheck : $(curl -s -o /dev/null -w "%{http_code}" https://${DOMAIN}/api/health || echo unreachable)"
+echo "   Healthcheck : $(curl -s -o /dev/null -w "%{http_code}" https://${DOMAIN}/api/v1/health || echo unreachable)"
