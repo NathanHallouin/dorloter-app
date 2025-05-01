@@ -64,5 +64,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            S3_PUBLIC_URL=https://cdn.example.com/miaou-photos
+            S3_PUBLIC_URL=https://cdn.example.com/dorloter-photos
             NEXT_PUBLIC_APP_URL=https://example.com

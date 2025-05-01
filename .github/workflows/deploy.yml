@@ -27,7 +27,7 @@ jobs:
           command_timeout: 15m
           script: |
             set -euo pipefail
-            cd /opt/miaou
+            cd /opt/dorloter
             echo "📥 git pull..."
             git fetch --prune
             git checkout main
