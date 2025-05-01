@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Miaou — création/rotation des rôles Postgres en prod.
+# Dorloter — création/rotation des rôles Postgres en prod.
 #
 # À exécuter :
 #   - une fois après le premier `prod:up`
 #   - après chaque migration qui ajoute une colonne à users / shelters
 #     (pour que les grants column-level couvrent les nouvelles colonnes)
-#   - si vous rotatez MIAOU_APP_PASSWORD / MIAOU_ADMIN_PASSWORD
+#   - si vous rotatez DORLOTER_APP_PASSWORD / DORLOTER_ADMIN_PASSWORD
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -25,20 +25,20 @@ set -a
 source .env.production
 set +a
 
-: "${MIAOU_APP_PASSWORD:?MIAOU_APP_PASSWORD manquant dans .env.production}"
-: "${MIAOU_ADMIN_PASSWORD:?MIAOU_ADMIN_PASSWORD manquant dans .env.production}"
+: "${DORLOTER_APP_PASSWORD:?DORLOTER_APP_PASSWORD manquant dans .env.production}"
+: "${DORLOTER_ADMIN_PASSWORD:?DORLOTER_ADMIN_PASSWORD manquant dans .env.production}"
 
-export COMPOSE_PROJECT_NAME=miaou-prod
+export COMPOSE_PROJECT_NAME=dorloter-prod
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
-PG_USER="${POSTGRES_SUPERUSER:-miaou}"
+PG_USER="${POSTGRES_SUPERUSER:-dorloter}"
 
 echo "🔐 Application des grants (scripts/init-db-roles.sql)…"
-$COMPOSE exec -T postgres psql -U "$PG_USER" -d miaou < scripts/init-db-roles.sql
+$COMPOSE exec -T postgres psql -U "$PG_USER" -d dorloter < scripts/init-db-roles.sql
 
-echo "🔑 Rotation des mots de passe miaou_app / miaou_admin…"
-$COMPOSE exec -T postgres psql -U "$PG_USER" -d miaou <<SQL
-ALTER ROLE miaou_app WITH PASSWORD '${MIAOU_APP_PASSWORD}';
-ALTER ROLE miaou_admin WITH PASSWORD '${MIAOU_ADMIN_PASSWORD}';
+echo "🔑 Rotation des mots de passe dorloter_app / dorloter_admin…"
+$COMPOSE exec -T postgres psql -U "$PG_USER" -d dorloter <<SQL
+ALTER ROLE dorloter_app WITH PASSWORD '${DORLOTER_APP_PASSWORD}';
+ALTER ROLE dorloter_admin WITH PASSWORD '${DORLOTER_ADMIN_PASSWORD}';
 SQL
 
 echo "✅ Rôles prêts"

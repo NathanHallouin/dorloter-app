@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Miaou — backup quotidien Postgres + MinIO vers un bucket S3-compatible
+# Dorloter — backup quotidien Postgres + MinIO vers un bucket S3-compatible
 #
 # Destinataire par défaut : OVH Object Storage (standard) ou Cold Archive.
 # Fonctionne aussi avec Scaleway, Backblaze B2, R2 ou tout autre endpoint S3.
@@ -9,7 +9,7 @@
 #   ./scripts/backup.sh
 #
 # Cron recommandé (crontab -e sur le VPS) :
-#   0 3 * * *  cd /opt/miaou && ./scripts/backup.sh >> /var/log/miaou-backup.log 2>&1
+#   0 3 * * *  cd /opt/dorloter && ./scripts/backup.sh >> /var/log/dorloter-backup.log 2>&1
 #
 # Pré-requis :
 #   - .env.production rempli (S3_BACKUP_* configurés)
@@ -46,16 +46,16 @@ BACKUP_ROOT="./backups"
 BACKUP_DIR="$BACKUP_ROOT/$TS"
 mkdir -p "$BACKUP_DIR"
 
-export COMPOSE_PROJECT_NAME=miaou-prod
+export COMPOSE_PROJECT_NAME=dorloter-prod
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
 
 # ─── Dump Postgres ──────────────────────────────────────────────────────────
 echo "📦 Dump Postgres…"
 $COMPOSE exec -T postgres pg_dump \
-  -U "${POSTGRES_SUPERUSER:-miaou}" \
+  -U "${POSTGRES_SUPERUSER:-dorloter}" \
   --no-owner \
   --no-privileges \
-  miaou \
+  dorloter \
   | gzip -9 > "$BACKUP_DIR/db.sql.gz"
 
 PG_SIZE=$(du -h "$BACKUP_DIR/db.sql.gz" | cut -f1)
@@ -66,7 +66,7 @@ echo "📦 Archive MinIO…"
 # Container alpine temporaire : monte le volume MinIO en read-only + le
 # dossier de backup. Pas besoin d'arrêter MinIO : les fichiers uploadés
 # sont immuables (chaque upload a un nom unique).
-VOLUME_NAME="miaou-prod_miniodata"
+VOLUME_NAME="dorloter-prod_miniodata"
 docker run --rm \
   -v "${VOLUME_NAME}:/data:ro" \
   -v "$ROOT_DIR/$BACKUP_DIR:/backup" \

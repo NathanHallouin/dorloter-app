@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Miaou — script de déploiement exécuté sur le VPS (par GitHub Actions via SSH
+# Dorloter — script de déploiement exécuté sur le VPS (par GitHub Actions via SSH
 # ou manuellement).
 #
 # Préconditions (à satisfaire une seule fois au setup initial) :
 #   - Docker + docker compose plugin v2 installés
-#   - /opt/miaou contient un clone git du repo
-#   - /opt/miaou/.env.production rempli (voir docs/ENV.md)
+#   - /opt/dorloter contient un clone git du repo
+#   - /opt/dorloter/.env.production rempli (voir docs/ENV.md)
 #   - Rôles PG créés (via bun prod:init-roles)
 #
 # Idempotent : peut être relancé autant de fois que nécessaire, garanti
@@ -24,7 +24,7 @@ if [[ ! -f .env.production ]]; then
   exit 1
 fi
 
-export COMPOSE_PROJECT_NAME=miaou-prod
+export COMPOSE_PROJECT_NAME=dorloter-prod
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
 
 echo "📦 Build images web (SPA Vite) + api  (sur le VPS)…"
@@ -36,7 +36,7 @@ $COMPOSE up -d postgres minio
 # Attente que PG réponde
 echo "⏳ Attente de Postgres…"
 for i in {1..30}; do
-  if $COMPOSE exec -T postgres pg_isready -U "${POSTGRES_SUPERUSER:-miaou}" -d miaou > /dev/null 2>&1; then
+  if $COMPOSE exec -T postgres pg_isready -U "${POSTGRES_SUPERUSER:-dorloter}" -d dorloter > /dev/null 2>&1; then
     echo "   → prêt"
     break
   fi
@@ -47,7 +47,7 @@ for i in {1..30}; do
   fi
 done
 
-echo "🔐 Grants PG (rôles miaou_app / miaou_admin)…"
+echo "🔐 Grants PG (rôles dorloter_app / dorloter_admin)…"
 ./scripts/prod-init-roles.sh
 
 # Les migrations de schéma sont appliquées par l'API au démarrage
