@@ -1,0 +1,18 @@
+# Normalisation des fins de ligne : LF partout (cohérent Linux/macOS/WSL/Windows).
+* text=auto eol=lf
+
+# Scripts shell : toujours LF (sinon ils ne s'exécutent pas).
+*.sh text eol=lf
+
+# Binaires (pas de normalisation ni de diff texte).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Fichiers générés : exclus des stats de langage et repliés dans les diffs.
+bun.lock linguist-generated=true
+packages/api-client/src/types.gen.ts linguist-generated=true

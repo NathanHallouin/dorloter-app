@@ -9,10 +9,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
+    "dev": "bun run --filter='@dorloter/web' dev",
+    "build": "bun run --filter='*' build",
+    "lint": "bun run --filter='*' lint",
+    "typecheck": "bun run --filter='*' typecheck",
     "db:init-roles": "docker compose -f docker-compose.yml exec -T postgres psql -U dorloter -d dorloter < scripts/init-db-roles.sql",
     "api:types": "bun scripts/generate-api-types.ts",
     "mobile:assets": "bun scripts/generate-mobile-assets.ts",
@@ -29,7 +29,6 @@
   "devDependencies": {
     "openapi-typescript": "^7.13.0",
     "sharp": "^0.34.5",
-    "turbo": "^2.9.16",
     "typescript": "^6.0.3"
   },
   "overrides": {

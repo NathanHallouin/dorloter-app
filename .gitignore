@@ -1,49 +1,29 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies (any workspace level)
+# Dépendances
 node_modules/
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-coverage/
-
-# next.js (any workspace level)
-.next/
-out/
-
-# turbo cache
-.turbo/
-
-# production
+# Sorties de build / caches
+dist/
 build/
+out/
+.vite/
+*.tsbuildinfo
 
-# misc
+# NestJS (filet ; apps/api a aussi son propre .gitignore)
+bin/
+obj/
+
+# Tests / couverture
+coverage/
+test-results/
+
+# Env & secrets (les fichiers *.example sont versionnés)
+.env
+.env.*
+!.env*.example
+
+# OS / éditeurs
 .DS_Store
 *.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-!.env.local.example
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# playwright
-playwright-report/
-test-results/
+# Logs
+*.log
