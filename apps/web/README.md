@@ -1,61 +1,68 @@
-# Dorloter · front React (Vite)
+# Dorloter · front web (React + Vite)
 
-Front **React « brut » (sans Next.js)** qui consomme l'**API Java** (`/api/v1`).
-SPA Vite + React + TypeScript + React Router + TanStack Query + Tailwind v4.
+SPA grand public du monorepo : catalogue d'adoption, perdus / trouvés, annuaire
+pensions. **React 19 + Vite + TypeScript**, consomme l'API (`apps/api`)
+via `/api/v1`. Build statique (`dist/`) servi par Caddy en prod.
 
-## Lancer
+## Stack
 
-```bash
-# 1. Démarrer l'API Java (autre terminal)
-cd ../api && ./mvnw spring-boot:run        # http://localhost:8080
+- **React 19 + Vite** · SPA TypeScript
+- **React Router** · routing client
+- **TanStack Query** · cache et état serveur
+- **Tailwind CSS v4** · plugin `@tailwindcss/vite`, config CSS-first via `@theme`
+- **MapLibre** (`react-map-gl` + `maplibre-gl`) · carte des signalements, tuiles OpenFreeMap
+- **Auth JWT** · access + refresh en localStorage, retry auto sur 401 après refresh
 
-# 2. Démarrer le front
-bun install                                # (à la racine du monorepo)
-bun --cwd apps/web run dev             # http://localhost:5173
-```
-
-En dev, Vite proxifie `/api` vers `http://localhost:8080` (cf. `vite.config.ts`),
-donc aucun souci de CORS. En prod, définir `VITE_API_URL` sur l'URL de l'API.
-
-## Commandes
-
-```bash
-bun --cwd apps/web run dev        # serveur de dev
-bun --cwd apps/web run build      # typecheck + build prod (dist/)
-bun --cwd apps/web run preview    # prévisualiser le build
-bun --cwd apps/web run typecheck  # tsc --noEmit
-```
-
-## Architecture
+## Structure
 
 ```
 src/
-├── api/          # client HTTP (JWT + refresh auto sur 401) + modules par domaine + types
-├── auth/         # AuthContext (login/register/logout, /me)
-├── components/   # Layout, ProtectedRoute, PetCard
-├── pages/        # Accueil, Catalogue, Détail, Perdus-trouvés, Pensions,
-│                 # Favoris, Candidatures, Login, Register, 404
+├── api/          # client HTTP (JWT + refresh auto) + modules par domaine + types
+├── auth/         # AuthContext (login / register / logout, /me)
+├── components/   # Layout, ProtectedRoute, PetCard, ...
+├── pages/        # accueil, catalogue, fiche animal, perdus-trouvés, pensions,
+│                 #   favoris, candidatures, login, register, 404
+├── ui/           # primitives UI
 ├── lib/          # QueryClient
 └── main.tsx      # providers (Query + Router + Auth)
 ```
 
-- **Auth JWT** : `access` + `refresh` en localStorage ; le client retente une fois
-  après refresh sur 401 (`src/api/client.ts`).
-- **Pas de Supabase** : toutes les données viennent de l'API Java. Le format de
-  réponse (`{ data }` / `{ data, pagination }` / `{ error }`) est géré côté client.
+## Prérequis
+
+- **Bun** (gestion des dépendances · installer depuis la racine : `bun install`)
+- L'**API** lancée sur `:8080` (cf. [`../api/README.md`](../api/README.md))
+
+## Commandes
+
+```bash
+cd apps/web
+bun dev            # serveur de dev Vite (http://localhost:5173)
+bun run build      # typecheck (tsc --noEmit) + build prod (dist/)
+bun run preview    # prévisualiser le build
+bun run typecheck  # tsc --noEmit
+```
+
+En dev, Vite proxifie `/api` vers l'API (cf. `vite.config.ts`), donc pas de souci
+de CORS.
+
+## Variables d'environnement
+
+```env
+VITE_API_PROXY=http://localhost:8080   # cible du proxy /api en dev
+VITE_API_URL=                          # URL de l'API en prod (si pas de proxy)
+VITE_MAP_STYLE=                        # style de tuiles MapLibre (défaut OpenFreeMap, sans clé)
+```
 
 ## Écrans
 
 Publics : accueil, catalogue d'adoption (filtres + pagination cursor), fiche animal,
-perdus-trouvés (**carte MapLibre** + liste), **fiche signalement avec ses
-correspondances** (score + distance, met en valeur le matching géo de l'API),
-annuaire pensions. Authentifiés : favoris, candidatures, dépôt de candidature et
-mise en favori depuis la fiche animal, **signalement d'un animal** (formulaire avec
-sélection du lieu sur la carte).
+perdus-trouvés (carte MapLibre + liste), fiche signalement avec ses correspondances
+(score + distance, met en valeur le matching géo de l'API), annuaire pensions.
+Authentifiés : favoris, candidatures, dépôt de candidature et mise en favori depuis
+la fiche animal, signalement d'un animal (sélection du lieu sur la carte).
 
-Cartographie : `react-map-gl` + `maplibre-gl`, tuiles OpenFreeMap (gratuit, sans clé,
-surchargeable via `VITE_MAP_STYLE`). Le bundle maplibre est volumineux : à lazy-loader
-(`React.lazy` sur les pages carte) si besoin.
+## Liens
 
-À étendre (back-office, messagerie, notifications in-app...) : le client API et le
-routing sont prêts pour brancher de nouveaux écrans.
+- Racine du monorepo : [`../../README.md`](../../README.md)
+- API : [`../api/README.md`](../api/README.md)
+- Documentation : [`../../docs/`](../../docs/)

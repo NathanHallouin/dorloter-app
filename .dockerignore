@@ -28,6 +28,9 @@ coverage
 *.tsbuildinfo
 .DS_Store
 
+# Documentation (inutile dans les images)
+docs
+
 # Fichiers infra inutiles dans une image (chemins racine uniquement :
 # apps/web/Caddyfile.static est requis par le runtime de l'image web).
 **/Dockerfile
