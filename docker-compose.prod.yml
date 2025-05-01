@@ -13,13 +13,13 @@ services:
     image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_SUPERUSER:-miaou}
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-dorloter}
       POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD in .env.production}
-      POSTGRES_DB: miaou
+      POSTGRES_DB: dorloter
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER:-miaou} -d miaou"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER:-dorloter} -d dorloter"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,8 +52,8 @@ services:
     entrypoint: >
       /bin/sh -c "
       mc alias set local http://minio:9000 ${S3_ACCESS_KEY} ${S3_SECRET_KEY};
-      mc mb --ignore-existing local/${S3_BUCKET:-miaou-photos};
-      mc anonymous set download local/${S3_BUCKET:-miaou-photos};
+      mc mb --ignore-existing local/${S3_BUCKET:-dorloter-photos};
+      mc anonymous set download local/${S3_BUCKET:-dorloter-photos};
       "
     restart: "no"
     networks: [internal]
@@ -69,10 +69,10 @@ services:
     environment:
       # Role applicatif a privileges restreints (cf. scripts/init-db-roles.sql).
       # search_path dorloter_api,public : PostGIS vit dans public (partage).
-      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=miaou;Username=miaou_app;Password=${MIAOU_APP_PASSWORD:?set MIAOU_APP_PASSWORD};Search Path=dorloter_api,public"
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=dorloter;Username=dorloter_app;Password=${DORLOTER_APP_PASSWORD:?set DORLOTER_APP_PASSWORD};Search Path=dorloter_api,public"
       # Migrations DDL : role dedie (le superuser). Optionnel ; si absent,
       # AutoMigrate utilise la connexion Default.
-      ConnectionStrings__Migrations: "Host=postgres;Port=5432;Database=miaou;Username=${POSTGRES_SUPERUSER:-miaou};Password=${POSTGRES_SUPERUSER_PASSWORD};Search Path=dorloter_api,public"
+      ConnectionStrings__Migrations: "Host=postgres;Port=5432;Database=dorloter;Username=${POSTGRES_SUPERUSER:-dorloter};Password=${POSTGRES_SUPERUSER_PASSWORD};Search Path=dorloter_api,public"
       Dorloter__Security__Jwt__Secret: "${API_JWT_SECRET:?set API_JWT_SECRET in .env.production}"
       Dorloter__Security__Jwt__Issuer: "dorloter-api"
       Dorloter__Security__Jwt__AccessTokenTtl: "00:15:00"

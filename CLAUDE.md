@@ -384,7 +384,7 @@ bun api:types                                 # régénère packages/api-client/
 
 ```env
 # API (apps/api) · en dev, les défauts sont dans appsettings.json (DB sur :5438)
-ConnectionStrings__Default=Host=localhost;Port=5438;Database=miaou;Username=miaou;Password=miaou;Search Path=dorloter_api,public
+ConnectionStrings__Default=Host=localhost;Port=5438;Database=dorloter;Username=dorloter;Password=dorloter;Search Path=dorloter_api,public
 Dorloter__Security__Jwt__Secret=...            # >= 32 octets (openssl rand -base64 48)
 Dorloter__Security__Jwt__Issuer=dorloter-api
 Dorloter__Security__CorsAllowedOrigins=http://localhost:5173

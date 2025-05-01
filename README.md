@@ -46,7 +46,7 @@ docker compose up -d
 
 Démarre :
 
-- **PostgreSQL 16 + PostGIS** sur `localhost:5438` (base `miaou`, user/mdp `miaou` / `miaou`)
+- **PostgreSQL 16 + PostGIS** sur `localhost:5438` (base `dorloter`, user/mdp `dorloter` / `dorloter`)
 - **MinIO** (stockage S3) sur `localhost:9000`, console sur `localhost:9001` (`minioadmin` / `minioadmin`)
 
 ### 2. API 

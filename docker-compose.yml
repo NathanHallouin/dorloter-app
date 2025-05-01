@@ -1,11 +1,15 @@
+# Stack de dev : Postgres/PostGIS + MinIO. Nom de projet figé pour des noms de
+# conteneurs stables (dorloter-postgres-1, etc.), independamment du dossier.
+name: dorloter
+
 services:
   postgres:
     image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
-      POSTGRES_USER: miaou
-      POSTGRES_PASSWORD: miaou
-      POSTGRES_DB: miaou
+      POSTGRES_USER: dorloter
+      POSTGRES_PASSWORD: dorloter
+      POSTGRES_DB: dorloter
     ports:
       - "5438:5432"
     volumes:
@@ -32,8 +36,8 @@ services:
       /bin/sh -c "
       sleep 3;
       mc alias set local http://minio:9000 minioadmin minioadmin;
-      mc mb local/miaou-photos --ignore-existing;
-      mc anonymous set download local/miaou-photos;
+      mc mb local/dorloter-photos --ignore-existing;
+      mc anonymous set download local/dorloter-photos;
       "
 
 volumes:
