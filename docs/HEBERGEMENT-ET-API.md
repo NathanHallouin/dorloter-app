@@ -137,7 +137,7 @@ Aujourd'hui : un seul repo Next.js. À l'arrivée du mobile, deux options :
 ### Option A — Monorepo Turborepo (recommandé)
 
 ```
-miaou/
+dorloter/
 ├── apps/
 │   ├── web/                        # Next.js 16 actuel (tel quel, déplacé)
 │   └── mobile/                     # Expo + React Native (nouveau)
@@ -165,7 +165,7 @@ miaou/
 
 ### Option B — Repo séparé pour le mobile
 
-Si la migration monorepo te paraît trop lourde, garde Next.js tel quel et crée un repo `miaou-mobile` à côté. Le contrat partagé (types, validators) est publié comme package npm privé (GitHub Packages, gratuit) et consommé par les deux.
+Si la migration monorepo te paraît trop lourde, garde Next.js tel quel et crée un repo `dorloter-mobile` à côté. Le contrat partagé (types, validators) est publié comme package npm privé (GitHub Packages, gratuit) et consommé par les deux.
 
 **Inconvénient** : friction sur les changements de contrat (publish + bump dans 2 repos). À éviter à long terme.
 

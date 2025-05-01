@@ -56,19 +56,19 @@ Le projet utilise trois rôles Postgres distincts pour la défense en profondeur
 
 | Variable | Dev | Prod | Rôle |
 |---|---|---|---|
-| `DATABASE_URL` | `miaou_app:miaou_app@localhost:5438` | `miaou_app:<pass>@postgres:5432` | App publique (CRUD restreint : pas d'UPDATE sur `users.role`, `shelters.is_verified`, etc.) |
-| `DATABASE_URL_ADMIN` | `miaou_admin:miaou_admin@localhost:5438` | `miaou_admin:<pass>@postgres:5432` | Opérations platform_admin (écritures privilégiées) |
-| `DATABASE_URL_MIGRATIONS` | `miaou:miaou@localhost:5438` | `miaou:<pass>@postgres:5432` | Rôle DDL · migrations SQL embarquées de l'API (appliquées au démarrage). Côté NestJS : `ConnectionStrings__Migrations` |
+| `DATABASE_URL` | `dorloter_app:dorloter_app@localhost:5438` | `dorloter_app:<pass>@postgres:5432` | App publique (CRUD restreint : pas d'UPDATE sur `users.role`, `shelters.is_verified`, etc.) |
+| `DATABASE_URL_ADMIN` | `dorloter_admin:dorloter_admin@localhost:5438` | `dorloter_admin:<pass>@postgres:5432` | Opérations platform_admin (écritures privilégiées) |
+| `DATABASE_URL_MIGRATIONS` | `dorloter:dorloter@localhost:5438` | `dorloter:<pass>@postgres:5432` | Rôle DDL · migrations SQL embarquées de l'API (appliquées au démarrage). Côté NestJS : `ConnectionStrings__Migrations` |
 
 Générer les mots de passe prod :
 
 ```bash
 openssl rand -base64 24    # POSTGRES_SUPERUSER_PASSWORD
-openssl rand -base64 24    # MIAOU_APP_PASSWORD
-openssl rand -base64 24    # MIAOU_ADMIN_PASSWORD
+openssl rand -base64 24    # DORLOTER_APP_PASSWORD
+openssl rand -base64 24    # DORLOTER_ADMIN_PASSWORD
 ```
 
-> En prod, les `miaou_app` / `miaou_admin` sont créés par `bun prod:init-roles` qui lit ces variables et les applique via `ALTER ROLE`.
+> En prod, les `dorloter_app` / `dorloter_admin` sont créés par `bun prod:init-roles` qui lit ces variables et les applique via `ALTER ROLE`.
 
 ### 2. Authentification (JWT, API)
 
@@ -90,8 +90,8 @@ En dev, MinIO local sert de S3. En prod, MinIO auto-hébergé sur le même VPS, 
 | `S3_ENDPOINT` | `http://localhost:9000` | *(non défini, géré par le compose : `http://minio:9000`)* |
 | `S3_ACCESS_KEY` | `minioadmin` | `openssl rand -hex 12` |
 | `S3_SECRET_KEY` | `minioadmin` | `openssl rand -hex 24` |
-| `S3_BUCKET` | `miaou-photos` | `miaou-photos` |
-| `S3_PUBLIC_URL` | `http://localhost:9000/miaou-photos` | *(géré par le compose : `https://cdn.dorloter.fr/miaou-photos`)* |
+| `S3_BUCKET` | `dorloter-photos` | `dorloter-photos` |
+| `S3_PUBLIC_URL` | `http://localhost:9000/dorloter-photos` | *(géré par le compose : `https://cdn.dorloter.fr/dorloter-photos`)* |
 
 ### 4. Cartographie — MapTiler
 
@@ -144,14 +144,14 @@ RESEND_FROM_EMAIL=Dorloter <noreply@dorloter.fr>
 
 Cible par défaut : OVH Object Storage (bucket Standard ou Cold Archive).
 
-1. Console OVH → Public Cloud → Object Storage → créer un bucket `miaou-backups`
+1. Console OVH → Public Cloud → Object Storage → créer un bucket `dorloter-backups`
 2. Users & Roles → créer un user → S3 credentials → copier access key + secret
 3. Remplir `.env.production` :
 
 ```env
 S3_BACKUP_ENDPOINT=https://s3.gra.io.cloud.ovh.net
 S3_BACKUP_REGION=gra
-S3_BACKUP_BUCKET=miaou-backups
+S3_BACKUP_BUCKET=dorloter-backups
 S3_BACKUP_ACCESS_KEY=...
 S3_BACKUP_SECRET_KEY=...
 ```
@@ -211,8 +211,8 @@ Caddy obtient les certificats automatiquement au premier hit HTTPS.
 cat <<EOF
 BETTER_AUTH_SECRET=$(openssl rand -base64 32)
 POSTGRES_SUPERUSER_PASSWORD=$(openssl rand -base64 24)
-MIAOU_APP_PASSWORD=$(openssl rand -base64 24)
-MIAOU_ADMIN_PASSWORD=$(openssl rand -base64 24)
+DORLOTER_APP_PASSWORD=$(openssl rand -base64 24)
+DORLOTER_ADMIN_PASSWORD=$(openssl rand -base64 24)
 S3_ACCESS_KEY=$(openssl rand -hex 12)
 S3_SECRET_KEY=$(openssl rand -hex 24)
 EOF

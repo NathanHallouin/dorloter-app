@@ -203,7 +203,7 @@ Tous les endpoints protégés par `CRON_SECRET` (token via `?token=xxx` ou heade
 ### 6.3 Backups
 - [x] Backup quotidien Postgres + volume MinIO via [scripts/backup.sh](scripts/backup.sh) : `pg_dump | gzip` + `tar` du volume, upload vers bucket S3 compatible (OVH Object Storage par défaut)
 - [x] Rétention 7 derniers jours en local + rétention côté bucket via lifecycle rule configurée dans la console OVH (30 jours recommandés)
-- [x] Restauration documentée : cron `0 3 * * * ./scripts/backup.sh`, restore = `gunzip db.sql.gz | psql` + `tar xf minio.tar -C /var/lib/docker/volumes/miaou-prod_miniodata/_data`
+- [x] Restauration documentée : cron `0 3 * * * ./scripts/backup.sh`, restore = `gunzip db.sql.gz | psql` + `tar xf minio.tar -C /var/lib/docker/volumes/dorloter-prod_miniodata/_data`
 
 ---
 
@@ -249,7 +249,7 @@ Stack et runbook livrés dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Le provi
 - [x] Variables d'environnement en secrets : `.env.production` jamais commit (dans `.gitignore`), secrets GitHub Actions pour SSH/VPS, `CRON_SECRET` pour les endpoints cron, rotation documentée dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 **Bonus défense-en-profondeur livré au-delà de la roadmap** :
-- 3 rôles PG distincts (`miaou_app` / `miaou_admin` / superuser migrations) avec grants column-level sur `users.role`, `shelters.is_verified` etc. — voir [scripts/init-db-roles.sql](scripts/init-db-roles.sql). Une Server Action compromise ne peut pas escalader un rôle au niveau driver Postgres.
+- 3 rôles PG distincts (`dorloter_app` / `dorloter_admin` / superuser migrations) avec grants column-level sur `users.role`, `shelters.is_verified` etc. — voir [scripts/init-db-roles.sql](scripts/init-db-roles.sql). Une Server Action compromise ne peut pas escalader un rôle au niveau driver Postgres.
 
 ---
 

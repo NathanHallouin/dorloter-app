@@ -391,7 +391,7 @@ Tant que **zéro** de ces signaux → reste en monolithe modulaire. C'est optima
 ## 6. Structure monorepo cible (phase 5, si besoin)
 
 ```
-miaou/
+dorloter/
 ├── apps/
 │   ├── web/                     # Next.js — public + adoptant + refuge + admin
 │   ├── tnr/                     # Next.js dédié TNR (UX, auth, perms différents)
@@ -420,7 +420,7 @@ miaou/
     └── docker-compose.prod.yml   # orchestre les 1-3 apps ensemble
 ```
 
-**Turborepo** : gère les builds incrémentaux (un changement dans `@miaou/adoption` ne rebuild que les apps qui en dépendent).
+**Turborepo** : gère les builds incrémentaux (un changement dans `@dorloter/adoption` ne rebuild que les apps qui en dépendent).
 
 **Déploiement** : chaque app peut être déployée indépendamment. Partage la même DB (ou bases séparées si domaines vraiment indépendants).
 
@@ -453,7 +453,7 @@ CREATE TABLE tnr.colonies (...);
 
 Avantages :
 - Isolation namespace (évite `tnr_colony` + `adoption_cat` préfixés)
-- Grants PG par schéma (ex. rôle `miaou_tnr` peut lire/écrire `tnr.*`, rien d'autre)
+- Grants PG par schéma (ex. rôle `dorloter_tnr` peut lire/écrire `tnr.*`, rien d'autre)
 - Migrations par schéma
 - Préparation au split futur en bases séparées
 

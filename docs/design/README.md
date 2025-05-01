@@ -1,7 +1,7 @@
 # Handoff — Refonte « Dorloter » (DA éditoriale / gazette)
 
 ## Vue d'ensemble
-Refonte complète de l'app web **Dorloter** (repo `miaou`) : une plateforme d'adoption,
+Refonte complète de l'app web **Dorloter** (repo `dorloter`) : une plateforme d'adoption,
 de perdus & trouvés, de pensions, de refuges et de vétérinaires, avec messagerie,
 profils membres et back-offices professionnels.
 

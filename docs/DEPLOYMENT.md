@@ -98,10 +98,10 @@ docker --version && docker compose version
 ### Cloner le repo
 
 ```bash
-sudo mkdir -p /opt/miaou
-sudo chown deploy:deploy /opt/miaou
-git clone https://github.com/<votre-org>/miaou.git /opt/miaou
-cd /opt/miaou
+sudo mkdir -p /opt/dorloter
+sudo chown deploy:deploy /opt/dorloter
+git clone https://github.com/<votre-org>/dorloter.git /opt/dorloter
+cd /opt/dorloter
 ```
 
 ### Installer Bun (requis pour quelques scripts, pas pour le runtime)
@@ -124,8 +124,8 @@ Voir **[docs/ENV.md](./ENV.md)** pour le détail de chaque variable. Générer t
 cat <<EOF >> .env.production
 Dorloter__Security__Jwt__Secret=$(openssl rand -base64 48)
 POSTGRES_SUPERUSER_PASSWORD=$(openssl rand -base64 24)
-MIAOU_APP_PASSWORD=$(openssl rand -base64 24)
-MIAOU_ADMIN_PASSWORD=$(openssl rand -base64 24)
+DORLOTER_APP_PASSWORD=$(openssl rand -base64 24)
+DORLOTER_ADMIN_PASSWORD=$(openssl rand -base64 24)
 S3_ACCESS_KEY=$(openssl rand -hex 12)
 S3_SECRET_KEY=$(openssl rand -hex 24)
 CRON_SECRET=$(openssl rand -base64 32)
@@ -142,10 +142,10 @@ Puis éditer à la main :
 ### Premier déploiement
 
 ```bash
-cd /opt/miaou
+cd /opt/dorloter
 docker compose -f docker-compose.prod.yml build   # ~3-5 min le premier coup (API + front Vite)
 docker compose -f docker-compose.prod.yml up -d   # démarre tout ; l'API applique les migrations SQL au démarrage
-bun prod:init-roles                               # crée miaou_app / miaou_admin + grants
+bun prod:init-roles                               # crée dorloter_app / dorloter_admin + grants
 ```
 
 Caddy obtient automatiquement les certificats Let's Encrypt au premier hit HTTPS. Attendre ~10s puis tester :
@@ -177,7 +177,7 @@ CRON_SECRET=xxx
 0 3 1 * *   curl -sS "https://dorloter.fr/api/cron/purge-stale-conversations?token=$CRON_SECRET"  > /dev/null
 
 # Backup quotidien à 2h du matin
-0 2 * * *   cd /opt/miaou && ./scripts/backup.sh >> /var/log/miaou-backup.log 2>&1
+0 2 * * *   cd /opt/dorloter && ./scripts/backup.sh >> /var/log/dorloter-backup.log 2>&1
 ```
 
 ### Monitoring externe
@@ -207,12 +207,12 @@ Dans `Settings → Secrets and variables → Actions` du repo :
 Sur votre machine locale :
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/miaou_deploy -C "github-actions-deploy" -N ""
+ssh-keygen -t ed25519 -f ~/.ssh/dorloter_deploy -C "github-actions-deploy" -N ""
 ```
 
-Ajouter la **clé publique** (`~/.ssh/miaou_deploy.pub`) dans `/home/deploy/.ssh/authorized_keys` sur le VPS.
+Ajouter la **clé publique** (`~/.ssh/dorloter_deploy.pub`) dans `/home/deploy/.ssh/authorized_keys` sur le VPS.
 
-Copier le contenu de la **clé privée** (`~/.ssh/miaou_deploy`) dans le secret GitHub `VPS_SSH_KEY`.
+Copier le contenu de la **clé privée** (`~/.ssh/dorloter_deploy`) dans le secret GitHub `VPS_SSH_KEY`.
 
 ### Workflow
 
@@ -257,12 +257,12 @@ Les backups sont dans `./backups/` en local (7 derniers jours) et sur le bucket 
 bun prod:down
 
 # Postgres
-cd /opt/miaou/backups/20260418-030000  # ou le backup désiré
-gunzip -c db.sql.gz | docker compose -f ../../docker-compose.prod.yml exec -T postgres psql -U miaou -d miaou
+cd /opt/dorloter/backups/20260418-030000  # ou le backup désiré
+gunzip -c db.sql.gz | docker compose -f ../../docker-compose.prod.yml exec -T postgres psql -U dorloter -d dorloter
 
 # MinIO
 docker run --rm \
-  -v miaou-prod_miniodata:/data \
+  -v dorloter-prod_miniodata:/data \
   -v "$(pwd):/backup:ro" \
   alpine:3 tar xf /backup/minio.tar -C /data
 
@@ -287,7 +287,7 @@ git push
 
 ```bash
 ssh deploy@dorloter.fr
-cd /opt/miaou
+cd /opt/dorloter
 git log --oneline -n 10       # identifier le commit stable précédent
 git reset --hard <sha>
 ./scripts/deploy.sh
@@ -302,7 +302,7 @@ docker stats --no-stream
 
 # Disque
 df -h /var/lib/docker
-du -sh /opt/miaou/backups
+du -sh /opt/dorloter/backups
 
 # Health app
 curl -s https://dorloter.fr/api/v1/health | jq
