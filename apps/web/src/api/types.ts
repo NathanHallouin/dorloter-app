@@ -1,13 +1,14 @@
 /**
- * Types du contrat d'API Java (/api/v1). Reflètent les DTOs Spring Boot.
+ * Types du contrat d'API (/api/v1), maintenus à la main pour le front web.
  *
  * Enveloppes :
  *   - succès        : { data: T }
  *   - liste paginée : { data: T[], pagination: { cursor, hasMore } }
  *   - erreur        : { error: { code, message, details? } }
  *
- * (Ces types peuvent aussi être régénérés depuis l'OpenAPI Java via
- *  `bun api:types:java` à la racine du monorepo.)
+ * NB : ces types sont parallèles au client typé généré `@dorloter/api-client`
+ * (types.gen.ts, source de vérité OpenAPI) que consomme le mobile. À terme,
+ * unifier le web dessus pour supprimer cette duplication maintenue à la main.
  */
 
 export interface ApiResponse<T> {
