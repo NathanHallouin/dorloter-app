@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { applicationsApi } from "@/api/applications";
-import { PageHead, PageBody, EmptyState } from "@/ui/forms";
-import { Btn, Pill } from "@/ui/primitives";
+import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
+import { Btn, Pill } from "@dorloter/ui";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
   envoyee: { label: "Envoyée", tone: "lavande" },

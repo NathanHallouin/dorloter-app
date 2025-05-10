@@ -4,8 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shelterApi } from "@/api/shelter";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiClientError } from "@/api/client";
-import { Btn, Pill } from "@/ui/primitives";
-import { Field, Input, Select } from "@/ui/forms";
+import { Btn, Pill } from "@dorloter/ui";
+import { Field, Input, Select } from "@dorloter/ui";
 import { DashPageHead, MiniBtn } from "@/components/dash/kit";
 
 const ROLES = [

@@ -6,9 +6,9 @@ import type { ReportSummary } from "@/api/types";
 import { LostFoundMap } from "@/components/LostFoundMap";
 import type { MapPin } from "@/components/LostFoundMap";
 import { MapSidePanel } from "@/components/MapSidePanel";
-import { cn } from "@/lib/cn";
-import { Btn, Pill } from "@/ui/primitives";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Btn, Pill } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 
 export function ReportsPage() {
   const navigate = useNavigate();

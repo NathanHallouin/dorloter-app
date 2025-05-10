@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { favoritesApi } from "@/api/favorites";
 import { PetCard } from "@/components/PetCard";
-import { PageHead, PageBody, EmptyState } from "@/ui/forms";
-import { Btn } from "@/ui/primitives";
+import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
+import { Btn } from "@dorloter/ui";
 
 export function FavoritesPage() {
   const navigate = useNavigate();

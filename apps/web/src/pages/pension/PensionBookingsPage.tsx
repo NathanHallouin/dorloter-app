@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { pensionsApi } from "@/api/pensions";
-import { PageHead, PageBody, EmptyState } from "@/ui/forms";
-import { Btn, Pill } from "@/ui/primitives";
+import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
+import { Btn, Pill } from "@dorloter/ui";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
   envoyee: { label: "À traiter", tone: "lavande" },

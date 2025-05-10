@@ -8,9 +8,9 @@ import { applicationsApi } from "@/api/applications";
 import { messagingApi } from "@/api/messaging";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiClientError } from "@/api/client";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
-import { Btn, Pill, CompatPills } from "@/ui/primitives";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Btn, Pill, CompatPills } from "@dorloter/ui";
 import { ReportContentButton } from "@/components/ReportContentButton";
 
 const AGE_LABEL: Record<string, string> = { chaton: "Chaton", jeune: "Jeune", adulte: "Adulte", senior: "Senior" };

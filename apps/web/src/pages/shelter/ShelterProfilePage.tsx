@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shelterApi } from "@/api/shelter";
 import { useAuth } from "@/auth/AuthContext";
 import { DashPageHead } from "@/components/dash/kit";
-import { Btn } from "@/ui/primitives";
+import { Btn } from "@dorloter/ui";
 
 /** Profil public du refuge + paramètres back-office. */
 export function ShelterProfilePage() {

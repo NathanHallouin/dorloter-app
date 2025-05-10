@@ -9,9 +9,9 @@ import { LostFoundMap } from "@/components/LostFoundMap";
 import type { MapPin } from "@/components/LostFoundMap";
 import { MapSidePanel } from "@/components/MapSidePanel";
 import { ReportContentButton } from "@/components/ReportContentButton";
-import { cn } from "@/lib/cn";
-import { Btn, Pill } from "@/ui/primitives";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Btn, Pill } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 
 function formatDistance(m: number): string {
   return m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1)} km`;

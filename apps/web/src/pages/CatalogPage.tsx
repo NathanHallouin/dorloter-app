@@ -4,8 +4,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { petsApi } from "@/api/pets";
 import type { PetFilters } from "@/api/pets";
 import { PetCard } from "@/components/PetCard";
-import { Icon } from "@/ui/Icon";
-import { Btn, FilterChip } from "@/ui/primitives";
+import { Icon } from "@dorloter/ui";
+import { Btn, FilterChip } from "@dorloter/ui";
 
 const AGE_LABEL: Record<string, string> = { chaton: "Chaton", jeune: "Jeune", adulte: "Adulte", senior: "Senior" };
 const AGES = ["tous", "chaton", "jeune", "adulte", "senior"];

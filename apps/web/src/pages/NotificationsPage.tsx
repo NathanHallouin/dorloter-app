@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notificationsApi } from "@/api/notifications";
-import { cn } from "@/lib/cn";
-import { PageHead, PageBody, EmptyState } from "@/ui/forms";
-import { Btn } from "@/ui/primitives";
+import { cn } from "@dorloter/ui";
+import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
+import { Btn } from "@dorloter/ui";
 
 export function NotificationsPage() {
   const queryClient = useQueryClient();

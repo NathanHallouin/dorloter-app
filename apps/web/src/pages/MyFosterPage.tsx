@@ -6,9 +6,9 @@ import { myFosterApi } from "@/api/foster";
 import { sheltersApi } from "@/api/shelters";
 import { ApiClientError } from "@/api/client";
 import type { FosterStatus, MyFostership } from "@/api/types";
-import { PageHead, PageBody, EmptyState, Field, Input, Select, Textarea } from "@/ui/forms";
-import { Btn, Pill } from "@/ui/primitives";
-import { Icon } from "@/ui/Icon";
+import { PageHead, PageBody, EmptyState, Field, Input, Select, Textarea } from "@dorloter/ui";
+import { Btn, Pill } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 
 const STATUS_LABEL: Record<FosterStatus, string> = {
   invited: "Invitation reçue", requested: "Demande envoyée", active: "Active", declined: "Refusée", ended: "Terminée",

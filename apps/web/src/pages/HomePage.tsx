@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { petsApi } from "@/api/pets";
 import { PetCard } from "@/components/PetCard";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
-import { Btn, Eyebrow, Marquee, Rule, Stamp } from "@/ui/primitives";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Btn, Eyebrow, Marquee, Rule, Stamp } from "@dorloter/ui";
 
 const HERO_IMG = "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&q=80&auto=format&fit=crop";
 // Chiffres vitrine (indicatifs) — à brancher sur un endpoint /stats ultérieurement.

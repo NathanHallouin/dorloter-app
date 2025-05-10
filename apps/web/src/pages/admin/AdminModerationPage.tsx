@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { moderationApi } from "@/api/moderation";
-import { PageHead, PageBody, EmptyState } from "@/ui/forms";
-import { Btn, Pill } from "@/ui/primitives";
+import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
+import { Btn, Pill } from "@dorloter/ui";
 
 const CONTENT_LABEL: Record<string, string> = {
   pet: "Animal", report: "Signalement", pension: "Pension", shelter: "Refuge", message: "Message", user: "Utilisateur",

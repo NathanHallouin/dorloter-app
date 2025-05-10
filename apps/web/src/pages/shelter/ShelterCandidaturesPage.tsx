@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shelterApi } from "@/api/shelter";
-import { cn } from "@/lib/cn";
+import { cn } from "@dorloter/ui";
 import { Tag, MiniBtn, DashPageHead } from "@/components/dash/kit";
 
 const FILTERS: [string, string][] = [["tous", "Toutes"], ["envoyee", "À traiter"], ["en_cours", "Entretien"], ["acceptee", "Acceptées"], ["refusee", "Refusées"]];

@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { pensionsApi } from "@/api/pensions";
 import type { PensionSummary } from "@/api/types";
-import { PageHead, PageBody, EmptyState } from "@/ui/forms";
-import { Icon } from "@/ui/Icon";
-import { Pill } from "@/ui/primitives";
+import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Pill } from "@dorloter/ui";
 
 function Stars({ n }: { n: number }) {
   return (

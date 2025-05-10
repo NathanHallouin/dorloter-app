@@ -4,9 +4,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { pensionsApi } from "@/api/pensions";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiClientError } from "@/api/client";
-import { Icon } from "@/ui/Icon";
-import { Btn, Pill, Rule } from "@/ui/primitives";
-import { Field, Input, Select } from "@/ui/forms";
+import { Icon } from "@dorloter/ui";
+import { Btn, Pill, Rule } from "@dorloter/ui";
+import { Field, Input, Select } from "@dorloter/ui";
 
 const SERVICE_LABELS: Record<string, string> = {
   medication: "Médication", grooming: "Toilettage", outdoorAccess: "Accès extérieur",

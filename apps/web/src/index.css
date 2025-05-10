@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Le design system vit dans packages/ui (hors node_modules scanné par défaut) :
+   on déclare explicitement ses sources pour que Tailwind détecte ses classes. */
+@source "../../../packages/ui/src";
+
 /* Dark mode piloté par la classe .dark sur <html> (et non prefers-color-scheme). */
 @custom-variant dark (&:where(.dark, .dark *));
 

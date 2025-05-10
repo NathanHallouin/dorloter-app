@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { sheltersApi } from "@/api/shelters";
 import type { ShelterListItem } from "@/api/types";
-import { Icon } from "@/ui/Icon";
-import { Eyebrow } from "@/ui/primitives";
-import { EmptyState } from "@/ui/forms";
+import { Icon } from "@dorloter/ui";
+import { Eyebrow } from "@dorloter/ui";
+import { EmptyState } from "@dorloter/ui";
 
 function ShelterCard({ s }: { s: ShelterListItem }) {
   return (

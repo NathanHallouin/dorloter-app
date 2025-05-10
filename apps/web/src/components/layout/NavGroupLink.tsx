@@ -1,5 +1,5 @@
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 import type { NavGroup } from "./nav-data";
 
 export function NavGroupLink({ g, active, path, open, setOpenMenu, go }: { g: NavGroup; active: boolean; path: string; open: boolean; setOpenMenu: (v: string | null | ((c: string | null) => string | null)) => void; go: (to: string) => void }) {

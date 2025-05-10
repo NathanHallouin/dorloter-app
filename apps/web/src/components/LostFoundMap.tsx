@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Map, { Marker, NavigationControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 import { MAP_STYLE, FRANCE_CENTER } from "@/lib/map";
 
 export interface MapPin {

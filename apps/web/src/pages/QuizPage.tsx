@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Icon } from "@/ui/Icon";
-import { Btn, Eyebrow } from "@/ui/primitives";
+import { Icon } from "@dorloter/ui";
+import { Btn, Eyebrow } from "@dorloter/ui";
 
 type Choice = { value: string; label: string; hint?: string; icon?: string };
 type Question = { id: string; prompt: string; helper?: string; choices: Choice[] };

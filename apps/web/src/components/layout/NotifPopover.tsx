@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notificationsApi } from "@/api/notifications";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 import { TILE } from "./nav-data";
 import { Divider, Popover } from "./Popover";
 

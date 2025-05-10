@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { moderationApi } from "@/api/moderation";
 import { useAuth } from "@/auth/AuthContext";
-import { Btn } from "@/ui/primitives";
-import { Icon } from "@/ui/Icon";
-import { Field, Select, Textarea } from "@/ui/forms";
+import { Btn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Field, Select, Textarea } from "@dorloter/ui";
 
 const REASONS = ["Contenu inapproprié", "Arnaque suspectée", "Informations erronées", "Autre"];
 

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { shelterApi } from "@/api/shelter";
-import { Pill } from "@/ui/primitives";
+import { Pill } from "@dorloter/ui";
 import { Panel, DashPageHead, Table, Td } from "@/components/dash/kit";
 
 export function ShelterAdoptionsPage() {

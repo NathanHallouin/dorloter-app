@@ -3,9 +3,9 @@ import type { FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { messagingApi } from "@/api/messaging";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
-import { Eyebrow } from "@/ui/primitives";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Eyebrow } from "@dorloter/ui";
 
 export function MessagesPage() {
   const { id } = useParams();

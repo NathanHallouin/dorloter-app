@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Icon } from "@/ui/Icon";
-import { Btn, Eyebrow, Rule } from "@/ui/primitives";
+import { Icon } from "@dorloter/ui";
+import { Btn, Eyebrow, Rule } from "@dorloter/ui";
 
 const VALUES: [string, string, string][] = [
   ["heart", "Le bien-être d'abord", "Aucune adoption n'est précipitée. Chaque étape protège l'animal autant que la famille."],

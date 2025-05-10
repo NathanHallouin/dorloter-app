@@ -8,9 +8,9 @@ import { myFosterApi } from "@/api/foster";
 import { ApiClientError } from "@/api/client";
 import { useAuth } from "@/auth/AuthContext";
 import { PetCard } from "@/components/PetCard";
-import { Icon } from "@/ui/Icon";
-import { Btn, Rule } from "@/ui/primitives";
-import { Field, Input, Textarea } from "@/ui/forms";
+import { Icon } from "@dorloter/ui";
+import { Btn, Rule } from "@dorloter/ui";
+import { Field, Input, Textarea } from "@dorloter/ui";
 import { ReportContentButton } from "@/components/ReportContentButton";
 
 export function ShelterDetailPage() {

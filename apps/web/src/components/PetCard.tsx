@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { favoritesApi } from "@/api/favorites";
-import { Icon } from "@/ui/Icon";
-import { Pill, FavoriteButton, CompatPills } from "@/ui/primitives";
+import { Icon } from "@dorloter/ui";
+import { Pill, FavoriteButton, CompatPills } from "@dorloter/ui";
 import type { PetSummary } from "@/api/types";
 
 const AGE_LABEL: Record<string, string> = { chaton: "Chaton", jeune: "Jeune", adulte: "Adulte", senior: "Senior" };

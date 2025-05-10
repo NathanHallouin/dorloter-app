@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { shelterApi } from "@/api/shelter";
-import { Icon } from "@/ui/Icon";
-import { Btn } from "@/ui/primitives";
+import { Icon } from "@dorloter/ui";
+import { Btn } from "@dorloter/ui";
 import { Stat, Panel, Tag, Bars, MiniBtn, DashPageHead, Table, Td } from "@/components/dash/kit";
 
 export function ShelterDashboardPage() {

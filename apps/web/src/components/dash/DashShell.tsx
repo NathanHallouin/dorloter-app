@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 
 export type DashNavItem = { to: string; label: string; icon: string; end?: boolean; count?: number };
 

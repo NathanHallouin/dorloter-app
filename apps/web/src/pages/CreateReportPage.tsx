@@ -6,9 +6,9 @@ import { reportsApi } from "@/api/reports";
 import type { CreateReportInput } from "@/api/reports";
 import { LocationPickerMap } from "@/components/LocationPickerMap";
 import { ApiClientError } from "@/api/client";
-import { Icon } from "@/ui/Icon";
-import { Btn, Eyebrow } from "@/ui/primitives";
-import { Field, Input, Textarea, Select, Segmented } from "@/ui/forms";
+import { Icon } from "@dorloter/ui";
+import { Btn, Eyebrow } from "@dorloter/ui";
+import { Field, Input, Textarea, Select, Segmented } from "@dorloter/ui";
 
 export function CreateReportPage() {
   const navigate = useNavigate();

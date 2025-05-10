@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { vetsApi } from "@/api/vets";
 import type { VetSummary } from "@/api/types";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
-import { Eyebrow, Pill } from "@/ui/primitives";
-import { EmptyState } from "@/ui/forms";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Eyebrow, Pill } from "@dorloter/ui";
+import { EmptyState } from "@dorloter/ui";
 
 function VetCard({ v }: { v: VetSummary }) {
   const species = [v.acceptsCats && "Chats", v.acceptsDogs && "Chiens", v.acceptsNac && "NAC"].filter(Boolean) as string[];

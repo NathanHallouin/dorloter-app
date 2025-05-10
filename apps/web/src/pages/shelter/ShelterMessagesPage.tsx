@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shelterApi } from "@/api/shelter";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 import { DashPageHead } from "@/components/dash/kit";
 
 export function ShelterMessagesPage() {

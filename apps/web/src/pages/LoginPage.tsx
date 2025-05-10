@@ -4,8 +4,8 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiClientError } from "@/api/client";
 import { AuthShell } from "@/components/AuthShell";
-import { Field, Input } from "@/ui/forms";
-import { Btn } from "@/ui/primitives";
+import { Field, Input } from "@dorloter/ui";
+import { Btn } from "@dorloter/ui";
 
 export function LoginPage() {
   const { login } = useAuth();

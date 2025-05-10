@@ -5,9 +5,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/auth/AuthContext";
 import { authApi } from "@/api/auth";
 import { ApiClientError } from "@/api/client";
-import { PageHead, PageBody, Field, Input, Textarea } from "@/ui/forms";
-import { Btn, Pill, Rule } from "@/ui/primitives";
-import { Icon } from "@/ui/Icon";
+import { PageHead, PageBody, Field, Input, Textarea } from "@dorloter/ui";
+import { Btn, Pill, Rule } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 
 const ROLE_LABEL: Record<string, string> = {
   user: "Membre", shelter_admin: "Refuge", pension_admin: "Pension", veterinarian_admin: "Vétérinaire", platform_admin: "Administration",

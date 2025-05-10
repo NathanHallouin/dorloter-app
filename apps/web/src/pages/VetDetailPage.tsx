@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { vetsApi } from "@/api/vets";
-import { Icon } from "@/ui/Icon";
-import { Btn, Pill, Rule } from "@/ui/primitives";
+import { Icon } from "@dorloter/ui";
+import { Btn, Pill, Rule } from "@dorloter/ui";
 
 const SERVICE_LABELS: Record<string, string> = {
   xray: "Imagerie", surgery: "Chirurgie", dental: "Dentisterie", hospitalization: "Hospitalisation",

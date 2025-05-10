@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Logo } from "@/ui/primitives";
+import { Logo } from "@dorloter/ui";
 
 const PANEL_IMG = "https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?w=800&q=80&auto=format&fit=crop";
 

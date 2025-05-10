@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Icon } from "@/ui/Icon";
+import { Icon } from "@dorloter/ui";
 
 export function Footer() {
   const COLS: [string, [string, string][]][] = [

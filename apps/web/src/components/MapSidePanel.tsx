@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 
 /** Panneau latéral rétractable superposé à la carte (style handoff). */
 export function MapSidePanel({ side, open, onToggle, icon, label, children }: {

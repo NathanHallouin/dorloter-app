@@ -5,8 +5,8 @@ import { shelterApi } from "@/api/shelter";
 import type { ShelterPetInput } from "@/api/shelter";
 import type { ShelterPet } from "@/api/types";
 import { ApiClientError } from "@/api/client";
-import { Btn } from "@/ui/primitives";
-import { Field, Input, Textarea, Select, Segmented } from "@/ui/forms";
+import { Btn } from "@dorloter/ui";
+import { Field, Input, Textarea, Select, Segmented } from "@dorloter/ui";
 import { Panel, Tag, MiniBtn, DashPageHead, Table, Td } from "@/components/dash/kit";
 
 const emptyForm: ShelterPetInput = { name: "", species: "chat", status: "disponible" };

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
-import { Pill } from "@/ui/primitives";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Pill } from "@dorloter/ui";
 
 const TILE: Record<string, string> = {
   coral: "bg-coral-50 border-coral-300 text-coral-600",

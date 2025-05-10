@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { petsApi } from "@/api/pets";
 import { favoritesApi } from "@/api/favorites";
 import { useAuth } from "@/auth/AuthContext";
-import { cn } from "@/lib/cn";
-import { Icon } from "@/ui/Icon";
-import { Btn, Eyebrow, Pill } from "@/ui/primitives";
+import { cn } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
+import { Btn, Eyebrow, Pill } from "@dorloter/ui";
 
 const THRESHOLD = 110;
 const AGE: Record<string, string> = { chaton: "Chaton", jeune: "Jeune", adulte: "Adulte", senior: "Senior" };

@@ -6,9 +6,9 @@ import { shelterApi } from "@/api/shelter";
 import { useAuth } from "@/auth/AuthContext";
 import { ApiClientError } from "@/api/client";
 import type { FosterFamily } from "@/api/types";
-import { Btn, Pill } from "@/ui/primitives";
-import { Field, Input, Select } from "@/ui/forms";
-import { Icon } from "@/ui/Icon";
+import { Btn, Pill } from "@dorloter/ui";
+import { Field, Input, Select } from "@dorloter/ui";
+import { Icon } from "@dorloter/ui";
 import { DashPageHead, MiniBtn } from "@/components/dash/kit";
 
 export function ShelterFostersPage() {
