@@ -1,0 +1,30 @@
+{
+  "name": "@dorloter/pro",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Espace pro Dorloter (SPA Vite) · consoles refuge / pension / vétérinaire + admin plateforme. Consomme /api/v1.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dorloter/client": "workspace:*",
+    "@dorloter/ui": "workspace:*",
+    "@tanstack/react-query": "^5.101.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.17.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "tailwindcss": "^4.3.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16"
+  }
+}
