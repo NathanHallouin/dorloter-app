@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Design system partagé (hors node_modules) : on declare ses classes a Tailwind
+   et on importe le theme commun (tokens, base, utilitaires). */
+@source "../../../packages/ui/src";
+@import "../../../packages/ui/src/theme.css";
