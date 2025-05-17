@@ -1,11 +1,11 @@
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fosterApi } from "@/api/foster";
-import { shelterApi } from "@/api/shelter";
-import { useAuth } from "@/auth/AuthContext";
-import { ApiClientError } from "@/api/client";
-import type { FosterFamily } from "@/api/types";
+import { fosterApi } from "@dorloter/client";
+import { shelterApi } from "@dorloter/client";
+import { useAuth } from "@dorloter/client";
+import { ApiClientError } from "@dorloter/client";
+import type { FosterFamily } from "@dorloter/client";
 import { Btn, Pill } from "@dorloter/ui";
 import { Field, Input, Select } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";

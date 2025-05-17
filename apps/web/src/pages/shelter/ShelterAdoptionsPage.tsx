@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
+import { shelterApi } from "@dorloter/client";
 import { Pill } from "@dorloter/ui";
 import { Panel, DashPageHead, Table, Td } from "@/components/dash/kit";
 

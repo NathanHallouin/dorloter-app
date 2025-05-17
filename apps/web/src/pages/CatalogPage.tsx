@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { petsApi } from "@/api/pets";
-import type { PetFilters } from "@/api/pets";
+import { petsApi } from "@dorloter/client";
+import type { PetFilters } from "@dorloter/client";
 import { PetCard } from "@/components/PetCard";
 import { Icon } from "@dorloter/ui";
 import { Btn, FilterChip } from "@dorloter/ui";

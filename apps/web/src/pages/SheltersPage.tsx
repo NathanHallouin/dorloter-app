@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { sheltersApi } from "@/api/shelters";
-import type { ShelterListItem } from "@/api/types";
+import { sheltersApi } from "@dorloter/client";
+import type { ShelterListItem } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Eyebrow } from "@dorloter/ui";
 import { EmptyState } from "@dorloter/ui";

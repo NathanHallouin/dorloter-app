@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { notificationsApi } from "@/api/notifications";
+import { notificationsApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
 import { Btn } from "@dorloter/ui";

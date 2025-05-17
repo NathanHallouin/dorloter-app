@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { messagingApi } from "@/api/messaging";
+import { messagingApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Eyebrow } from "@dorloter/ui";

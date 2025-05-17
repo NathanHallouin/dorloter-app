@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
-import { useAuth } from "@/auth/AuthContext";
+import { shelterApi } from "@dorloter/client";
+import { useAuth } from "@dorloter/client";
 import { DashShell, type DashNavItem } from "@/components/dash/DashShell";
 
 export function ShelterConsoleLayout() {

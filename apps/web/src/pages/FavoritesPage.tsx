@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { favoritesApi } from "@/api/favorites";
+import { favoritesApi } from "@dorloter/client";
 import { PetCard } from "@/components/PetCard";
 import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
 import { Btn } from "@dorloter/ui";

@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { pensionsApi } from "@/api/pensions";
-import { useAuth } from "@/auth/AuthContext";
-import { ApiClientError } from "@/api/client";
+import { pensionsApi } from "@dorloter/client";
+import { useAuth } from "@dorloter/client";
+import { ApiClientError } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Btn, Pill, Rule } from "@dorloter/ui";
 import { Field, Input, Select } from "@dorloter/ui";

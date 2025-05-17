@@ -1,10 +1,10 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
-import type { ShelterPetInput } from "@/api/shelter";
-import type { ShelterPet } from "@/api/types";
-import { ApiClientError } from "@/api/client";
+import { shelterApi } from "@dorloter/client";
+import type { ShelterPetInput } from "@dorloter/client";
+import type { ShelterPet } from "@dorloter/client";
+import { ApiClientError } from "@dorloter/client";
 import { Btn } from "@dorloter/ui";
 import { Field, Input, Textarea, Select, Segmented } from "@dorloter/ui";
 import { Panel, Tag, MiniBtn, DashPageHead, Table, Td } from "@/components/dash/kit";

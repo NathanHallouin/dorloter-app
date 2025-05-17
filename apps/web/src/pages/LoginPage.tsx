@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useAuth } from "@/auth/AuthContext";
-import { ApiClientError } from "@/api/client";
+import { useAuth } from "@dorloter/client";
+import { ApiClientError } from "@dorloter/client";
 import { AuthShell } from "@/components/AuthShell";
 import { Field, Input } from "@dorloter/ui";
 import { Btn } from "@dorloter/ui";

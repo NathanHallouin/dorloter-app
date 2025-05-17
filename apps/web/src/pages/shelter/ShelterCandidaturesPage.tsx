@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
+import { shelterApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Tag, MiniBtn, DashPageHead } from "@/components/dash/kit";
 

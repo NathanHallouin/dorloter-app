@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { moderationApi } from "@/api/moderation";
+import { moderationApi } from "@dorloter/client";
 import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
 import { Btn, Pill } from "@dorloter/ui";
 

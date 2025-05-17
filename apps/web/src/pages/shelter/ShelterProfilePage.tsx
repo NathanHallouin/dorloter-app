@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
-import { useAuth } from "@/auth/AuthContext";
+import { shelterApi } from "@dorloter/client";
+import { useAuth } from "@dorloter/client";
 import { DashPageHead } from "@/components/dash/kit";
 import { Btn } from "@dorloter/ui";
 

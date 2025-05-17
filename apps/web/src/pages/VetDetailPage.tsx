@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { vetsApi } from "@/api/vets";
+import { vetsApi } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Btn, Pill, Rule } from "@dorloter/ui";
 

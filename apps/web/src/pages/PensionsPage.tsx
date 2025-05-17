@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { pensionsApi } from "@/api/pensions";
-import type { PensionSummary } from "@/api/types";
+import { pensionsApi } from "@dorloter/client";
+import type { PensionSummary } from "@dorloter/client";
 import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Pill } from "@dorloter/ui";

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { pensionsApi } from "@/api/pensions";
+import { pensionsApi } from "@dorloter/client";
 import { PageHead, PageBody, EmptyState } from "@dorloter/ui";
 import { Btn, Pill } from "@dorloter/ui";
 

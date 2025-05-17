@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { petsApi } from "@/api/pets";
+import { petsApi } from "@dorloter/client";
 import { PetCard } from "@/components/PetCard";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";

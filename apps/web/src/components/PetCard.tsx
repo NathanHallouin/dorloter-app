@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/auth/AuthContext";
-import { favoritesApi } from "@/api/favorites";
+import { useAuth } from "@dorloter/client";
+import { favoritesApi } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Pill, FavoriteButton, CompatPills } from "@dorloter/ui";
-import type { PetSummary } from "@/api/types";
+import type { PetSummary } from "@dorloter/client";
 
 const AGE_LABEL: Record<string, string> = { chaton: "Chaton", jeune: "Jeune", adulte: "Adulte", senior: "Senior" };
 

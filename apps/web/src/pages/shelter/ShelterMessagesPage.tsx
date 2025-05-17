@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
+import { shelterApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { DashPageHead } from "@/components/dash/kit";

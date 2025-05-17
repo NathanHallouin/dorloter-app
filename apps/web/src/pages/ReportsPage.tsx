@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { reportsApi } from "@/api/reports";
-import type { ReportSummary } from "@/api/types";
+import { reportsApi } from "@dorloter/client";
+import type { ReportSummary } from "@dorloter/client";
 import { LostFoundMap } from "@/components/LostFoundMap";
 import type { MapPin } from "@/components/LostFoundMap";
 import { MapSidePanel } from "@/components/MapSidePanel";

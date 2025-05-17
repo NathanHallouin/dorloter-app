@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/auth/AuthContext";
-import { messagingApi } from "@/api/messaging";
-import { notificationsApi } from "@/api/notifications";
+import { useAuth } from "@dorloter/client";
+import { messagingApi } from "@dorloter/client";
+import { notificationsApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { CommandPalette } from "@/components/CommandPalette";

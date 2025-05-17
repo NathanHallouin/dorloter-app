@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { vetsApi } from "@/api/vets";
-import type { VetSummary } from "@/api/types";
+import { vetsApi } from "@dorloter/client";
+import type { VetSummary } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Eyebrow, Pill } from "@dorloter/ui";

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shelterApi } from "@/api/shelter";
-import { useAuth } from "@/auth/AuthContext";
-import { ApiClientError } from "@/api/client";
+import { shelterApi } from "@dorloter/client";
+import { useAuth } from "@dorloter/client";
+import { ApiClientError } from "@dorloter/client";
 import { Btn, Pill } from "@dorloter/ui";
 import { Field, Input, Select } from "@dorloter/ui";
 import { DashPageHead, MiniBtn } from "@/components/dash/kit";
