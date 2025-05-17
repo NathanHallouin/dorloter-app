@@ -1,0 +1,161 @@
+/* =========================================================================
+   Thème partagé Dorloter · « La Gazette » (design system).
+   Importé par apps/web et apps/pro. Ne pas y mettre `@import "tailwindcss"`
+   ni `@source` : ça reste côté app.
+   ========================================================================= */
+
+/* Dark mode piloté par la classe .dark sur <html> (et non prefers-color-scheme). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens -> utilitaires Tailwind. `inline` => les utilitaires émettent
+   var(--…), donc le swap .dark fonctionne automatiquement.
+   bg-card · text-foreground · text-muted-foreground · border-line ·
+   bg-coral-600 · text-lavande-700 · font-display · font-mono · rounded-card … */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-fg);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
+  --color-line: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-fg);
+  --color-tint-coral: var(--tint-coral);
+  --color-tint-lavande: var(--tint-lavande);
+  --color-tint-prune: var(--tint-prune);
+
+  --color-coral-50: var(--coral-50);  --color-coral-100: var(--coral-100); --color-coral-200: var(--coral-200);
+  --color-coral-300: var(--coral-300); --color-coral-400: var(--coral-400); --color-coral-500: var(--coral-500);
+  --color-coral-600: var(--coral-600); --color-coral-700: var(--coral-700); --color-coral-800: var(--coral-800); --color-coral-900: var(--coral-900);
+  --color-lavande-50: var(--lavande-50); --color-lavande-100: var(--lavande-100); --color-lavande-200: var(--lavande-200);
+  --color-lavande-300: var(--lavande-300); --color-lavande-400: var(--lavande-400); --color-lavande-500: var(--lavande-500);
+  --color-lavande-600: var(--lavande-600); --color-lavande-700: var(--lavande-700); --color-lavande-800: var(--lavande-800); --color-lavande-900: var(--lavande-900);
+  --color-sable-50: var(--sable-50); --color-sable-100: var(--sable-100); --color-sable-200: var(--sable-200);
+  --color-sable-300: var(--sable-300); --color-sable-400: var(--sable-400); --color-sable-500: var(--sable-500);
+  --color-sable-600: var(--sable-600); --color-sable-700: var(--sable-700); --color-sable-800: var(--sable-800); --color-sable-900: var(--sable-900);
+  --color-prune-50: var(--prune-50); --color-prune-100: var(--prune-100); --color-prune-200: var(--prune-200);
+  --color-prune-300: var(--prune-300); --color-prune-400: var(--prune-400); --color-prune-500: var(--prune-500);
+  --color-prune-600: var(--prune-600); --color-prune-700: var(--prune-700); --color-prune-800: var(--prune-800); --color-prune-900: var(--prune-900);
+  --color-brick-50: var(--brick-50); --color-brick-100: var(--brick-100); --color-brick-200: var(--brick-200);
+  --color-brick-300: var(--brick-300); --color-brick-400: var(--brick-400); --color-brick-500: var(--brick-500);
+  --color-brick-600: var(--brick-600); --color-brick-700: var(--brick-700); --color-brick-800: var(--brick-800); --color-brick-900: var(--brick-900);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: "Geist Mono", monospace;
+
+  --radius-card: 12px;
+  --radius-field: 6px;
+}
+
+/* =========================================================================
+   coral -> VERT BOUTEILLE · lavande -> AMBRE · sable -> PAPIER · prune -> ENCRE
+   ========================================================================= */
+:root {
+  /* Vert bouteille · primaire */
+  --coral-50: #eef4ef; --coral-100: #d6e7dc; --coral-200: #aecfba; --coral-300: #7db295;
+  --coral-400: #4c9270; --coral-500: #1f6f4f; --coral-600: #185a40; --coral-700: #144734;
+  --coral-800: #113a2b; --coral-900: #0d2b20;
+  /* Ambre · accent */
+  --lavande-50: #fbf2df; --lavande-100: #f6e4bd; --lavande-200: #edcd86; --lavande-300: #e3b552;
+  --lavande-400: #d59e2c; --lavande-500: #bf8718; --lavande-600: #9c6c14; --lavande-700: #785212;
+  --lavande-800: #553a0f; --lavande-900: #39270b;
+  /* Papier · neutres chauds */
+  --sable-50: #faf7f0; --sable-100: #f3ede1; --sable-200: #e6dcc8; --sable-300: #d6c8ab;
+  --sable-400: #bdaa87; --sable-500: #9d8a67; --sable-600: #7c6c50; --sable-700: #5f5340;
+  --sable-800: #473e30; --sable-900: #332c22;
+  /* Encre foret · profondeur */
+  --prune-50: #eef2ee; --prune-100: #d8e1d9; --prune-200: #b0c2b3; --prune-300: #7e9a84;
+  --prune-400: #4e6e57; --prune-500: #2f4d3a; --prune-600: #22392b; --prune-700: #1a2c22;
+  --prune-800: #13201a; --prune-900: #0c1610;
+  /* Terracotta · semantique negative / perdu / urgent */
+  --brick-50: #fbeee9; --brick-100: #f6d7cc; --brick-200: #eab3a1; --brick-300: #dd8a70;
+  --brick-400: #cf6543; --brick-500: #b5482f; --brick-600: #963829; --brick-700: #742c20;
+  --brick-800: #522017; --brick-900: #371610;
+  /* Semantiques (light) */
+  --background: #f3ede1; --foreground: #23201a; --card: #fbf8f1; --card-fg: #23201a;
+  --primary: #1f6f4f; --primary-fg: #fbf8f1; --muted: #ece4d4; --muted-fg: #7c6c50;
+  --border: #e0d7c4; --ring: #1f6f4f; --radius: 0.25rem;
+  --tint-coral: #eaf1ec; --tint-lavande: #fbf2df; --tint-prune: #eef2ee;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+}
+
+.dark {
+  --background: #141611; --foreground: #efe9da; --card: #1d211a; --card-fg: #efe9da;
+  --primary: #5aa67e; --primary-fg: #0c1610; --muted: #262a20; --muted-fg: #a89c83;
+  --border: #343a2c; --ring: #5aa67e;
+  --coral-300: #7db295; --coral-400: #57a07a; --coral-500: #6fbb91; --coral-600: #8fcdaa;
+  --lavande-400: #e3b552; --lavande-500: #e3b552; --lavande-600: #edcd86;
+  --sable-100: #1d211a; --sable-200: #343a2c; --sable-300: #3f4636;
+  --tint-coral: #16241c; --tint-lavande: #2a2212; --tint-prune: #101a13;
+  --brick-50: #2e1812; --brick-300: #a85a42; --brick-500: #d4795f; --brick-600: #e09a85; --brick-700: #eab3a1;
+}
+
+html { font-family: var(--font-body); }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+h1, h2, h3, .brandword { font-family: var(--font-display); font-weight: 600; }
+::selection { background: var(--lavande-200); color: var(--prune-900); }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+*::-webkit-scrollbar { width: 11px; height: 11px; }
+*::-webkit-scrollbar-thumb { background: var(--sable-300); border: 3px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: var(--sable-400); background-clip: padding-box; }
+
+.tabular { font-variant-numeric: tabular-nums; }
+.mono { font-family: "Geist Mono", monospace; }
+.serif-i { font-family: var(--font-display); font-style: italic; }
+.lead-drop::first-letter {
+  font-family: var(--font-display); font-weight: 700; font-size: 3.3em;
+  float: left; line-height: 0.78; padding: 6px 10px 0 0; color: var(--coral-600);
+}
+.np-scroll::-webkit-scrollbar { height: 0; width: 0; display: none; }
+.np-scroll { scrollbar-width: none; }
+
+/* Verre dépoli (navbar flottante + menus/popovers) */
+.glass { background: color-mix(in srgb, var(--card) 86%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); }
+.glass-panel { background: color-mix(in srgb, var(--card) 96%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); }
+
+@keyframes dlMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes dlStampIn { from { opacity: 0; transform: rotate(-14deg) scale(0.6); } to { opacity: 1; } }
+@keyframes dlFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dlPop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes dlMenu { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+/* Navigation publique : méga-menus en desktop, burger + panneau en mobile */
+.nav-burger { display: none; }
+@media (max-width: 1024px) {
+  .nav-desktop { display: none !important; }
+  .nav-burger { display: inline-flex !important; }
+}
+@media (min-width: 1025px) {
+  .nav-mobile-panel { display: none !important; }
+}
+@media (max-width: 640px) {
+  .np-hide { display: none !important; }
+}
+
+/* Consoles pro : grilles qui se replient */
+@media (max-width: 1000px) {
+  .dash-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  .dash-split { grid-template-columns: 1fr !important; }
+  .dash-grid6 { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 760px) {
+  .dash-side { display: none !important; }
+  .dash-stats { grid-template-columns: 1fr !important; }
+  .dash-grid6 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
