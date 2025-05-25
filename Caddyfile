@@ -60,6 +60,35 @@
 	}
 }
 
+# ─── Espace pro (SPA apps/pro) ───────────────────────────────────────────────
+pro.{$DOMAIN} {
+	encode zstd gzip
+
+	# Meme API, en same-origin pour la SPA pro.
+	handle /api/v1/* {
+		reverse_proxy api:8080
+	}
+
+	# Front espace pro (statique, fallback routing client gere par le conteneur).
+	handle {
+		reverse_proxy pro:80
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), geolocation=(self), microphone=()"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
 # ─── CDN images (bucket public MinIO) ────────────────────────────────────────
 cdn.{$DOMAIN} {
 	encode zstd gzip

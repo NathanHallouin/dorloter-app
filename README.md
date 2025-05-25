@@ -9,10 +9,13 @@ Voir [CLAUDE.md](CLAUDE.md) pour le détail produit et l'architecture, et [`docs
 ```
 apps/
   api/         API REST NestJS (le service API) · monolithe modulaire · port 8080 · /api/v1
-  web/         Front SPA React 19 + Vite · port 5173 · consomme /api/v1
+  web/         Front SPA public (vitrine adoptants) · React 19 + Vite · port 5173
+  pro/         Front SPA espace pro (consoles refuge/pension/véto + admin) · port 5174
   mobile/      App Expo / React Native · consomme /api/v1
 packages/
-  api-client/  Client openapi-fetch typé, généré depuis l'OpenAPI
+  ui/          Design system partagé (primitives, Icon, thème) · web + pro
+  client/      Couche API partagée (client JWT+refresh, types, auth) · web + pro
+  api-client/  Client openapi-fetch typé (mobile), généré depuis l'OpenAPI
 docs/          Documentation technique, produit et design
 scripts/       Génération de types, build/déploiement mobile, ops prod
 ```
@@ -20,9 +23,12 @@ scripts/       Génération de types, build/déploiement mobile, ops prod
 | Composant | Stack | README |
 |---|---|---|
 | API | NestJS 10, Kysely + PostGIS, JWT, OpenAPI | [apps/api](apps/api/README.md) |
-| Web | React 19, Vite, React Router, TanStack Query, Tailwind v4 | [apps/web](apps/web/README.md) |
+| Web (public) | React 19, Vite, React Router, TanStack Query, Tailwind v4 | [apps/web](apps/web/README.md) |
+| Pro (back-office) | React 19, Vite · `pro.dorloter.fr` | [apps/pro](apps/pro/README.md) |
 | Mobile | Expo, React Native, MapLibre | [apps/mobile](apps/mobile/README.md) |
-| Client API | openapi-fetch (typé, généré) | [packages/api-client](packages/api-client/README.md) |
+| Design system | primitives partagées web + pro | [packages/ui](packages/ui) |
+| Couche API | client HTTP + types + auth, web + pro | [packages/client](packages/client) |
+| Client API typé | openapi-fetch (mobile, généré) | [packages/api-client](packages/api-client/README.md) |
 
 Base de données : PostgreSQL 16 + PostGIS (schéma `dorloter_api`). Stockage images : S3-compatible (MinIO en dev). Reverse proxy + HTTPS en prod : Caddy.
 

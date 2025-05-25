@@ -85,7 +85,7 @@ services:
         condition: service_healthy
     networks: [internal]
 
-  # ─── Front SPA (Vite, statique) ────────────────────────────────────────────
+  # ─── Front SPA public (Vite, statique) · vitrine adoptants ─────────────────
   web:
     build:
       context: .
@@ -94,6 +94,18 @@ services:
         # La SPA appelle l'API en same-origin (/api/v1) derriere Caddy : URL vide.
         VITE_API_URL: ""
         VITE_MAP_STYLE: ${VITE_MAP_STYLE:-}
+        # Lien « espace pro » du navbar vers le sous-domaine pro.
+        VITE_PRO_URL: https://pro.${DOMAIN}
+    restart: unless-stopped
+    networks: [internal]
+
+  # ─── Front SPA espace pro (Vite, statique) · consoles refuge/pension/veto ──
+  pro:
+    build:
+      context: .
+      dockerfile: apps/pro/Dockerfile
+      args:
+        VITE_API_URL: ""
     restart: unless-stopped
     networks: [internal]
 
@@ -115,6 +127,7 @@ services:
     depends_on:
       - api
       - web
+      - pro
       - minio
     networks: [internal]
 

@@ -70,11 +70,16 @@ apps/
 │   │   └── Migrations/           # .sql embarqués (schéma dorloter_api), appliqués au démarrage
 │   └── tests/                    # xUnit + Testcontainers (PostGIS)
 │
-├── web/                          # Front SPA · React 19 + Vite (port 5173) · consomme /api/v1
+├── web/                          # Front SPA PUBLIC (vitrine adoptants) · React 19 + Vite (port 5173)
+├── pro/                          # Front SPA ESPACE PRO (consoles refuge/pension/véto + admin) · port 5174 · pro.dorloter.fr
 └── mobile/                       # Expo / React Native · client packages/api-client
 
-packages/api-client/             # Client openapi-fetch typé (généré depuis l'OpenAPI via `bun api:types`)
+packages/ui/                     # Design system partagé (primitives, Icon, thème CSS) · web + pro
+packages/client/                 # Couche API partagée (client JWT+refresh, types, modules domaine, auth, queryClient) · web + pro
+packages/api-client/             # Client openapi-fetch typé (mobile, généré depuis l'OpenAPI via `bun api:types`)
 ```
+
+**Deux fronts web** : `apps/web` (public, dorloter.fr) et `apps/pro` (back-office pros, pro.dorloter.fr), partageant `@dorloter/ui` + `@dorloter/client`. L'API (permissions par module) reste la frontière de sécurité, identique pour les deux.
 
 **Frontières inter-modules (API)** : un module n'accède à un autre QUE via son API publique exposée au niveau du package racine du module (ex. `ShelterDirectory`, `ShelterMembership`, `UserDirectory`), jamais via ses entités internes.
 
