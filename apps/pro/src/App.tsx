@@ -1,9 +1,26 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { ConsoleShell } from "@/components/ConsoleShell";
 import { LoginPage } from "@/pages/LoginPage";
-import { DashboardPage } from "@/pages/DashboardPage";
-import { PlaceholderPage } from "@/pages/PlaceholderPage";
+import { ConsoleHome } from "@/pages/ConsoleHome";
+
+// Console refuge
+import { ShelterConsoleLayout } from "@/pages/shelter/ShelterConsoleLayout";
+import { ShelterDashboardPage } from "@/pages/shelter/ShelterDashboardPage";
+import { ShelterAnnoncesPage } from "@/pages/shelter/ShelterAnnoncesPage";
+import { ShelterCandidaturesPage } from "@/pages/shelter/ShelterCandidaturesPage";
+import { ShelterAdoptionsPage } from "@/pages/shelter/ShelterAdoptionsPage";
+import { ShelterMessagesPage } from "@/pages/shelter/ShelterMessagesPage";
+import { ShelterFostersPage } from "@/pages/shelter/ShelterFostersPage";
+import { ShelterTeamPage } from "@/pages/shelter/ShelterTeamPage";
+import { ShelterProfilePage } from "@/pages/shelter/ShelterProfilePage";
+
+// Console pension
+import { PensionConsoleLayout } from "@/pages/pension/PensionConsoleLayout";
+import { PensionBookingsPage } from "@/pages/pension/PensionBookingsPage";
+
+// Console admin plateforme
+import { AdminConsoleLayout } from "@/pages/admin/AdminConsoleLayout";
+import { AdminModerationPage } from "@/pages/admin/AdminModerationPage";
 
 export function App() {
   return (
@@ -11,25 +28,36 @@ export function App() {
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route element={<ConsoleShell />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="annonces" element={<PlaceholderPage title="Annonces" />} />
-          <Route
-            path="candidatures"
-            element={<PlaceholderPage title="Candidatures" />}
-          />
-          <Route path="adoptions" element={<PlaceholderPage title="Adoptions" />} />
-          <Route
-            path="familles"
-            element={<PlaceholderPage title="Familles d'accueil" />}
-          />
-          <Route path="messages" element={<PlaceholderPage title="Messages" />} />
-          <Route path="equipe" element={<PlaceholderPage title="Équipe" />} />
-          <Route path="profil" element={<PlaceholderPage title="Profil" />} />
+        <Route index element={<ConsoleHome />} />
+
+        <Route path="/refuge" element={<ShelterConsoleLayout />}>
+          <Route index element={<ShelterDashboardPage />} />
+          <Route path="animaux" element={<ShelterAnnoncesPage />} />
+          <Route path="candidatures" element={<ShelterCandidaturesPage />} />
+          <Route path="adoptions" element={<ShelterAdoptionsPage />} />
+          <Route path="messages" element={<ShelterMessagesPage />} />
+          <Route path="familles" element={<ShelterFostersPage />} />
+          <Route path="equipe" element={<ShelterTeamPage />} />
+          <Route path="profil" element={<ShelterProfilePage />} />
+        </Route>
+
+        <Route path="/pension" element={<PensionConsoleLayout />}>
+          <Route index element={<PensionBookingsPage />} />
+        </Route>
+
+        <Route path="/admin" element={<AdminConsoleLayout />}>
+          <Route index element={<AdminModerationPage />} />
         </Route>
       </Route>
 
-      <Route path="*" element={<PlaceholderPage title="Page introuvable" />} />
+      <Route
+        path="*"
+        element={
+          <div className="grid min-h-screen place-items-center text-muted-foreground">
+            Page introuvable
+          </div>
+        }
+      />
     </Routes>
   );
 }
