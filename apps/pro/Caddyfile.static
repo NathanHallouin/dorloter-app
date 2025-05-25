@@ -1,0 +1,8 @@
+# Caddy interne au conteneur `pro` : sert la SPA espace pro en statique sur :80.
+# Routing client (React Router) : tout chemin inconnu retombe sur index.html.
+:80 {
+	root * /srv
+	encode zstd gzip
+	try_files {path} /index.html
+	file_server
+}

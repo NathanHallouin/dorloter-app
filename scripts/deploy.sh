@@ -27,8 +27,8 @@ fi
 export COMPOSE_PROJECT_NAME=dorloter-prod
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
 
-echo "📦 Build images web (SPA Vite) + api  (sur le VPS)…"
-$COMPOSE build web api
+echo "📦 Build images web + pro (SPA Vite) + api  (sur le VPS)…"
+$COMPOSE build web pro api
 
 echo "🗄  Services d'infra up (postgres + minio)…"
 $COMPOSE up -d postgres minio
@@ -53,8 +53,8 @@ echo "🔐 Grants PG (rôles dorloter_app / dorloter_admin)…"
 # Les migrations de schéma sont appliquées par l'API au démarrage
 # (DatabaseMigrator, fichiers .sql embarqués) via le rôle DDL
 # ConnectionStrings__Migrations. Pas d'étape de migration séparée ici.
-echo "🚀 Recreate web + api + caddy avec les nouvelles images…"
-$COMPOSE up -d --force-recreate --no-deps web api caddy
+echo "🚀 Recreate web + pro + api + caddy avec les nouvelles images…"
+$COMPOSE up -d --force-recreate --no-deps web pro api caddy
 
 echo "🧹 Nettoyage des images Docker orphelines…"
 docker image prune -f --filter "until=168h" > /dev/null || true
