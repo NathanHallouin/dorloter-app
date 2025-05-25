@@ -20,9 +20,15 @@ export const PRIMARY: NavGroup[] = [
 
 export const PRO_BY_ROLE: Record<string, { to: string; icon: string; label: string; desc: string }> = {
   shelter_admin: { to: "/refuge", icon: "shield", label: "Espace refuge", desc: "Gérer vos animaux" },
-  pension_admin: { to: "/pension/reservations", icon: "home", label: "Espace pension", desc: "Vos réservations" },
-  platform_admin: { to: "/admin/moderation", icon: "shieldCheck", label: "Administration", desc: "Modération & plateforme" },
+  pension_admin: { to: "/pension", icon: "home", label: "Espace pension", desc: "Vos réservations" },
+  platform_admin: { to: "/admin", icon: "shieldCheck", label: "Administration", desc: "Modération & plateforme" },
 };
+
+// L'espace pro est une application séparée (apps/pro), servie sur un autre
+// domaine. On y renvoie en navigation externe. En dev : localhost:5174.
+export const PRO_URL =
+  import.meta.env.VITE_PRO_URL ??
+  (import.meta.env.DEV ? "http://localhost:5174" : "https://pro.dorloter.fr");
 
 export const TILE: Record<string, string> = {
   coral: "bg-coral-50 text-coral-600 border-coral-300",

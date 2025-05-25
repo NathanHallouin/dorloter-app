@@ -7,7 +7,7 @@ import { notificationsApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { CommandPalette } from "@/components/CommandPalette";
-import { ghostBtn, PRIMARY, PRO_BY_ROLE, type NavGroup } from "./nav-data";
+import { ghostBtn, PRIMARY, PRO_BY_ROLE, PRO_URL, type NavGroup } from "./nav-data";
 import { useTheme } from "./useTheme";
 import { NavGroupLink } from "./NavGroupLink";
 import { NotifPopover } from "./NotifPopover";
@@ -45,6 +45,8 @@ export function Navbar() {
   const path = location.pathname;
   const groupActive = (g: NavGroup) => g.match.some((m) => path === m || path.startsWith(m + "/"));
   const go = (to: string) => { navigate(to); setMobileOpen(false); };
+  // L'espace pro est une autre application (autre domaine) : navigation externe.
+  const goPro = (to: string) => { window.location.href = `${PRO_URL}${to}`; };
   const onLogout = async () => { setPanel(null); await logout(); navigate("/"); };
   const pro = user ? PRO_BY_ROLE[user.role] : undefined;
   const isConsole = /^\/(refuge|pension|admin)(\/|$)/.test(path);
@@ -122,7 +124,7 @@ export function Navbar() {
                     <Row icon="inbox" label="Mes candidatures" onClick={() => go("/mes-candidatures")} />
                     <Row icon="calendar" label="Mes réservations" onClick={() => go("/mes-reservations")} />
                     <Row icon="home" label="Famille d'accueil" onClick={() => go("/famille-accueil")} />
-                    {pro && (<><Divider /><Label>Espace professionnel</Label><Row icon={pro.icon} label={pro.label} sub={pro.desc} tone="prune" onClick={() => go(pro.to)} /></>)}
+                    {pro && (<><Divider /><Label>Espace professionnel</Label><Row icon={pro.icon} label={pro.label} sub={pro.desc} tone="prune" onClick={() => goPro(pro.to)} /></>)}
                     <Divider />
                     <Row icon={dark ? "sun" : "moon"} label={dark ? "Thème clair" : "Thème sombre"} tone="lavande" onClick={toggle} />
                     <Row icon="logout" label="Se déconnecter" tone="brick" onClick={onLogout} />
@@ -166,7 +168,7 @@ export function Navbar() {
                   </button>
                 ))}
                 {pro && (
-                  <button onClick={() => go(pro.to)} className="flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-left">
+                  <button onClick={() => goPro(pro.to)} className="flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-left">
                     <span className="grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border border-prune-300 bg-prune-50 text-prune-600"><Icon name={pro.icon} size={15} /></span>
                     <span className="text-[14px] font-semibold text-foreground">{pro.label}</span>
                   </button>

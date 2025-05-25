@@ -8,9 +8,7 @@ import { PetDetailPage } from "@/pages/PetDetailPage";
 import { PensionsPage } from "@/pages/PensionsPage";
 import { PensionDetailPage } from "@/pages/PensionDetailPage";
 import { MyBookingsPage } from "@/pages/MyBookingsPage";
-import { PensionBookingsPage } from "@/pages/pension/PensionBookingsPage";
 import { ProfilePage } from "@/pages/ProfilePage";
-import { AdminModerationPage } from "@/pages/admin/AdminModerationPage";
 import { VetsPage } from "@/pages/VetsPage";
 import { VetDetailPage } from "@/pages/VetDetailPage";
 import { SheltersPage } from "@/pages/SheltersPage";
@@ -23,15 +21,6 @@ import { MyFosterPage } from "@/pages/MyFosterPage";
 import { ApplicationsPage } from "@/pages/ApplicationsPage";
 import { MessagesPage } from "@/pages/MessagesPage";
 import { NotificationsPage } from "@/pages/NotificationsPage";
-import { ShelterConsoleLayout } from "@/pages/shelter/ShelterConsoleLayout";
-import { ShelterDashboardPage } from "@/pages/shelter/ShelterDashboardPage";
-import { ShelterAnnoncesPage } from "@/pages/shelter/ShelterAnnoncesPage";
-import { ShelterCandidaturesPage } from "@/pages/shelter/ShelterCandidaturesPage";
-import { ShelterAdoptionsPage } from "@/pages/shelter/ShelterAdoptionsPage";
-import { ShelterProfilePage } from "@/pages/shelter/ShelterProfilePage";
-import { ShelterMessagesPage } from "@/pages/shelter/ShelterMessagesPage";
-import { ShelterTeamPage } from "@/pages/shelter/ShelterTeamPage";
-import { ShelterFostersPage } from "@/pages/shelter/ShelterFostersPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -46,6 +35,8 @@ const ReportDetailPage = lazy(() =>
 const CreateReportPage = lazy(() =>
   import("@/pages/CreateReportPage").then((m) => ({ default: m.CreateReportPage })),
 );
+
+// Les consoles pro (refuge, pension, admin plateforme) vivent dans apps/pro.
 
 export function App() {
   return (
@@ -79,18 +70,6 @@ export function App() {
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/messages/:id" element={<MessagesPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/refuge" element={<ShelterConsoleLayout />}>
-              <Route index element={<ShelterDashboardPage />} />
-              <Route path="animaux" element={<ShelterAnnoncesPage />} />
-              <Route path="candidatures" element={<ShelterCandidaturesPage />} />
-              <Route path="adoptions" element={<ShelterAdoptionsPage />} />
-              <Route path="messages" element={<ShelterMessagesPage />} />
-              <Route path="familles" element={<ShelterFostersPage />} />
-              <Route path="equipe" element={<ShelterTeamPage />} />
-              <Route path="profil" element={<ShelterProfilePage />} />
-            </Route>
-            <Route path="/pension/reservations" element={<PensionBookingsPage />} />
-            <Route path="/admin/moderation" element={<AdminModerationPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
