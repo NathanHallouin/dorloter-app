@@ -10,6 +10,7 @@ import { ShelterDashboardPage } from "@/pages/shelter/ShelterDashboardPage";
 import { ShelterAnnoncesPage } from "@/pages/shelter/ShelterAnnoncesPage";
 import { ShelterCandidaturesPage } from "@/pages/shelter/ShelterCandidaturesPage";
 import { ShelterAdoptionsPage } from "@/pages/shelter/ShelterAdoptionsPage";
+import { ShelterContractsPage } from "@/pages/shelter/ShelterContractsPage";
 import { ShelterMessagesPage } from "@/pages/shelter/ShelterMessagesPage";
 import { ShelterFostersPage } from "@/pages/shelter/ShelterFostersPage";
 import { ShelterTeamPage } from "@/pages/shelter/ShelterTeamPage";
@@ -37,6 +38,7 @@ export function App() {
           <Route path="animaux" element={<ShelterAnnoncesPage />} />
           <Route path="candidatures" element={<ShelterCandidaturesPage />} />
           <Route path="adoptions" element={<ShelterAdoptionsPage />} />
+          <Route path="contrats" element={<ShelterContractsPage />} />
           <Route path="messages" element={<ShelterMessagesPage />} />
           <Route path="familles" element={<ShelterFostersPage />} />
           <Route path="equipe" element={<ShelterTeamPage />} />

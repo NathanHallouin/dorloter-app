@@ -14,6 +14,7 @@ export function ShelterConsoleLayout() {
     { to: "/refuge/animaux", label: "Mes annonces", icon: "heart" },
     { to: "/refuge/candidatures", label: "Candidatures", icon: "inbox", count: pending },
     { to: "/refuge/adoptions", label: "Adoptions", icon: "badgeCheck" },
+    { to: "/refuge/contrats", label: "Contrats", icon: "shieldCheck" },
     { to: "/refuge/familles", label: "Familles d'accueil", icon: "home" },
     { to: "/refuge/messages", label: "Messagerie", icon: "message" },
     { to: "/refuge/equipe", label: "Équipe", icon: "users" },
