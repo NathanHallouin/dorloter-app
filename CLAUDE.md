@@ -364,7 +364,7 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 ```bash
 # Base de données + stockage (à la racine)
 docker compose up -d                          # PostgreSQL + PostGIS (port 5438) + MinIO
-bun db:seed                                   # seed données de test (via apps/web/Drizzle)
+bun db:seed                                   # seed données de test (scripts/seed.sql, idempotent)
 
 # API · apps/api (port 8080)
 cd apps/api

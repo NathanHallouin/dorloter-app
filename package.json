@@ -14,6 +14,7 @@
     "lint": "bun run --filter='*' lint",
     "typecheck": "bun run --filter='*' typecheck",
     "db:init-roles": "docker compose -f docker-compose.yml exec -T postgres psql -U dorloter -d dorloter < scripts/init-db-roles.sql",
+    "db:seed": "docker compose -f docker-compose.yml exec -T postgres psql -U dorloter -d dorloter < scripts/seed.sql",
     "api:types": "bun scripts/generate-api-types.ts",
     "mobile:assets": "bun scripts/generate-mobile-assets.ts",
     "mobile:build": "./scripts/mobile-build.sh",
