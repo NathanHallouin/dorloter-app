@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { RequirePro } from "@/components/RequirePro";
 import { LoginPage } from "@/pages/LoginPage";
 import { ConsoleHome } from "@/pages/ConsoleHome";
 
@@ -28,6 +29,7 @@ export function App() {
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<ProtectedRoute />}>
+        <Route element={<RequirePro />}>
         <Route index element={<ConsoleHome />} />
 
         <Route path="/refuge" element={<ShelterConsoleLayout />}>
@@ -47,6 +49,7 @@ export function App() {
 
         <Route path="/admin" element={<AdminConsoleLayout />}>
           <Route index element={<AdminModerationPage />} />
+        </Route>
         </Route>
       </Route>
 
