@@ -23,6 +23,7 @@ export * from "./api/foster";
 export * from "./api/messaging";
 export * from "./api/moderation";
 export * from "./api/notifications";
+export * from "./api/contracts";
 
 // Auth & data layer
 export * from "./auth/AuthContext";

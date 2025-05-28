@@ -74,6 +74,27 @@ INSERT INTO pets (id, shelter_id, species, name, description, breed, color, sex,
    false, true, true, 'oui', 'non', 'inconnu', 'disponible', 100.00, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
+-- ─── Famille d'accueil + candidature acceptée (de quoi générer des contrats) ──
+INSERT INTO users (id, email, email_verified, name, role, is_public, created_at, updated_at) VALUES
+  ('d0000000-0000-0000-0000-000000000008', 'marie.lambert@dorloter.fr', true, 'Marie Lambert', 'user', false, now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO accounts (id, user_id, account_id, provider_id, password, created_at, updated_at)
+SELECT gen_random_uuid(), u.id, u.id::text, 'credential', :'pwd', now(), now()
+FROM users u
+WHERE u.email = 'marie.lambert@dorloter.fr'
+  AND NOT EXISTS (SELECT 1 FROM accounts a WHERE a.user_id = u.id AND a.provider_id = 'credential');
+
+INSERT INTO foster_families (id, shelter_id, user_id, source, status, city, capacity, accepts_cats, accepts_dogs, created_at, updated_at) VALUES
+  ('f1000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000008',
+   'shelter', 'active', 'Lyon', 2, true, true, now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO applications (id, pet_id, user_id, status, motivation, created_at, updated_at) VALUES
+  ('a1000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004',
+   'acceptee', 'Famille avec jardin, présente en journée. Coup de cœur pour Minette.', now(), now())
+ON CONFLICT (id) DO NOTHING;
+
 COMMIT;
 
 \echo 'Seed appliqué. Comptes (mot de passe motdepasse12) :'

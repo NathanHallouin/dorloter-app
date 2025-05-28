@@ -449,3 +449,61 @@ export interface Notification {
   isRead: boolean;
   createdAt: string;
 }
+
+// ─── Contrats (adoption / convention famille d'accueil) ──────────────────────
+
+export type ContractType = "adoption" | "foster";
+export type ContractStatus =
+  | "brouillon"
+  | "envoye"
+  | "signe"
+  | "active"
+  | "terminee"
+  | "resilie"
+  | "annule";
+
+export interface Contract {
+  id: string;
+  type: ContractType;
+  status: ContractStatus;
+  reference: string;
+  petId: string | null;
+  userId: string;
+  applicationId: string | null;
+  fosterFamilyId: string | null;
+  effectiveDate: string | null;
+  endDate: string | null;
+  adoptionFee: number | null;
+  terms: Record<string, unknown>;
+  notes: string | null;
+  signedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAdoptionContractInput {
+  applicationId?: string;
+  petId?: string;
+  userId?: string;
+  adoptionFee?: number;
+  effectiveDate?: string;
+  terms?: Record<string, unknown>;
+  notes?: string;
+}
+
+export interface CreateFosterContractInput {
+  fosterFamilyId: string;
+  petId?: string;
+  effectiveDate?: string;
+  endDate?: string;
+  terms?: Record<string, unknown>;
+  notes?: string;
+}
+
+export interface UpdateContractInput {
+  adoptionFee?: number;
+  effectiveDate?: string;
+  endDate?: string;
+  terms?: Record<string, unknown>;
+  notes?: string;
+}
