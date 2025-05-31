@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { shelterApi } from "@dorloter/client";
+import { shelterApi, contractsApi } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Btn } from "@dorloter/ui";
 import { Stat, Panel, Tag, Bars, MiniBtn, DashPageHead, Table, Td } from "@/components/dash/kit";
@@ -8,9 +8,11 @@ import { Stat, Panel, Tag, Bars, MiniBtn, DashPageHead, Table, Td } from "@/comp
 export function ShelterDashboardPage() {
   const pets = useQuery({ queryKey: ["shelter-pets"], queryFn: () => shelterApi.pets() });
   const apps = useQuery({ queryKey: ["shelter-applications"], queryFn: () => shelterApi.applications() });
+  const contracts = useQuery({ queryKey: ["shelter-contracts"], queryFn: () => contractsApi.list() });
 
   const petsList = pets.data ?? [];
   const appsList = apps.data ?? [];
+  const toSign = (contracts.data ?? []).filter((c) => c.status === "brouillon" || c.status === "envoye").length;
   const online = petsList.filter((p) => p.status === "disponible").length;
   const pending = appsList.filter((a) => a.status === "envoyee" || a.status === "en_cours").length;
   const adopted = petsList.filter((p) => p.status === "adopte").length;
@@ -27,7 +29,7 @@ export function ShelterDashboardPage() {
         <Stat icon="heart" label="Animaux en ligne" value={String(online)} sub={`${petsList.length} au total`} />
         <Stat icon="inbox" label="Candidatures à traiter" value={String(pending)} tone="brick" sub={pending > 0 ? "à étudier" : "rien en attente"} />
         <Stat icon="badgeCheck" label="Adoptions finalisées" value={String(adopted)} tone="lavande" />
-        <Stat icon="eye" label="Statut du refuge" value="✓" tone="prune" sub="vérifié" />
+        <Link to="/refuge/contrats"><Stat icon="shieldCheck" label="Contrats à signer" value={String(toSign)} tone="prune" sub={toSign > 0 ? "à finaliser" : "à jour"} /></Link>
       </div>
       <div className="dash-split grid grid-cols-[1fr_340px] items-start gap-[18px]">
         <Panel title="Candidatures récentes" hint="Les plus récentes en premier" action={<Link to="/refuge/candidatures"><MiniBtn label="Tout voir" icon="arrow" /></Link>} pad={false}>

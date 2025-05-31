@@ -37,7 +37,13 @@ const FILTERS: [string, string][] = [
   ["foster", "Famille d'accueil"],
 ];
 
-type Draft = { terms: Record<string, boolean>; notes: string };
+type Draft = {
+  terms: Record<string, boolean>;
+  notes: string;
+  adoptionFee?: number;
+  effectiveDate?: string;
+  endDate?: string;
+};
 
 export function ShelterContractsPage() {
   const qc = useQueryClient();
@@ -56,7 +62,8 @@ export function ShelterContractsPage() {
   const createFoster = useMutation({ mutationFn: (v: { fosterFamilyId: string; petId?: string }) => contractsApi.createFoster(v), onSuccess: invalidate });
   const setStatus = useMutation({ mutationFn: ({ id, status }: { id: string; status: ContractStatus }) => contractsApi.setStatus(id, status), onSuccess: invalidate });
   const update = useMutation({
-    mutationFn: ({ id, d }: { id: string; d: Draft }) => contractsApi.update(id, { terms: d.terms, notes: d.notes }),
+    mutationFn: ({ id, d }: { id: string; d: Draft }) =>
+      contractsApi.update(id, { terms: d.terms, notes: d.notes, adoptionFee: d.adoptionFee, effectiveDate: d.effectiveDate, endDate: d.endDate }),
     onSuccess: () => { invalidate(); setDraft(null); },
   });
 
@@ -73,7 +80,13 @@ export function ShelterContractsPage() {
     if (c.status === "brouillon") {
       const terms: Record<string, boolean> = {};
       for (const cl of clausesFor(c.type)) terms[cl.key] = Boolean((c.terms ?? {})[cl.key]);
-      setDraft({ terms, notes: c.notes ?? "" });
+      setDraft({
+        terms,
+        notes: c.notes ?? "",
+        adoptionFee: c.adoptionFee ?? undefined,
+        effectiveDate: c.effectiveDate ?? undefined,
+        endDate: c.endDate ?? undefined,
+      });
     } else {
       setDraft(null);
     }
@@ -186,6 +199,24 @@ export function ShelterContractsPage() {
                           <span>{cl.label}</span>
                         </label>
                       ))}
+                    </div>
+                    <div className="mt-3 grid gap-3 md:grid-cols-3">
+                      {c.type === "adoption" && (
+                        <label className="text-xs text-muted-foreground">
+                          Frais d'adoption (€)
+                          <input type="number" min="0" step="1" value={draft.adoptionFee ?? ""} onChange={(e) => setDraft((d) => d && ({ ...d, adoptionFee: e.target.value === "" ? undefined : Number(e.target.value) }))} className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                        </label>
+                      )}
+                      <label className="text-xs text-muted-foreground">
+                        {c.type === "adoption" ? "Date d'adoption" : "Début d'accueil"}
+                        <input type="date" value={draft.effectiveDate ?? ""} onChange={(e) => setDraft((d) => d && ({ ...d, effectiveDate: e.target.value || undefined }))} className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                      </label>
+                      {c.type === "foster" && (
+                        <label className="text-xs text-muted-foreground">
+                          Fin prévue
+                          <input type="date" value={draft.endDate ?? ""} onChange={(e) => setDraft((d) => d && ({ ...d, endDate: e.target.value || undefined }))} className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                        </label>
+                      )}
                     </div>
                     <textarea
                       value={draft.notes}
