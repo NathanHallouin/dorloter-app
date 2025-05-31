@@ -468,9 +468,13 @@ export interface Contract {
   status: ContractStatus;
   reference: string;
   petId: string | null;
+  petName: string | null;
   userId: string;
+  adopterName: string | null;
+  adopterEmail: string | null;
   applicationId: string | null;
   fosterFamilyId: string | null;
+  shelterName: string | null;
   effectiveDate: string | null;
   endDate: string | null;
   adoptionFee: number | null;

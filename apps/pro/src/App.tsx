@@ -11,6 +11,7 @@ import { ShelterAnnoncesPage } from "@/pages/shelter/ShelterAnnoncesPage";
 import { ShelterCandidaturesPage } from "@/pages/shelter/ShelterCandidaturesPage";
 import { ShelterAdoptionsPage } from "@/pages/shelter/ShelterAdoptionsPage";
 import { ShelterContractsPage } from "@/pages/shelter/ShelterContractsPage";
+import { ContractDocumentPage } from "@/pages/shelter/ContractDocumentPage";
 import { ShelterMessagesPage } from "@/pages/shelter/ShelterMessagesPage";
 import { ShelterFostersPage } from "@/pages/shelter/ShelterFostersPage";
 import { ShelterTeamPage } from "@/pages/shelter/ShelterTeamPage";
@@ -32,6 +33,9 @@ export function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<RequirePro />}>
         <Route index element={<ConsoleHome />} />
+
+        {/* Document imprimable : hors shell console (impression propre, sans sidebar). */}
+        <Route path="/refuge/contrats/:id/document" element={<ContractDocumentPage />} />
 
         <Route path="/refuge" element={<ShelterConsoleLayout />}>
           <Route index element={<ShelterDashboardPage />} />

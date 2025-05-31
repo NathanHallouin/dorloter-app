@@ -9,6 +9,7 @@ import {
 } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { clausesFor } from "./contract-clauses";
 
 const STATUS_LABEL: Record<ContractStatus, string> = {
   brouillon: "Brouillon",
@@ -36,10 +37,14 @@ const FILTERS: [string, string][] = [
   ["foster", "Famille d'accueil"],
 ];
 
+type Draft = { terms: Record<string, boolean>; notes: string };
+
 export function ShelterContractsPage() {
   const qc = useQueryClient();
   const [f, setF] = useState("tous");
   const [open, setOpen] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [fosterPet, setFosterPet] = useState<Record<string, string>>({});
 
   const contracts = useQuery({ queryKey: ["shelter-contracts"], queryFn: () => contractsApi.list() });
   const pets = useQuery({ queryKey: ["shelter-pets"], queryFn: () => shelterApi.pets() });
@@ -48,15 +53,31 @@ export function ShelterContractsPage() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["shelter-contracts"] });
   const createAdoption = useMutation({ mutationFn: (applicationId: string) => contractsApi.createAdoption({ applicationId }), onSuccess: invalidate });
-  const createFoster = useMutation({ mutationFn: (fosterFamilyId: string) => contractsApi.createFoster({ fosterFamilyId }), onSuccess: invalidate });
+  const createFoster = useMutation({ mutationFn: (v: { fosterFamilyId: string; petId?: string }) => contractsApi.createFoster(v), onSuccess: invalidate });
   const setStatus = useMutation({ mutationFn: ({ id, status }: { id: string; status: ContractStatus }) => contractsApi.setStatus(id, status), onSuccess: invalidate });
+  const update = useMutation({
+    mutationFn: ({ id, d }: { id: string; d: Draft }) => contractsApi.update(id, { terms: d.terms, notes: d.notes }),
+    onSuccess: () => { invalidate(); setDraft(null); },
+  });
 
   const petName = (id: string | null) => (id ? (pets.data ?? []).find((p) => p.id === id)?.name ?? "Animal" : "—");
   const list = (contracts.data ?? []).filter((c) => f === "tous" || c.type === f);
 
-  // Candidatures acceptées sans contrat encore généré.
   const withContract = new Set((contracts.data ?? []).map((c) => c.applicationId).filter(Boolean));
   const toGenerate = (apps.data ?? []).filter((a) => a.status === "acceptee" && !withContract.has(a.id));
+  const availablePets = (pets.data ?? []).filter((p) => p.status === "disponible" || p.status === "reserve");
+
+  const openContract = (c: Contract) => {
+    if (open === c.id) { setOpen(null); setDraft(null); return; }
+    setOpen(c.id);
+    if (c.status === "brouillon") {
+      const terms: Record<string, boolean> = {};
+      for (const cl of clausesFor(c.type)) terms[cl.key] = Boolean((c.terms ?? {})[cl.key]);
+      setDraft({ terms, notes: c.notes ?? "" });
+    } else {
+      setDraft(null);
+    }
+  };
 
   const actions = (c: Contract) => {
     const b: { label: string; status: ContractStatus; tone?: "green" | "brick" | "sable" }[] = [];
@@ -78,7 +99,6 @@ export function ShelterContractsPage() {
         desc="Contrats d'adoption et conventions de famille d'accueil. À la signature d'une adoption, l'animal passe « adopté »."
       />
 
-      {/* Génération */}
       <Panel title="Générer un contrat" hint="Depuis une candidature acceptée ou une famille d'accueil">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -97,14 +117,23 @@ export function ShelterContractsPage() {
             {(fosters.data ?? []).map((fam) => (
               <div key={fam.id} className="mb-2 flex items-center justify-between gap-3 rounded-field border border-line px-3 py-2">
                 <span className="text-sm">{fam.name ?? "Famille d'accueil"}</span>
-                <MiniBtn label="Convention" icon="home" onClick={() => createFoster.mutate(fam.id)} disabled={createFoster.isPending} />
+                <div className="flex items-center gap-2">
+                  <select
+                    value={fosterPet[fam.id] ?? ""}
+                    onChange={(e) => setFosterPet((m) => ({ ...m, [fam.id]: e.target.value }))}
+                    className="rounded-field border border-line bg-background px-2 py-1 text-xs"
+                  >
+                    <option value="">Animal (optionnel)</option>
+                    {availablePets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                  <MiniBtn label="Convention" icon="home" onClick={() => createFoster.mutate({ fosterFamilyId: fam.id, petId: fosterPet[fam.id] || undefined })} disabled={createFoster.isPending} />
+                </div>
               </div>
             ))}
           </div>
         </div>
       </Panel>
 
-      {/* Liste */}
       <div className="mb-4 mt-6 flex flex-wrap gap-2">
         {FILTERS.map(([v, l]) => (
           <button key={v} onClick={() => setF(v)} className={cn("h-[34px] cursor-pointer rounded-[8px] border px-[13px] text-[13px] font-semibold", f === v ? "border-coral-600 bg-coral-600 text-sable-50" : "border-line bg-card text-muted-foreground")}>{l}</button>
@@ -120,32 +149,69 @@ export function ShelterContractsPage() {
             <div className="flex flex-wrap items-center gap-3">
               <span className="mono text-[12px] font-semibold text-foreground">{c.reference}</span>
               <span className="mono text-[11px] uppercase tracking-wide text-muted-foreground">
-                {c.type === "adoption" ? "Adoption" : "Famille d'accueil"} · {petName(c.petId)}
+                {c.type === "adoption" ? "Adoption" : "Famille d'accueil"} · {c.petName ?? petName(c.petId)}
               </span>
+              {c.adopterName && <span className="text-[12px] text-muted-foreground">{c.adopterName}</span>}
               <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-semibold", STATUS_TONE[c.status])}>{STATUS_LABEL[c.status]}</span>
               {c.adoptionFee != null && <span className="text-[12px] text-muted-foreground">{c.adoptionFee} €</span>}
-              <div className="ml-auto flex gap-2">
-                <MiniBtn label={open === c.id ? "Masquer" : "Clauses"} icon="sliders" onClick={() => setOpen(open === c.id ? null : c.id)} />
+              <div className="ml-auto flex items-center gap-2">
+                <MiniBtn label={open === c.id ? "Masquer" : "Clauses"} icon="sliders" onClick={() => openContract(c)} />
+                <a
+                  href={`/refuge/contrats/${c.id}/document`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-line bg-card px-3 text-[13px] font-semibold text-muted-foreground hover:text-foreground"
+                >
+                  Document
+                </a>
                 {actions(c).map((a) => (
                   <MiniBtn key={a.status} label={a.label} icon="check" tone={a.tone} onClick={() => setStatus.mutate({ id: c.id, status: a.status })} disabled={setStatus.isPending} />
                 ))}
               </div>
             </div>
+
             {open === c.id && (
               <div className="mt-3 border-t border-line pt-3 text-[13px]">
-                {Object.keys(c.terms).length === 0 ? (
-                  <p className="text-muted-foreground">Aucune clause renseignée.</p>
+                {draft && c.status === "brouillon" ? (
+                  <div>
+                    <div className="grid gap-1.5 md:grid-cols-2">
+                      {clausesFor(c.type).map((cl) => (
+                        <label key={cl.key} className="flex cursor-pointer items-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={draft.terms[cl.key] ?? false}
+                            onChange={(e) => setDraft((d) => d && ({ ...d, terms: { ...d.terms, [cl.key]: e.target.checked } }))}
+                            className="mt-0.5"
+                          />
+                          <span>{cl.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <textarea
+                      value={draft.notes}
+                      onChange={(e) => setDraft((d) => d && ({ ...d, notes: e.target.value }))}
+                      placeholder="Notes / clauses particulières…"
+                      className="mt-3 w-full rounded-field border border-line bg-background px-3 py-2"
+                      rows={2}
+                    />
+                    <div className="mt-2">
+                      <MiniBtn label="Enregistrer les clauses" icon="check" tone="green" onClick={() => update.mutate({ id: c.id, d: draft })} disabled={update.isPending} />
+                    </div>
+                  </div>
                 ) : (
                   <ul className="grid gap-1 md:grid-cols-2">
-                    {Object.entries(c.terms).map(([k, v]) => (
-                      <li key={k} className="flex justify-between gap-3 border-b border-line/60 py-1">
-                        <span className="text-muted-foreground">{k}</span>
-                        <span className="font-medium">{typeof v === "boolean" ? (v ? "Oui" : "Non") : String(v)}</span>
-                      </li>
-                    ))}
+                    {clausesFor(c.type).map((cl) => {
+                      const on = Boolean((c.terms ?? {})[cl.key]);
+                      return (
+                        <li key={cl.key} className="flex items-start gap-2">
+                          <span className="mono mt-0.5 text-muted-foreground">{on ? "[x]" : "[ ]"}</span>
+                          <span className={on ? "" : "text-muted-foreground"}>{cl.label}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
-                {c.notes && <p className="mt-2 text-muted-foreground">{c.notes}</p>}
+                {c.notes && c.status !== "brouillon" && <p className="mt-2 text-muted-foreground">{c.notes}</p>}
               </div>
             )}
           </div>
