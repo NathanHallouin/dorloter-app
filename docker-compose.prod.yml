@@ -77,7 +77,14 @@ services:
       Dorloter__Security__Jwt__Issuer: "dorloter-api"
       Dorloter__Security__Jwt__AccessTokenTtl: "00:15:00"
       Dorloter__Security__Jwt__RefreshTokenTtl: "30.00:00:00"
-      Dorloter__Security__CorsAllowedOrigins: "https://${DOMAIN}"
+      Dorloter__Security__CorsAllowedOrigins: "https://${DOMAIN},https://pro.${DOMAIN}"
+      # Email transactionnel (SMTP) · ex. Brevo : smtp-relay.brevo.com:587.
+      Dorloter__Email__Host: ${EMAIL_SMTP_HOST:-}
+      Dorloter__Email__Port: ${EMAIL_SMTP_PORT:-587}
+      Dorloter__Email__User: ${EMAIL_SMTP_USER:-}
+      Dorloter__Email__Password: ${EMAIL_SMTP_PASSWORD:-}
+      Dorloter__Email__FromEmail: ${EMAIL_FROM:-no-reply@${DOMAIN}}
+      Dorloter__Email__FromName: ${EMAIL_FROM_NAME:-Dorloter}
       ASPNETCORE_ENVIRONMENT: "Production"
       ASPNETCORE_URLS: "http://+:8080"
     depends_on:
