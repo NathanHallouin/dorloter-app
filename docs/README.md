@@ -1,6 +1,6 @@
 # Documentation Dorloter
 
-Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'animaux domestiques (chats et chiens, extensible aux NAC), complétée d'un **annuaire de pensions professionnelles** agréées. Le produit s'appuie sur une **API** (`apps/api`, le service API, routes `/api/v1`), un **front web SPA** React + Vite (`apps/web`) et une **app mobile** Expo (`apps/mobile`), avec Postgres/PostGIS et un stockage S3-compatible (MinIO/Scaleway).
+Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'animaux domestiques (chats et chiens, extensible aux NAC), complétée d'un **annuaire de pensions professionnelles** agréées et d'un **annuaire vétérinaire**. Le produit s'appuie sur une **API** (`apps/api`, le service API, routes `/api/v1`), une **SPA publique** React + Vite (`apps/web`, `dorloter.fr`), une **SPA espace pro** (`apps/pro`, `pro.dorloter.fr`) et une **app mobile** Expo (`apps/mobile`). Les deux fronts web partagent leur design system (`packages/ui`) et leur couche d'accès API (`packages/client`). Postgres/PostGIS pour les données, MinIO/Scaleway pour le stockage S3-compatible, Caddy en reverse proxy.
 
 > La **source de vérité** du projet (stack, modèle de données, conventions) est le fichier **[../CLAUDE.md](../CLAUDE.md)** à la racine du dépôt. Les documents `docs/` ci-dessous apportent du détail, du contexte et de l'historique. Plusieurs documents de conception ont été rédigés à l'époque de l'ancien front Next.js (retiré) : ils portent un encart de contexte en tête précisant ce qui reste valable et ce qui est caduc.
 
@@ -8,10 +8,12 @@ Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'
 
 | Document | Description |
 |---|---|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Réflexion sur le monolithe modulaire à bounded contexts et les frontières inter-modules (proposition d'origine, réalisée dans l'API). |
-| [SERVICES-API.md](./SERVICES-API.md) | Pattern services + contrat d'API REST (versioning, enveloppe `{ data }` / `{ error }`, pagination cursor, DTO). Conventions toujours valables, exemples de code historiques. |
-| [MESSAGING.md](./MESSAGING.md) | Design de la messagerie 1-to-1 (flux, modèle de données, réactions). L'implémentation actuelle est en polling côté API. |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture de référence : monorepo bun workspaces (apps/api NestJS, apps/web, apps/pro, apps/mobile), packages partagés (ui, client, api-client), modules de l'API, séparation public/pro, déploiement, gaps. |
+| [SERVICES-API.md](./SERVICES-API.md) | Pattern services + contrat d'API REST (versioning, enveloppe `{ data }` / `{ error }`, pagination cursor, DTO). |
+| [MESSAGING.md](./MESSAGING.md) | Design de la messagerie 1-to-1 (flux, modèle de données, réactions). Implémentation en polling côté API. |
 | [GAMIFICATION.md](./GAMIFICATION.md) | Stratégie d'engagement : crédits de résolution, badges de contribution, garde-fous anti dark-patterns. |
+| [CONTRATS.md](./CONTRATS.md) | Système de contrats du module Adoption : table `contracts` (type adoption / foster), contrats d'adoption et conventions de famille d'accueil. |
+| [EMAIL.md](./EMAIL.md) | Email transactionnel : `IEmailSender` SMTP (SMTP), provider-agnostique (Brevo, OVH, Scaleway TEM, Postfix), templates et déclencheurs. |
 
 ## Infrastructure & déploiement
 

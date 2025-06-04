@@ -1,152 +1,95 @@
 # Configuration des variables d'environnement
 
-> **Stack actuelle** : ce guide a été rédigé pour l'ancien front Next.js (auth
-> Better Auth, ORM Drizzle, runtime Bun), désormais retiré. Le stack en vigueur
-> est : **API** (`apps/api`, auth **JWT**), **front SPA React + Vite**
-> (`apps/web`), **mobile Expo** (`apps/mobile`). Les variables réellement
-> utilisées aujourd'hui sont décrites dans **[CLAUDE.md](../CLAUDE.md)** (section
-> « Variables d'environnement ») : `ConnectionStrings__Default`,
-> `Dorloter__Security__Jwt__Secret`, `Dorloter__Security__Jwt__Issuer`,
-> `Dorloter__Security__CorsAllowedOrigins` côté API ; `VITE_API_PROXY`,
-> `VITE_MAPTILER_KEY` côté web ; `EXPO_PUBLIC_API_BASE_URL` côté mobile.
-> Les sections ci-dessous sur l'object storage (S3/MinIO), la cartographie,
-> le Web Push, l'email et les backups restent valables sur le principe ; seuls
-> les noms de variables et les commandes liées à Better Auth / Drizzle / Bun
-> ont changé.
-
-Guide pas-à-pas pour remplir la configuration en dev et en prod.
+Stack en vigueur : **API** (`apps/api`, auth **JWT**), **front public** (`apps/web`), **espace pro** (`apps/pro`), **mobile Expo** (`apps/mobile`). En dev, les défauts sont dans `apps/api/src/apps/api/appsettings.json` ; en prod, tout passe par `.env.production` (voir `.env.production.example`).
 
 ## TL;DR
 
 ### Dev
 
 ```bash
-cp .env.local.example .env.local
-# Générer le secret Better Auth :
-echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> .env.local
-# (Optionnel) Générer les clés VAPID pour les Web Push :
-bun x web-push generate-vapid-keys
-# Puis coller dans .env.local
-
-docker compose up -d
-bun db:migrate
-bun db:init-roles
-bun db:seed
-bun dev
+docker compose up -d                          # Postgres/PostGIS (:5438) + MinIO
+cd apps/api && bun dev   # migre le schéma au démarrage
+bun db:seed                                   # données de test (idempotent)
+cd apps/web && bun dev                        # vitrine    :5173
+cd apps/pro && bun dev                        # espace pro :5174
 ```
+
+En dev, aucun secret n'est requis : `appsettings.json` fournit des valeurs locales (DB `dorloter`, secret JWT de dev, email désactivé donc loggé).
 
 ### Prod
 
 ```bash
-cp .env.production.example .env.production
-# Remplir TOUS les __REPLACE_*__ ci-dessous
-bun prod:build
-bun prod:up
-bun prod:migrate
-bun prod:init-roles
+cp .env.production.example .env.production     # remplir tous les __REPLACE_*__
+bun prod:init-roles                            # crée/rote les rôles PG dorloter_app / dorloter_admin
+bun prod:build && bun prod:up                  # build + démarre la stack (l'API migre au démarrage)
 ```
+
+Pas d'étape de migration séparée : l'API applique ses migrations SQL au démarrage (`DatabaseMigrator`).
 
 ---
 
 ## Variables par section
 
-### 1. Postgres — 3 connexions
+### 1. Postgres
 
-Le projet utilise trois rôles Postgres distincts pour la défense en profondeur (voir [scripts/init-db-roles.sql](../scripts/init-db-roles.sql)).
+L'app utilise des rôles à privilèges restreints (défense en profondeur, voir [scripts/init-db-roles.sql](../scripts/init-db-roles.sql)).
 
-| Variable | Dev | Prod | Rôle |
-|---|---|---|---|
-| `DATABASE_URL` | `dorloter_app:dorloter_app@localhost:5438` | `dorloter_app:<pass>@postgres:5432` | App publique (CRUD restreint : pas d'UPDATE sur `users.role`, `shelters.is_verified`, etc.) |
-| `DATABASE_URL_ADMIN` | `dorloter_admin:dorloter_admin@localhost:5438` | `dorloter_admin:<pass>@postgres:5432` | Opérations platform_admin (écritures privilégiées) |
-| `DATABASE_URL_MIGRATIONS` | `dorloter:dorloter@localhost:5438` | `dorloter:<pass>@postgres:5432` | Rôle DDL · migrations SQL embarquées de l'API (appliquées au démarrage). Côté NestJS : `ConnectionStrings__Migrations` |
+| Variable | Rôle |
+|---|---|
+| `POSTGRES_SUPERUSER` / `POSTGRES_SUPERUSER_PASSWORD` | superuser · migrations (DDL) + création des rôles |
+| `DORLOTER_APP_PASSWORD` | mot de passe du rôle applicatif `dorloter_app` (CRUD restreint) |
+| `DORLOTER_ADMIN_PASSWORD` | mot de passe du rôle `dorloter_admin` (écritures privilégiées) |
 
-Générer les mots de passe prod :
-
-```bash
-openssl rand -base64 24    # POSTGRES_SUPERUSER_PASSWORD
-openssl rand -base64 24    # DORLOTER_APP_PASSWORD
-openssl rand -base64 24    # DORLOTER_ADMIN_PASSWORD
-```
-
-> En prod, les `dorloter_app` / `dorloter_admin` sont créés par `bun prod:init-roles` qui lit ces variables et les applique via `ALTER ROLE`.
+Côté API, la connexion est construite par le compose :
+- `ConnectionStrings__Default` : rôle `dorloter_app` (search_path `dorloter_api,public`)
+- `ConnectionStrings__Migrations` : rôle DDL (superuser) · optionnel, sinon `Default` est utilisé
 
 ### 2. Authentification (JWT, API)
 
-> Historiquement géré par Better Auth (variables `BETTER_AUTH_*`,
-> `NEXT_PUBLIC_APP_URL`). L'auth est désormais en **JWT** côté API.
+| Variable | Comment |
+|---|---|
+| `API_JWT_SECRET` (compose → `Dorloter__Security__Jwt__Secret`) | >= 32 octets, `openssl rand -base64 48` |
+| `Dorloter__Security__Jwt__Issuer` | `dorloter-api` |
+| `Dorloter__Security__CorsAllowedOrigins` | origines front, ex. `https://dorloter.fr,https://pro.dorloter.fr` |
 
-| Variable | Obligatoire | Comment |
-|---|---|---|
-| `Dorloter__Security__Jwt__Secret` | ✅ | >= 32 octets, `openssl rand -base64 48` |
-| `Dorloter__Security__Jwt__Issuer` | ✅ | `dorloter-api` |
-| `Dorloter__Security__CorsAllowedOrigins` | ✅ | origine du front, ex. `http://localhost:5173` en dev, `https://dorloter.fr` en prod |
+### 3. Object storage (photos)
 
-### 3. Object Storage (photos)
-
-En dev, MinIO local sert de S3. En prod, MinIO auto-hébergé sur le même VPS, exposé via Caddy sur `cdn.{DOMAIN}`.
+MinIO en dev et en prod (auto-hébergé, exposé via Caddy sur `cdn.{DOMAIN}`).
 
 | Variable | Dev | Prod |
 |---|---|---|
-| `S3_ENDPOINT` | `http://localhost:9000` | *(non défini, géré par le compose : `http://minio:9000`)* |
 | `S3_ACCESS_KEY` | `minioadmin` | `openssl rand -hex 12` |
 | `S3_SECRET_KEY` | `minioadmin` | `openssl rand -hex 24` |
 | `S3_BUCKET` | `dorloter-photos` | `dorloter-photos` |
-| `S3_PUBLIC_URL` | `http://localhost:9000/dorloter-photos` | *(géré par le compose : `https://cdn.dorloter.fr/dorloter-photos`)* |
 
-### 4. Cartographie — MapTiler
+> Le presign d'upload n'est pas encore porté sur l'API (gap connu, voir docs/ARCHITECTURE.md).
 
-1. Créer un compte gratuit sur [maptiler.com](https://www.maptiler.com/) (100k loads/mois inclus)
-2. Account → API Keys → copier la clé
-3. Remplir :
+### 4. Cartographie (fronts)
 
-```env
-NEXT_PUBLIC_MAPTILER_KEY=abcdef123456
-```
+| Variable | Comment |
+|---|---|
+| `VITE_MAP_STYLE` | URL d'un style MapLibre · optionnel (sans valeur, OpenFreeMap est utilisé sans clé) |
 
-### 5. Web Push (notifications)
+### 5. Email transactionnel (SMTP)
 
-```bash
-bun x web-push generate-vapid-keys
-```
-
-Sortie :
-
-```
-Public Key:
-BJWobgG8e6vLuoyKAjbxa2Te7USrMcx0HkRhPv2Bwbmphuij51PQTlHi4FeokfZBVy-...
-Private Key:
-cXEZjCrb5J0kNtsGXFyVvuu-XoFTmBQ7s6q3WNPtg5U
-```
+Provider-agnostique (SMTP). Recommandé : **Brevo** (français, offre gratuite ~300 mails/jour). Voir [EMAIL.md](EMAIL.md).
 
 ```env
-VAPID_PUBLIC_KEY=BJWobgG8...
-VAPID_PRIVATE_KEY=cXEZjCrb...
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=BJWobgG8...    # même valeur que VAPID_PUBLIC_KEY
-VAPID_SUBJECT=mailto:noreply@dorloter.fr
+EMAIL_SMTP_HOST=smtp-relay.brevo.com    # vide = envoi désactivé (loggé)
+EMAIL_SMTP_PORT=587
+EMAIL_SMTP_USER=<login SMTP Brevo>
+EMAIL_SMTP_PASSWORD=<clé SMTP Brevo>
+EMAIL_FROM=no-reply@dorloter.fr
+EMAIL_FROM_NAME=Dorloter
 ```
 
-> Sans ces clés, les notifs push sont désactivées côté client (dégradation propre, pas d'erreur).
+Le compose mappe ces variables vers `Dorloter__Email__Host/Port/User/Password/FromEmail/FromName`. Swappable vers OVH / Scaleway TEM / Postfix sans changer le code.
 
-### 6. Emails — Resend
+> Web Push (VAPID) : pas encore porté sur l'API (gap).
 
-1. Créer un compte sur [resend.com](https://resend.com) (3k emails/mois, 100/jour gratuits)
-2. Domains → ajouter `dorloter.fr` → suivre les DNS records (SPF + DKIM)
-3. API Keys → créer une clé
+### 6. Backup S3 (prod)
 
-```env
-RESEND_API_KEY=re_123abc...
-RESEND_FROM_EMAIL=Dorloter <noreply@dorloter.fr>
-```
-
-> Sans `RESEND_API_KEY`, les emails sont loggés dans la console (mode dev friendly).
-
-### 7. Backup S3 (prod uniquement)
-
-Cible par défaut : OVH Object Storage (bucket Standard ou Cold Archive).
-
-1. Console OVH → Public Cloud → Object Storage → créer un bucket `dorloter-backups`
-2. Users & Roles → créer un user → S3 credentials → copier access key + secret
-3. Remplir `.env.production` :
+Cible par défaut : OVH Object Storage (France).
 
 ```env
 S3_BACKUP_ENDPOINT=https://s3.gra.io.cloud.ovh.net
@@ -158,58 +101,35 @@ S3_BACKUP_SECRET_KEY=...
 
 | Provider | Endpoint |
 |---|---|
-| OVH Gravelines (Standard) | `https://s3.gra.io.cloud.ovh.net` |
-| OVH Strasbourg | `https://s3.sbg.io.cloud.ovh.net` |
+| OVH Gravelines | `https://s3.gra.io.cloud.ovh.net` |
 | Scaleway Paris | `https://s3.fr-par.scw.cloud` |
-| Cloudflare R2 | `https://<account>.r2.cloudflarestorage.com` |
-| Backblaze B2 | `https://s3.<region>.backblazeb2.com` |
 
-> Si ces vars sont vides, le backup ne fait que le dump local dans `./backups/` (utile en dev).
+> Vides : le backup ne fait que le dump local dans `./backups/`.
 
-### 8. Domaine (prod uniquement)
+### 7. Domaine (prod)
 
 | Variable | Exemple |
 |---|---|
 | `DOMAIN` | `dorloter.fr` |
-| `ACME_EMAIL` | `admin@dorloter.fr` (pour Let's Encrypt) |
+| `ACME_EMAIL` | `admin@dorloter.fr` (Let's Encrypt) |
 
-Pré-requis DNS (zone du domaine chez OVH/Gandi/Cloudflare) :
+DNS (zone du domaine) :
 
 ```
-dorloter.fr      A    <IP publique du VPS>
-cdn.dorloter.fr  A    <IP publique du VPS>
+dorloter.fr        A   <IP publique du VPS>
+pro.dorloter.fr    A   <IP publique du VPS>
+cdn.dorloter.fr    A   <IP publique du VPS>
 ```
 
 Caddy obtient les certificats automatiquement au premier hit HTTPS.
 
 ---
 
-## Checklist pré-déploiement prod
-
-- [ ] VPS provisionné, SSH configuré
-- [ ] DNS `A` records posés pour `dorloter.fr` et `cdn.dorloter.fr`
-- [ ] `.env.production` rempli — aucun `__REPLACE_*__` restant
-- [ ] `BETTER_AUTH_SECRET` généré (`openssl rand -base64 32`)
-- [ ] 3 mots de passe PG distincts, forts, différents
-- [ ] `S3_ACCESS_KEY` / `S3_SECRET_KEY` MinIO générés (ne PAS utiliser `minioadmin`)
-- [ ] Clés VAPID générées (`bun x web-push generate-vapid-keys`)
-- [ ] MapTiler : clé API récupérée
-- [ ] Resend : domaine vérifié + clé API
-- [ ] OVH Object Storage : bucket créé + credentials S3
-- [ ] `bun prod:build` réussi
-- [ ] `bun prod:up && bun prod:migrate && bun prod:init-roles`
-- [ ] Cron backup posé (`crontab -e`)
-- [ ] Ouvrir `https://dorloter.fr` — certificat vert, landing page chargée
-- [ ] Créer un compte test + vérifier la réception email
-- [ ] Se connecter en admin plateforme — accéder à `/admin`
-
----
-
-## Génération rapide de tous les secrets
+## Génération rapide des secrets prod
 
 ```bash
 cat <<EOF
-BETTER_AUTH_SECRET=$(openssl rand -base64 32)
+API_JWT_SECRET=$(openssl rand -base64 48)
 POSTGRES_SUPERUSER_PASSWORD=$(openssl rand -base64 24)
 DORLOTER_APP_PASSWORD=$(openssl rand -base64 24)
 DORLOTER_ADMIN_PASSWORD=$(openssl rand -base64 24)
@@ -218,4 +138,17 @@ S3_SECRET_KEY=$(openssl rand -hex 24)
 EOF
 ```
 
-Copier-coller dans `.env.production`, puis ajouter manuellement VAPID, MapTiler, Resend, S3 backup.
+Compléter ensuite : `DOMAIN`, `ACME_EMAIL`, les variables `EMAIL_SMTP_*` (Brevo) et `S3_BACKUP_*`.
+
+## Checklist pré-déploiement prod
+
+- [ ] VPS provisionné (France : OVH/Scaleway), SSH configuré
+- [ ] DNS `A` posés : `dorloter.fr`, `pro.dorloter.fr`, `cdn.dorloter.fr`
+- [ ] `.env.production` rempli (aucun `__REPLACE_*__` restant)
+- [ ] `API_JWT_SECRET` généré, mots de passe PG distincts et forts
+- [ ] `S3_ACCESS_KEY` / `S3_SECRET_KEY` MinIO générés (pas `minioadmin`)
+- [ ] Email : compte Brevo + clé SMTP (sinon emails seulement loggés)
+- [ ] Backup : bucket OVH/Scaleway + credentials
+- [ ] `bun prod:init-roles` puis `bun prod:build && bun prod:up`
+- [ ] `https://dorloter.fr` et `https://pro.dorloter.fr` répondent (certificats OK)
+- [ ] Cron backup posé
