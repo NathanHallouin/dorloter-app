@@ -12,6 +12,7 @@ export function ShelterConsoleLayout() {
   const nav: DashNavItem[] = [
     { to: "/refuge", label: "Tableau de bord", icon: "gauge", end: true },
     { to: "/refuge/animaux", label: "Mes annonces", icon: "heart" },
+    { to: "/refuge/sante", label: "Santé", icon: "syringe" },
     { to: "/refuge/candidatures", label: "Candidatures", icon: "inbox", count: pending },
     { to: "/refuge/adoptions", label: "Adoptions", icon: "badgeCheck" },
     { to: "/refuge/contrats", label: "Contrats", icon: "shieldCheck" },
