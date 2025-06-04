@@ -511,3 +511,54 @@ export interface UpdateContractInput {
   terms?: Record<string, unknown>;
   notes?: string;
 }
+
+// ─── Suivi médical & sanitaire ───────────────────────────────────────────────
+
+export type HealthEventType =
+  | "vaccin"
+  | "vermifuge"
+  | "antiparasitaire"
+  | "sterilisation"
+  | "test_fiv_felv"
+  | "visite"
+  | "traitement"
+  | "pesee"
+  | "autre";
+
+export interface HealthEvent {
+  id: string;
+  petId: string;
+  type: HealthEventType;
+  eventDate: string;
+  label: string | null;
+  vetLabel: string | null;
+  result: string | null;
+  nextDueDate: string | null;
+  cost: number | null;
+  weightKg: number | null;
+  notes: string | null;
+  documentUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpcomingHealth {
+  petId: string;
+  petName: string;
+  event: HealthEvent;
+}
+
+export interface CreateHealthEventInput {
+  type: HealthEventType;
+  eventDate?: string;
+  label?: string;
+  vetLabel?: string;
+  result?: string;
+  nextDueDate?: string;
+  cost?: number;
+  weightKg?: number;
+  notes?: string;
+  documentUrl?: string;
+}
+
+export type UpdateHealthEventInput = Partial<Omit<CreateHealthEventInput, "type">>;

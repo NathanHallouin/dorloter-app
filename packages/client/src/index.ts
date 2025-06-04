@@ -24,6 +24,7 @@ export * from "./api/messaging";
 export * from "./api/moderation";
 export * from "./api/notifications";
 export * from "./api/contracts";
+export * from "./api/health";
 
 // Auth & data layer
 export * from "./auth/AuthContext";
