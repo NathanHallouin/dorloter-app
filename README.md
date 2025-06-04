@@ -66,17 +66,29 @@ bun dev
 - Les migrations de schéma (`dorloter_api`) sont appliquées automatiquement au démarrage (`DatabaseMigrator`).
 - Vérifier : `curl http://localhost:8080/api/v1/health`.
 
-### 3. Front (Vite)
+### 3. Données de démo (optionnel)
 
-Dans un autre terminal :
+Une fois l'API lancée (le schéma est créé), peuple la base avec un jeu de test (refuge « Quatre Pattes » + équipe, animaux, candidature acceptée, famille d'accueil) :
 
 ```bash
-cd apps/web
-bun install      # première fois seulement
-bun dev
+bun db:seed      # scripts/seed.sql, idempotent
 ```
 
-- Servi sur **http://localhost:5173**. En dev, Vite proxifie `/api` vers `http://localhost:8080` (cible configurable via `VITE_API_PROXY`).
+Comptes créés · mot de passe commun `motdepasse12` (voir [docs/COMPTES-TEST.md](docs/COMPTES-TEST.md)).
+
+### 4. Fronts (Vite)
+
+Deux SPA distinctes, chacune dans son terminal (les deux proxifient `/api` vers `http://localhost:8080` en dev) :
+
+```bash
+# Vitrine publique (adoptants)
+cd apps/web && bun install && bun dev    # http://localhost:5173
+
+# Espace pro (consoles refuge / pension / vétérinaire + admin plateforme)
+cd apps/pro && bun install && bun dev    # http://localhost:5174
+```
+
+Pour l'espace pro, connecte-toi avec un compte pro (ex. `camille.roussel@dorloter.fr`, console refuge).
 
 ### Mobile (optionnel)
 
@@ -110,7 +122,9 @@ cd apps/web && bun run build
 
 ## Déploiement
 
-Production sur VPS (Hetzner / Scaleway) via Docker Compose + Caddy. Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) et `docker-compose.prod.yml`.
+Production sur **VPS européen** (France privilégiée : OVH Gravelines ou Scaleway Paris), via un seul `docker-compose.prod.yml` : `postgres` (PostGIS), `minio`, `api` , `web` (vitrine), `pro` (espace pro), `caddy` (edge TLS). Caddy sert les SPA statiques (`dorloter.fr` et `pro.dorloter.fr`) et proxifie `/api/v1` vers l'API ; le CDN images est sur `cdn.dorloter.fr` (MinIO).
+
+Email transactionnel via SMTP (Brevo recommandé · français), configuré par les variables `EMAIL_SMTP_*`. Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/ENV.md](docs/ENV.md) et `.env.production.example`.
 
 ## Arrêter
 

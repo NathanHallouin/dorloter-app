@@ -25,20 +25,29 @@ Monorepo polyglotte (`apps/`). L'API est un service NestJS séparé ; les fronts
 - **Migrations schéma** : `DatabaseMigrator` au démarrage (fichiers `.sql` embarqués · compatible avec un schéma déjà géré par Flyway)
 - **Validation** : DataAnnotations (sur les paramètres de record)
 - **OpenAPI** : Microsoft.AspNetCore.OpenApi, servi sur `/api/v1/openapi`
+- **Email** : transactionnel via SMTP (SMTP), provider-agnostique (`Infrastructure/Email`, section `Dorloter:Email`). Brevo recommandé (français). Voir docs/EMAIL.md.
 - **Tests** : xUnit + Testcontainers (PostGIS)
 
-**Fronts**
-- **web · `apps/web`** : React 19 + Vite + TypeScript + React Router + TanStack Query · SPA, consomme `/api/v1`
-- **mobile · `apps/mobile`** : Expo / React Native + client `openapi-fetch` typé (`packages/api-client`, généré depuis l'OpenAPI)
+**Fronts (DEUX SPA distinctes, design system + couche API partagés)**
+- **web · `apps/web`** : SPA PUBLIQUE (vitrine adoptants) · React 19 + Vite + React Router + TanStack Query · port 5173 · `dorloter.fr`
+- **pro · `apps/pro`** : SPA ESPACE PRO (back-office) · consoles refuge / pension / vétérinaire + admin plateforme · port 5174 · `pro.dorloter.fr`. Shell console `DashShell`, aiguillage par rôle (`ConsoleHome`), garde `RequirePro` (rôle pro OU appartenance refuge).
+- **mobile · `apps/mobile`** : Expo / React Native + client `openapi-fetch` typé (`packages/api-client`)
+
+**Packages partagés**
+- **`packages/ui`** (`@dorloter/ui`) : design system (primitives, Icon, helper `cn`, thème CSS `theme.css`) · consommé par web + pro. NB Tailwind v4 : `@source` requis pour scanner le package hors `node_modules`.
+- **`packages/client`** (`@dorloter/client`) : couche d'accès API (client HTTP JWT + refresh, types, modules domaine, `AuthContext`, `queryClient`) · consommée par web + pro.
+- **`packages/api-client`** (`@dorloter/api-client`) : client openapi-fetch typé généré depuis l'OpenAPI · consommé par le mobile.
+- Séparation public/pro sans duplication : web et pro partagent `ui` + `client`. L'API (permissions par module) reste la frontière de sécurité.
 
 **Commun**
 - **Base de données** : PostgreSQL 16 + PostGIS (schéma `dorloter_api`)
-- **UI** (fronts) : Tailwind CSS v4 (config CSS-first via `@theme`) + shadcn/ui
+- **UI** (fronts) : Tailwind CSS v4 (config CSS-first via `@theme`, thème dans `packages/ui`) + primitives maison
 - **Cartographie** : MapLibre GL JS via react-map-gl
-- **Upload images** : S3-compatible (MinIO en dev, Scaleway Object Storage en prod)
-- **Notifications** : Web Push API (service worker) + email via Resend ou Brevo
-- **Infra** : Docker Compose (dev), VPS Hetzner ou Scaleway (prod), Caddy (reverse proxy + HTTPS)
-- **CI** : GitHub Actions
+- **Upload images** : S3-compatible (MinIO en dev, OVH/Scaleway Object Storage en prod) · presign à porter sur NestJS (gap)
+- **Notifications** : email transactionnel SMTP (porté, Brevo) · Web Push (VAPID) à porter sur NestJS (gap)
+- **Monorepo** : bun workspaces (Turborepo retiré)
+- **Infra** : Docker Compose (dev), VPS européen France (OVH/Scaleway, prod), Caddy (reverse proxy + HTTPS)
+- **CI** : GitHub Actions (portable Forgejo Actions pour Codeberg)
 
 ## Architecture du projet
 
@@ -217,6 +226,19 @@ Règles pensions : uniquement des pros (SIRET requis), pas de particuliers. Un u
 - `is_verified` : boolean · vérifié par l'admin plateforme
 - `created_at`, `updated_at` : timestamp
 
+**contracts** · contrats d'adoption et conventions de famille d'accueil (back-office refuge · table unifiée · migration V18 · module Adoption)
+- `id` : UUID (pk)
+- `type` : enum('adoption', 'foster')
+- `status` : enum('brouillon', 'envoye', 'signe', 'active', 'terminee', 'resilie', 'annule') · adoption : brouillon→envoye→signe(→resilie) ; foster : brouillon→active→terminee
+- `shelter_id` : UUID (fk → shelters), not null · `user_id` : UUID (fk → users), not null (adoptant ou famille d'accueil)
+- `pet_id` : UUID (fk → pets) nullable · `application_id` : UUID (fk → applications) nullable (issu d'une candidature acceptée) · `foster_family_id` : UUID (fk → foster_families) nullable
+- `reference` : varchar(40) · unique par refuge
+- `effective_date`, `end_date` : date nullable · `adoption_fee` : decimal(8,2) nullable
+- `terms` : jsonb · clauses cochées (adoption : stérilisation, droit de suite, non-abandon, restitution… ; foster : propriété asso, frais véto pris en charge…)
+- `notes` : text · `signed_at`, `created_at`, `updated_at` : timestamp
+
+Règles contrats : à la signature d'une adoption (`status=signe`), l'animal passe `status=adopte`. Permissions via `ShelterMembership` (adoption → `Applications*`, foster → `Fosters*`). Voir docs/CONTRATS.md.
+
 **notifications** · notifications persistées
 - `id` : UUID (pk)
 - `user_id` : UUID (fk → users), not null
@@ -354,10 +376,10 @@ Seuil d'affichage : score >= 40. Les matches sont recalculés à chaque nouveau 
 - `location-picker.tsx` : composant réutilisable pour sélectionner un point sur la carte (formulaires signalement, profil)
 
 ### Notifications
-- Web Push via l'API Push du navigateur + service worker
-- Fallback email (Resend ou Brevo) si push non supporté
-- Déclencheurs : nouveau signalement "trouvé" dans le rayon d'un signalement "perdu" actif, mise à jour candidature, nouvel animal dans un refuge suivi
-- Notifications persistées en base (table `notifications`) pour le centre de notifications in-app
+- **Email transactionnel · PORTÉ** : SMTP via SMTP (`Infrastructure/Email`), provider-agnostique, Brevo recommandé (français). Déclenché sur candidature acceptée/refusée et contrat d'adoption envoyé. Ne lève jamais (no-op loggé si non configuré). Voir docs/EMAIL.md.
+- **Web Push (VAPID) · gap** : à porter sur l'API (notifications navigateur, alertes perdus/trouvés).
+- Déclencheurs cibles : nouveau "trouvé" dans le rayon d'un "perdu" actif, mise à jour candidature/contrat, nouvel animal dans un refuge suivi.
+- Notifications persistées en base (table `notifications`) pour le centre in-app.
 
 ## Commandes
 
@@ -372,11 +394,18 @@ bun dev         # lance l'API (migre le schéma au démarrage)
 bun run test                                   # tests xUnit + Testcontainers (PostGIS, nécessite Docker)
 bun run build -c Release                       # build
 
-# Front SPA · apps/web (port 5173)
+# Front SPA public · apps/web (port 5173)
 cd apps/web
 bun dev                                       # Vite dev (proxy /api → localhost:8080)
 bun run build                                 # typecheck + build prod
 bun run typecheck                             # tsc --noEmit
+
+# Front SPA espace pro · apps/pro (port 5174) · consoles refuge/pension/véto + admin
+cd apps/pro && bun dev                        # Vite dev (proxy /api → localhost:8080)
+
+# Racine (bun workspaces, sans Turbo) : tâches sur tous les workspaces
+bun run typecheck                             # = bun run --filter='*' typecheck
+bun run build                                 # = bun run --filter='*' build
 
 # Mobile · apps/mobile
 cd apps/mobile && bun start                   # Expo
@@ -395,9 +424,14 @@ Dorloter__Security__Jwt__Issuer=dorloter-api
 Dorloter__Security__CorsAllowedOrigins=http://localhost:5173
 # Optionnels : ConnectionStrings__Migrations (rôle DDL), Dorloter__Database__AutoMigrate=false
 
-# Fronts (apps/web Vite SPA + apps/mobile)
-VITE_API_PROXY=http://localhost:8080            # apps/web · cible du proxy /api en dev
-VITE_MAPTILER_KEY=...                           # apps/web · cartographie (ou OpenFreeMap sans clé)
+# Email transactionnel (API) · prod · vide = désactivé (loggé en dev)
+Dorloter__Email__Host=smtp-relay.brevo.com      # Brevo (français). User/Password = login + clé SMTP Brevo
+Dorloter__Email__FromEmail=no-reply@dorloter.fr
+# (compose prod : variables EMAIL_SMTP_HOST/PORT/USER/PASSWORD + EMAIL_FROM/EMAIL_FROM_NAME)
+
+# Fronts (apps/web public + apps/pro espace pro + apps/mobile)
+VITE_API_PROXY=http://localhost:8080            # apps/web & apps/pro · cible du proxy /api en dev
+VITE_MAP_STYLE=...                              # style MapLibre (ou OpenFreeMap sans clé)
 EXPO_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1   # apps/mobile
 ```
 
