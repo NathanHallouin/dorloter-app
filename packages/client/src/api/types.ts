@@ -627,3 +627,63 @@ export interface UpdateSignupInput {
   status?: SignupStatus;
   hours?: number;
 }
+
+// ─── Événements & opérations terrain ─────────────────────────────────────────
+
+export type EventType =
+  | "collecte"
+  | "journee_adoption"
+  | "porte_ouverte"
+  | "marche"
+  | "sensibilisation"
+  | "autre";
+
+export interface ShelterEvent {
+  id: string;
+  title: string;
+  type: EventType;
+  startsAt: string;
+  endsAt: string | null;
+  location: string | null;
+  isPublic: boolean;
+  capacity: number | null;
+  needs: string | null;
+  notes: string | null;
+  resultAmount: number | null;
+  resultNotes: string | null;
+  createdAt: string;
+}
+
+export interface EventSignup {
+  id: string;
+  eventId: string;
+  volunteerId: string;
+  volunteerName: string;
+  status: SignupStatus;
+}
+
+export interface CreateEventInput {
+  title: string;
+  type?: EventType;
+  startsAt: string;
+  endsAt?: string;
+  location?: string;
+  isPublic?: boolean;
+  capacity?: number;
+  needs?: string;
+  notes?: string;
+}
+
+export interface UpdateEventInput {
+  title?: string;
+  type?: EventType;
+  startsAt?: string;
+  endsAt?: string;
+  location?: string;
+  isPublic?: boolean;
+  capacity?: number;
+  needs?: string;
+  notes?: string;
+  resultAmount?: number;
+  resultNotes?: string;
+}

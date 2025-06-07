@@ -26,6 +26,7 @@ export * from "./api/notifications";
 export * from "./api/contracts";
 export * from "./api/health";
 export * from "./api/volunteering";
+export * from "./api/events";
 
 // Auth & data layer
 export * from "./auth/AuthContext";
