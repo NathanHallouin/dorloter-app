@@ -687,3 +687,45 @@ export interface UpdateEventInput {
   resultAmount?: number;
   resultNotes?: string;
 }
+
+// ─── Registre entrée / sortie & statistiques ─────────────────────────────────
+
+export type IntakeOrigin = "abandon" | "errance" | "transfert" | "saisie" | "naissance" | "autre";
+export type OutcomeType = "adoption" | "transfert" | "deces" | "retour_proprietaire" | "euthanasie" | "autre";
+
+export interface RegistreEntry {
+  id: string;
+  name: string;
+  species: Species;
+  icadNumber: string | null;
+  intakeDate: string | null;
+  intakeOrigin: IntakeOrigin | null;
+  intakeNotes: string | null;
+  outcomeDate: string | null;
+  outcomeType: OutcomeType | null;
+  outcomeNotes: string | null;
+  status: string;
+}
+
+export interface RegistreStats {
+  total: number;
+  present: number;
+  presentCats: number;
+  presentDogs: number;
+  enteredThisYear: number;
+  adoptionsThisYear: number;
+  avgStayDays: number | null;
+}
+
+export interface SetIntakeInput {
+  date?: string;
+  origin?: IntakeOrigin;
+  notes?: string;
+  icadNumber?: string;
+}
+
+export interface SetOutcomeInput {
+  date?: string;
+  type?: OutcomeType;
+  notes?: string;
+}
