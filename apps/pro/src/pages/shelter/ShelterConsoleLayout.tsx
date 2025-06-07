@@ -19,6 +19,7 @@ export function ShelterConsoleLayout() {
     { to: "/refuge/familles", label: "Familles d'accueil", icon: "home" },
     { to: "/refuge/benevoles", label: "Bénévoles", icon: "star" },
     { to: "/refuge/evenements", label: "Événements", icon: "map" },
+    { to: "/refuge/registre", label: "Registre & stats", icon: "compass" },
     { to: "/refuge/messages", label: "Messagerie", icon: "message" },
     { to: "/refuge/equipe", label: "Équipe", icon: "users" },
     { to: "/refuge/profil", label: "Profil du refuge", icon: "settings" },
