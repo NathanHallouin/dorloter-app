@@ -562,3 +562,68 @@ export interface CreateHealthEventInput {
 }
 
 export type UpdateHealthEventInput = Partial<Omit<CreateHealthEventInput, "type">>;
+
+// ─── Bénévoles & planning ────────────────────────────────────────────────────
+
+export type VolunteerStatus = "candidate" | "active" | "inactive";
+export type ShiftKind = "permanence" | "promenade" | "nettoyage" | "accueil" | "transport" | "autre";
+export type SignupStatus = "inscrit" | "present" | "absent";
+
+export interface Volunteer {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  skills: string | null;
+  availability: string | null;
+  status: VolunteerStatus;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface VolunteerShift {
+  id: string;
+  title: string;
+  kind: ShiftKind;
+  startsAt: string;
+  endsAt: string | null;
+  location: string | null;
+  capacity: number | null;
+  notes: string | null;
+}
+
+export interface ShiftSignup {
+  id: string;
+  shiftId: string;
+  volunteerId: string;
+  volunteerName: string;
+  status: SignupStatus;
+  hours: number | null;
+}
+
+export interface CreateVolunteerInput {
+  name: string;
+  email?: string;
+  phone?: string;
+  skills?: string;
+  availability?: string;
+  status?: VolunteerStatus;
+  notes?: string;
+}
+export type UpdateVolunteerInput = Partial<CreateVolunteerInput>;
+
+export interface CreateShiftInput {
+  title: string;
+  kind?: ShiftKind;
+  startsAt: string;
+  endsAt?: string;
+  location?: string;
+  capacity?: number;
+  notes?: string;
+}
+export type UpdateShiftInput = Partial<CreateShiftInput>;
+
+export interface UpdateSignupInput {
+  status?: SignupStatus;
+  hours?: number;
+}
