@@ -28,6 +28,7 @@ export * from "./api/health";
 export * from "./api/volunteering";
 export * from "./api/events";
 export * from "./api/registre";
+export * from "./api/inventory";
 
 // Auth & data layer
 export * from "./auth/AuthContext";

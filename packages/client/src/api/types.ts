@@ -729,3 +729,27 @@ export interface SetOutcomeInput {
   type?: OutcomeType;
   notes?: string;
 }
+
+// ─── Stock & besoins ─────────────────────────────────────────────────────────
+
+export type InventoryCategory = "alimentation" | "litiere" | "medical" | "materiel" | "autre";
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: InventoryCategory;
+  quantity: number;
+  unit: string | null;
+  threshold: number | null;
+  notes: string | null;
+}
+
+export interface CreateInventoryItemInput {
+  name: string;
+  category?: InventoryCategory;
+  quantity?: number;
+  unit?: string;
+  threshold?: number;
+  notes?: string;
+}
+export type UpdateInventoryItemInput = Partial<CreateInventoryItemInput>;
