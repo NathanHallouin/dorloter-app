@@ -10,6 +10,15 @@
       rel="stylesheet"
     />
     <title>Espace pro · Dorloter</title>
+    <script>
+      // Thème appliqué avant le premier paint (évite le flash clair/sombre).
+      try {
+        var t = localStorage.getItem("dl-theme");
+        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

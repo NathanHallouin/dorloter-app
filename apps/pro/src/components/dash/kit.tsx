@@ -13,7 +13,7 @@ const TILE: Record<string, string> = {
 /* ------------------------------ Stat card --------------------------------- */
 export function Stat({ icon, label, value, delta, tone = "coral", sub }: { icon: string; label: string; value: string; delta?: number; tone?: string; sub?: string }) {
   return (
-    <div className="rounded-card border border-line bg-card px-[18px] pb-4 pt-[18px]">
+    <div className="group rounded-card border border-line bg-card px-[18px] pb-4 pt-[18px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-px hover:border-coral-300 hover:shadow-[0_8px_24px_rgba(20,16,8,.07)]">
       <div className="flex items-center justify-between">
         <span className={cn("grid h-[38px] w-[38px] place-items-center rounded-[9px] border", TILE[tone] ?? TILE.coral)}><Icon name={icon} size={19} /></span>
         {delta != null && (

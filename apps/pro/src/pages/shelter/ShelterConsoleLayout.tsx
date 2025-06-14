@@ -10,21 +10,21 @@ export function ShelterConsoleLayout() {
   const pending = (apps.data ?? []).filter((a) => a.status === "envoyee" || a.status === "en_cours").length;
 
   const nav: DashNavItem[] = [
-    { to: "/refuge", label: "Tableau de bord", icon: "gauge", end: true },
-    { to: "/refuge/animaux", label: "Mes annonces", icon: "heart" },
-    { to: "/refuge/sante", label: "Santé", icon: "syringe" },
-    { to: "/refuge/candidatures", label: "Candidatures", icon: "inbox", count: pending },
-    { to: "/refuge/adoptions", label: "Adoptions", icon: "badgeCheck" },
-    { to: "/refuge/contrats", label: "Contrats", icon: "shieldCheck" },
-    { to: "/refuge/familles", label: "Familles d'accueil", icon: "home" },
-    { to: "/refuge/benevoles", label: "Bénévoles", icon: "star" },
-    { to: "/refuge/evenements", label: "Événements", icon: "map" },
-    { to: "/refuge/registre", label: "Registre & stats", icon: "compass" },
-    { to: "/refuge/stock", label: "Stock & besoins", icon: "sliders" },
-    { to: "/refuge/communication", label: "Communication", icon: "send" },
-    { to: "/refuge/messages", label: "Messagerie", icon: "message" },
-    { to: "/refuge/equipe", label: "Équipe", icon: "users" },
-    { to: "/refuge/profil", label: "Profil du refuge", icon: "settings" },
+    { to: "/refuge", label: "Tableau de bord", icon: "gauge", end: true, group: "Pilotage" },
+    { to: "/refuge/animaux", label: "Mes annonces", icon: "heart", group: "Animaux & adoption" },
+    { to: "/refuge/sante", label: "Santé", icon: "syringe", group: "Animaux & adoption" },
+    { to: "/refuge/candidatures", label: "Candidatures", icon: "inbox", count: pending, group: "Animaux & adoption" },
+    { to: "/refuge/adoptions", label: "Adoptions", icon: "badgeCheck", group: "Animaux & adoption" },
+    { to: "/refuge/contrats", label: "Contrats", icon: "shieldCheck", group: "Animaux & adoption" },
+    { to: "/refuge/familles", label: "Familles d'accueil", icon: "home", group: "Animaux & adoption" },
+    { to: "/refuge/benevoles", label: "Bénévoles", icon: "star", group: "Vie associative" },
+    { to: "/refuge/evenements", label: "Événements", icon: "map", group: "Vie associative" },
+    { to: "/refuge/stock", label: "Stock & besoins", icon: "sliders", group: "Vie associative" },
+    { to: "/refuge/communication", label: "Communication", icon: "send", group: "Vie associative" },
+    { to: "/refuge/registre", label: "Registre & stats", icon: "compass", group: "Suivi" },
+    { to: "/refuge/messages", label: "Messagerie", icon: "message", group: "Suivi" },
+    { to: "/refuge/equipe", label: "Équipe", icon: "users", group: "Réglages" },
+    { to: "/refuge/profil", label: "Profil du refuge", icon: "settings", group: "Réglages" },
   ];
 
   return (
