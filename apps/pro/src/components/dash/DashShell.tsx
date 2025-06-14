@@ -221,7 +221,7 @@ function SidebarBody({ org, label, icon, nav }: { org: string; label: string; ic
                 className={({ isActive }) =>
                   cn(
                     "group relative flex h-[38px] items-center justify-between gap-2 rounded-[9px] px-[11px] transition-colors",
-                    isActive ? "bg-coral-50 text-coral-700" : "text-foreground hover:bg-muted",
+                    isActive ? "bg-tint-coral text-coral-700 dark:text-coral-200" : "text-foreground hover:bg-muted",
                   )
                 }
               >
@@ -238,7 +238,7 @@ function SidebarBody({ org, label, icon, nav }: { org: string; label: string; ic
                       <span
                         className={cn(
                           "font-mono tabular grid h-5 min-w-[20px] place-items-center rounded-full px-1.5 text-[10.5px] font-bold",
-                          isActive ? "bg-coral-600 text-sable-50" : "bg-brick-100 text-brick-600",
+                          isActive ? "bg-coral-600 text-background" : "bg-brick-100 text-brick-600",
                         )}
                       >
                         {n.count}

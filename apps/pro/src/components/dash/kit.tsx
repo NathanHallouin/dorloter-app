@@ -4,9 +4,9 @@ import { Icon } from "@dorloter/ui";
 import { Pill } from "@dorloter/ui";
 
 const TILE: Record<string, string> = {
-  coral: "bg-coral-50 border-coral-300 text-coral-600",
-  lavande: "bg-lavande-50 border-lavande-300 text-lavande-600",
-  prune: "bg-prune-50 border-prune-300 text-prune-600",
+  coral: "bg-coral-50 dark:bg-tint-coral border-coral-300 text-coral-600",
+  lavande: "bg-lavande-50 dark:bg-tint-lavande border-lavande-300 text-lavande-600",
+  prune: "bg-prune-50 dark:bg-tint-prune border-prune-300 text-prune-600 dark:text-prune-200",
   brick: "bg-brick-50 border-brick-300 text-brick-600",
 };
 
