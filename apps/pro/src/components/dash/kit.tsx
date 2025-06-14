@@ -1,7 +1,33 @@
-import type { ReactNode } from "react";
+import type { ReactNode, SelectHTMLAttributes } from "react";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Pill } from "@dorloter/ui";
+
+/* ------------------------------ Form controls ----------------------------- *
+ * Densité back-office, tokens dark-aware, focus ring cohérent. `field` pour
+ * les <input>/<textarea>, `selectField` (flèche maison via .dl-select) pour
+ * les <select>, `Field` pour le label, `Select` comme raccourci stylé.       */
+export const field =
+  "w-full rounded-field border border-line bg-background text-foreground px-3 py-2 text-[14px] outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-sable-400 focus:border-coral-500 focus:ring-2 focus:ring-coral-500/15 disabled:cursor-not-allowed disabled:opacity-60";
+export const selectField = cn(field, "dl-select cursor-pointer");
+
+export function Field({ label, hint, children, className }: { label?: string; hint?: string; children: ReactNode; className?: string }) {
+  return (
+    <label className={cn("block", className)}>
+      {label && <span className="font-mono mb-1.5 block text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>}
+      {children}
+      {hint && <span className="mt-1 block text-[12px] text-muted-foreground">{hint}</span>}
+    </label>
+  );
+}
+
+export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select {...props} className={cn(selectField, className)}>
+      {children}
+    </select>
+  );
+}
 
 const TILE: Record<string, string> = {
   coral: "bg-coral-50 dark:bg-tint-coral border-coral-300 text-coral-600",

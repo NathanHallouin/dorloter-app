@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { communicationsApi, type CampaignAudience, type EmailCampaign } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn , field, selectField } from "@/components/dash/kit";
 
 const AUD: Record<CampaignAudience, string> = {
   benevoles: "Bénévoles actifs",
@@ -33,7 +33,7 @@ export function ShelterCommunicationPage() {
   });
 
   const reach = counts.data?.[audience] ?? 0;
-  const input = "rounded-field border border-line bg-background px-2 py-1.5 text-sm";
+  const input = field;
 
   function onSend(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,7 +58,7 @@ export function ShelterCommunicationPage() {
             <select
               value={audience}
               onChange={(e) => setAudience(e.target.value as CampaignAudience)}
-              className={cn(input, "mt-1 w-full md:w-auto")}
+              className={cn(selectField, "mt-1 w-full md:w-auto")}
             >
               {AUDS.map((a) => (
                 <option key={a} value={a}>

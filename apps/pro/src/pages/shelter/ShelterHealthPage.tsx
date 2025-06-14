@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { healthApi, shelterApi, type HealthEventType } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn, field, selectField } from "@/components/dash/kit";
 
 const TYPE_LABEL: Record<HealthEventType, string> = {
   vaccin: "Vaccin",
@@ -92,7 +92,7 @@ export function ShelterHealthPage() {
 
       <div className="mt-6">
         <Panel title="Carnet de santé par animal" hint="Sélectionnez un animal pour voir et compléter son suivi">
-          <select value={petId} onChange={(e) => setPetId(e.target.value)} className="mb-4 rounded-field border border-line bg-background px-3 py-2 text-sm">
+          <select value={petId} onChange={(e) => setPetId(e.target.value)} className={cn(selectField, "mb-4 md:w-auto")}>
             <option value="">Choisir un animal…</option>
             {(pets.data ?? []).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
@@ -101,30 +101,30 @@ export function ShelterHealthPage() {
             <>
               <form onSubmit={onAdd} className="mb-5 grid gap-2 rounded-card border border-line p-3 md:grid-cols-4">
                 <label className="text-xs text-muted-foreground">Type
-                  <select name="type" required defaultValue="vaccin" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm">
+                  <select name="type" required defaultValue="vaccin" className={cn(selectField, "mt-1")}>
                     {TYPES.map((t) => <option key={t} value={t}>{TYPE_LABEL[t]}</option>)}
                   </select>
                 </label>
                 <label className="text-xs text-muted-foreground">Date
-                  <input type="date" name="eventDate" defaultValue={today()} className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input type="date" name="eventDate" defaultValue={today()} className={cn(field, "mt-1")} />
                 </label>
                 <label className="text-xs text-muted-foreground">Libellé (produit, motif…)
-                  <input name="label" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input name="label" className={cn(field, "mt-1")} />
                 </label>
                 <label className="text-xs text-muted-foreground">Rappel le
-                  <input type="date" name="nextDueDate" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input type="date" name="nextDueDate" className={cn(field, "mt-1")} />
                 </label>
                 <label className="text-xs text-muted-foreground">Vétérinaire
-                  <input name="vetLabel" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input name="vetLabel" className={cn(field, "mt-1")} />
                 </label>
                 <label className="text-xs text-muted-foreground">Coût (€)
-                  <input type="number" step="0.01" min="0" name="cost" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input type="number" step="0.01" min="0" name="cost" className={cn(field, "mt-1")} />
                 </label>
                 <label className="text-xs text-muted-foreground">Poids (kg)
-                  <input type="number" step="0.01" min="0" name="weightKg" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input type="number" step="0.01" min="0" name="weightKg" className={cn(field, "mt-1")} />
                 </label>
                 <label className="text-xs text-muted-foreground">Notes
-                  <input name="notes" className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                  <input name="notes" className={cn(field, "mt-1")} />
                 </label>
                 <div className="md:col-span-4">
                   <MiniBtn label="Ajouter au carnet" icon="check" tone="green" />

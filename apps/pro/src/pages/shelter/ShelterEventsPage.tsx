@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { eventsApi, volunteeringApi, type EventType } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn , field, selectField } from "@/components/dash/kit";
 
 const TYPE: Record<EventType, string> = {
   collecte: "Collecte", journee_adoption: "Journée d'adoption", porte_ouverte: "Porte ouverte",
@@ -30,7 +30,7 @@ export function ShelterEventsPage() {
   const delSignup = useMutation({ mutationFn: (id: string) => eventsApi.removeSignup(id), onSuccess: invSignups });
 
   const vols = volunteers.data ?? [];
-  const input = "rounded-field border border-line bg-background px-2 py-1.5 text-sm";
+  const input = field;
 
   function onAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -61,7 +61,7 @@ export function ShelterEventsPage() {
       <Panel title="Nouvel événement">
         <form onSubmit={onAdd} className="grid gap-2 md:grid-cols-4">
           <input name="title" required placeholder="Intitulé" className={cn(input, "md:col-span-2")} />
-          <select name="type" defaultValue="collecte" className={input}>
+          <select name="type" defaultValue="collecte" className={selectField}>
             {TYPES.map((t) => <option key={t} value={t}>{TYPE[t]}</option>)}
           </select>
           <input name="startsAt" type="datetime-local" required className={input} />
@@ -97,7 +97,7 @@ export function ShelterEventsPage() {
                 <div>
                   <div className="mono mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Bénévoles inscrits</div>
                   <div className="mb-2 flex items-center gap-2">
-                    <select id={`ev-vol-${ev.id}`} className={input} defaultValue="">
+                    <select id={`ev-vol-${ev.id}`} className={selectField} defaultValue="">
                       <option value="">Inscrire un bénévole…</option>
                       {vols.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
                     </select>

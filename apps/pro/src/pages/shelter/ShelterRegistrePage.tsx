@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { registreApi, type IntakeOrigin, type OutcomeType, type RegistreEntry } from "@dorloter/client";
-import { Stat, Panel, MiniBtn, DashPageHead, Table, Td } from "@/components/dash/kit";
+import { Stat, Panel, MiniBtn, DashPageHead, Table, Td , field, selectField } from "@/components/dash/kit";
 import { Btn } from "@dorloter/ui";
 
 const ORIGIN: Record<IntakeOrigin, string> = {
@@ -47,7 +47,7 @@ export function ShelterRegistrePage() {
 
   const rows = registre.data ?? [];
   const s = stats.data;
-  const input = "rounded-field border border-line bg-background px-2 py-1.5 text-sm";
+  const input = field;
 
   function onIntake(e: FormEvent<HTMLFormElement>, id: string) {
     e.preventDefault();
@@ -104,7 +104,7 @@ export function ShelterRegistrePage() {
               <div className="mono mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Entrée · {r.name}</div>
               <div className="grid gap-2">
                 <input name="date" type="date" defaultValue={r.intakeDate ?? ""} className={input} />
-                <select name="origin" defaultValue={r.intakeOrigin ?? ""} className={input}>
+                <select name="origin" defaultValue={r.intakeOrigin ?? ""} className={selectField}>
                   <option value="">Provenance…</option>
                   {ORIGINS.map((o) => <option key={o} value={o}>{ORIGIN[o]}</option>)}
                 </select>
@@ -116,7 +116,7 @@ export function ShelterRegistrePage() {
               <div className="mono mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Sortie · {r.name}</div>
               <div className="grid gap-2">
                 <input name="date" type="date" defaultValue={r.outcomeDate ?? ""} className={input} />
-                <select name="type" defaultValue={r.outcomeType ?? ""} className={input}>
+                <select name="type" defaultValue={r.outcomeType ?? ""} className={selectField}>
                   <option value="">Motif de sortie…</option>
                   {OUTCOMES.map((o) => <option key={o} value={o}>{OUTCOME[o]}</option>)}
                 </select>

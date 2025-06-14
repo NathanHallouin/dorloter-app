@@ -7,7 +7,7 @@ import {
   type VolunteerStatus,
 } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn , field, selectField } from "@/components/dash/kit";
 
 const VOL_STATUS: Record<VolunteerStatus, string> = { candidate: "Candidat", active: "Actif", inactive: "Inactif" };
 const KIND: Record<ShiftKind, string> = {
@@ -67,7 +67,7 @@ export function ShelterVolunteersPage() {
     e.currentTarget.reset();
   }
 
-  const input = "rounded-field border border-line bg-background px-2 py-1.5 text-sm";
+  const input = field;
 
   return (
     <div>
@@ -78,7 +78,7 @@ export function ShelterVolunteersPage() {
           <input name="name" required placeholder="Nom" className={input} />
           <input name="email" type="email" placeholder="Email" className={input} />
           <input name="phone" placeholder="Téléphone" className={input} />
-          <select name="status" defaultValue="active" className={input}>
+          <select name="status" defaultValue="active" className={selectField}>
             {(Object.keys(VOL_STATUS) as VolunteerStatus[]).map((s) => <option key={s} value={s}>{VOL_STATUS[s]}</option>)}
           </select>
           <input name="skills" placeholder="Compétences" className={cn(input, "md:col-span-2")} />
@@ -104,7 +104,7 @@ export function ShelterVolunteersPage() {
         <Panel title="Planning des permanences" hint="Créneaux à venir et inscriptions">
           <form onSubmit={onAddShift} className="mb-4 grid gap-2 rounded-card border border-line p-3 md:grid-cols-5">
             <input name="title" required placeholder="Intitulé" className={cn(input, "md:col-span-2")} />
-            <select name="kind" defaultValue="permanence" className={input}>
+            <select name="kind" defaultValue="permanence" className={selectField}>
               {KINDS.map((k) => <option key={k} value={k}>{KIND[k]}</option>)}
             </select>
             <input name="startsAt" type="datetime-local" required className={input} />
@@ -130,7 +130,7 @@ export function ShelterVolunteersPage() {
                 {openShift === s.id && (
                   <div className="mt-3 border-t border-line pt-3">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <select id={`vol-${s.id}`} className={input} defaultValue="">
+                      <select id={`vol-${s.id}`} className={selectField} defaultValue="">
                         <option value="">Inscrire un bénévole…</option>
                         {vols.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
                       </select>

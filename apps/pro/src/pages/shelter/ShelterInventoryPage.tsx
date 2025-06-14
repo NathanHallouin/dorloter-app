@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { inventoryApi, type InventoryCategory, type InventoryItem } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn , field, selectField } from "@/components/dash/kit";
 
 const CAT: Record<InventoryCategory, string> = {
   alimentation: "Alimentation", litiere: "Litière", medical: "Médical", materiel: "Matériel", autre: "Autre",
@@ -24,7 +24,7 @@ export function ShelterInventoryPage() {
 
   const list = items.data ?? [];
   const needs = list.filter(isLow);
-  const input = "rounded-field border border-line bg-background px-2 py-1.5 text-sm";
+  const input = field;
 
   function onAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -56,7 +56,7 @@ export function ShelterInventoryPage() {
       <Panel title="Ajouter un article">
         <form onSubmit={onAdd} className="grid gap-2 md:grid-cols-5">
           <input name="name" required placeholder="Article (ex. Croquettes chaton)" className={cn(input, "md:col-span-2")} />
-          <select name="category" defaultValue="alimentation" className={input}>
+          <select name="category" defaultValue="alimentation" className={selectField}>
             {CATS.map((c) => <option key={c} value={c}>{CAT[c]}</option>)}
           </select>
           <input name="quantity" type="number" step="0.01" min="0" placeholder="Quantité" className={input} />

@@ -8,7 +8,7 @@ import {
   type ContractStatus,
 } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn, selectField } from "@/components/dash/kit";
 import { clausesFor } from "./contract-clauses";
 
 const STATUS_LABEL: Record<ContractStatus, string> = {
@@ -134,7 +134,7 @@ export function ShelterContractsPage() {
                   <select
                     value={fosterPet[fam.id] ?? ""}
                     onChange={(e) => setFosterPet((m) => ({ ...m, [fam.id]: e.target.value }))}
-                    className="rounded-field border border-line bg-background px-2 py-1 text-xs"
+                    className={cn(selectField, "w-auto py-1 text-xs")}
                   >
                     <option value="">Animal (optionnel)</option>
                     {availablePets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
