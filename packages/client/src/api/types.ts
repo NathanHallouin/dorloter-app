@@ -753,3 +753,24 @@ export interface CreateInventoryItemInput {
   notes?: string;
 }
 export type UpdateInventoryItemInput = Partial<CreateInventoryItemInput>;
+
+// Communication : campagnes email (newsletter)
+export type CampaignAudience = "benevoles" | "abonnes" | "tous";
+
+export interface EmailCampaign {
+  id: string;
+  subject: string;
+  body: string;
+  audience: CampaignAudience;
+  recipientCount: number;
+  sentAt: string | null;
+  createdAt: string;
+}
+
+export interface SendCampaignInput {
+  subject: string;
+  body: string;
+  audience: CampaignAudience;
+}
+
+export type AudienceCounts = Record<CampaignAudience, number>;
