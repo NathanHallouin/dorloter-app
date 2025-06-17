@@ -94,6 +94,12 @@
   --brick-50: #2e1812; --brick-300: #a85a42; --brick-500: #d4795f; --brick-600: #e09a85; --brick-700: #eab3a1;
 }
 
+/* Schéma natif : aligne les contrôles OS (liste du <select>, date picker,
+   cases à cocher, scrollbars) sur le thème courant. Sans ça, en mode sombre
+   ils s'affichent dans le schéma clair de l'OS (texte illisible). */
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
+
 html { font-family: var(--font-body); }
 body {
   margin: 0;
@@ -110,6 +116,19 @@ button { font-family: inherit; }
 *::-webkit-scrollbar { width: 11px; height: 11px; }
 *::-webkit-scrollbar-thumb { background: var(--sable-300); border: 3px solid transparent; background-clip: padding-box; }
 *::-webkit-scrollbar-thumb:hover { background: var(--sable-400); background-clip: padding-box; }
+
+/* Select stylé : flèche maison dark-aware (var(--muted-fg)) au lieu du chevron natif. */
+.dl-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.25rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-fg) 50%),
+    linear-gradient(135deg, var(--muted-fg) 50%, transparent 50%);
+  background-position: calc(100% - 16px) center, calc(100% - 11px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
 
 .tabular { font-variant-numeric: tabular-nums; }
 .mono { font-family: "Geist Mono", monospace; }
