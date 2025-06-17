@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { healthApi, shelterApi, type HealthEventType } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn, field, selectField } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn, field, Select } from "@/components/dash/kit";
 
 const TYPE_LABEL: Record<HealthEventType, string> = {
   vaccin: "Vaccin",
@@ -92,18 +92,19 @@ export function ShelterHealthPage() {
 
       <div className="mt-6">
         <Panel title="Carnet de santé par animal" hint="Sélectionnez un animal pour voir et compléter son suivi">
-          <select value={petId} onChange={(e) => setPetId(e.target.value)} className={cn(selectField, "mb-4 md:w-auto")}>
-            <option value="">Choisir un animal…</option>
-            {(pets.data ?? []).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <Select
+            value={petId}
+            onChange={setPetId}
+            placeholder="Choisir un animal…"
+            options={(pets.data ?? []).map((p) => ({ value: p.id, label: p.name }))}
+            className="mb-4 md:max-w-xs"
+          />
 
           {petId && (
             <>
               <form onSubmit={onAdd} className="mb-5 grid gap-2 rounded-card border border-line p-3 md:grid-cols-4">
                 <label className="text-xs text-muted-foreground">Type
-                  <select name="type" required defaultValue="vaccin" className={cn(selectField, "mt-1")}>
-                    {TYPES.map((t) => <option key={t} value={t}>{TYPE_LABEL[t]}</option>)}
-                  </select>
+                  <Select name="type" defaultValue="vaccin" options={TYPES.map((t) => ({ value: t, label: TYPE_LABEL[t] }))} className="mt-1" />
                 </label>
                 <label className="text-xs text-muted-foreground">Date
                   <input type="date" name="eventDate" defaultValue={today()} className={cn(field, "mt-1")} />

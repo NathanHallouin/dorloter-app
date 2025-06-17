@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { registreApi, type IntakeOrigin, type OutcomeType, type RegistreEntry } from "@dorloter/client";
-import { Stat, Panel, MiniBtn, DashPageHead, Table, Td , field, selectField } from "@/components/dash/kit";
+import { Stat, Panel, MiniBtn, DashPageHead, Table, Td, field, Select } from "@/components/dash/kit";
 import { Btn } from "@dorloter/ui";
 
 const ORIGIN: Record<IntakeOrigin, string> = {
@@ -104,10 +104,7 @@ export function ShelterRegistrePage() {
               <div className="mono mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Entrée · {r.name}</div>
               <div className="grid gap-2">
                 <input name="date" type="date" defaultValue={r.intakeDate ?? ""} className={input} />
-                <select name="origin" defaultValue={r.intakeOrigin ?? ""} className={selectField}>
-                  <option value="">Provenance…</option>
-                  {ORIGINS.map((o) => <option key={o} value={o}>{ORIGIN[o]}</option>)}
-                </select>
+                <Select name="origin" defaultValue={r.intakeOrigin ?? ""} options={[{ value: "", label: "Provenance…" }, ...ORIGINS.map((o) => ({ value: o, label: ORIGIN[o] }))]} />
                 <input name="icad" defaultValue={r.icadNumber ?? ""} placeholder="N° ICAD" className={input} />
                 <div><MiniBtn label="Enregistrer l'entrée" icon="check" tone="green" /></div>
               </div>
@@ -116,10 +113,7 @@ export function ShelterRegistrePage() {
               <div className="mono mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Sortie · {r.name}</div>
               <div className="grid gap-2">
                 <input name="date" type="date" defaultValue={r.outcomeDate ?? ""} className={input} />
-                <select name="type" defaultValue={r.outcomeType ?? ""} className={selectField}>
-                  <option value="">Motif de sortie…</option>
-                  {OUTCOMES.map((o) => <option key={o} value={o}>{OUTCOME[o]}</option>)}
-                </select>
+                <Select name="type" defaultValue={r.outcomeType ?? ""} options={[{ value: "", label: "Motif de sortie…" }, ...OUTCOMES.map((o) => ({ value: o, label: OUTCOME[o] }))]} />
                 <div><MiniBtn label="Enregistrer la sortie" icon="check" /></div>
               </div>
             </form>

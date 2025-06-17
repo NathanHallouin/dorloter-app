@@ -8,7 +8,7 @@ import {
   type ContractStatus,
 } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn, selectField } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn, Select } from "@/components/dash/kit";
 import { clausesFor } from "./contract-clauses";
 
 const STATUS_LABEL: Record<ContractStatus, string> = {
@@ -131,14 +131,13 @@ export function ShelterContractsPage() {
               <div key={fam.id} className="mb-2 flex items-center justify-between gap-3 rounded-field border border-line px-3 py-2">
                 <span className="text-sm">{fam.name ?? "Famille d'accueil"}</span>
                 <div className="flex items-center gap-2">
-                  <select
+                  <Select
                     value={fosterPet[fam.id] ?? ""}
-                    onChange={(e) => setFosterPet((m) => ({ ...m, [fam.id]: e.target.value }))}
-                    className={cn(selectField, "w-auto py-1 text-xs")}
-                  >
-                    <option value="">Animal (optionnel)</option>
-                    {availablePets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                    onChange={(v) => setFosterPet((m) => ({ ...m, [fam.id]: v }))}
+                    placeholder="Animal (optionnel)"
+                    options={availablePets.map((p) => ({ value: p.id, label: p.name }))}
+                    className="w-56"
+                  />
                   <MiniBtn label="Convention" icon="home" onClick={() => createFoster.mutate({ fosterFamilyId: fam.id, petId: fosterPet[fam.id] || undefined })} disabled={createFoster.isPending} />
                 </div>
               </div>

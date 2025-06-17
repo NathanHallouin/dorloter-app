@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { eventsApi, volunteeringApi, type EventType } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn , field, selectField } from "@/components/dash/kit";
+import { DashPageHead, Panel, MiniBtn, field, Select } from "@/components/dash/kit";
 
 const TYPE: Record<EventType, string> = {
   collecte: "Collecte", journee_adoption: "Journée d'adoption", porte_ouverte: "Porte ouverte",
@@ -61,9 +61,7 @@ export function ShelterEventsPage() {
       <Panel title="Nouvel événement">
         <form onSubmit={onAdd} className="grid gap-2 md:grid-cols-4">
           <input name="title" required placeholder="Intitulé" className={cn(input, "md:col-span-2")} />
-          <select name="type" defaultValue="collecte" className={selectField}>
-            {TYPES.map((t) => <option key={t} value={t}>{TYPE[t]}</option>)}
-          </select>
+          <Select name="type" defaultValue="collecte" options={TYPES.map((t) => ({ value: t, label: TYPE[t] }))} />
           <input name="startsAt" type="datetime-local" required className={input} />
           <input name="location" placeholder="Lieu (ex. Carrefour Lyon 7)" className={cn(input, "md:col-span-2")} />
           <input name="capacity" type="number" min="1" placeholder="Bénévoles attendus" className={input} />
@@ -97,10 +95,7 @@ export function ShelterEventsPage() {
                 <div>
                   <div className="mono mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Bénévoles inscrits</div>
                   <div className="mb-2 flex items-center gap-2">
-                    <select id={`ev-vol-${ev.id}`} className={selectField} defaultValue="">
-                      <option value="">Inscrire un bénévole…</option>
-                      {vols.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
-                    </select>
+                    <Select id={`ev-vol-${ev.id}`} placeholder="Inscrire un bénévole…" options={vols.map((v) => ({ value: v.id, label: v.name }))} />
                     <MiniBtn label="Inscrire" icon="check" onClick={() => {
                       const sel = document.getElementById(`ev-vol-${ev.id}`) as HTMLSelectElement | null;
                       if (sel?.value) signup.mutate({ eventId: ev.id, volunteerId: sel.value });

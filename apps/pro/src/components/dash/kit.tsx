@@ -1,4 +1,4 @@
-import type { ReactNode, SelectHTMLAttributes } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Pill } from "@dorloter/ui";
@@ -21,11 +21,110 @@ export function Field({ label, hint, children, className }: { label?: string; hi
   );
 }
 
-export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+type SelectOption = string | { value: string; label: string };
+
+/**
+ * Select maison : bouton + popover entièrement stylé (dark-aware), à la place du
+ * <select> natif dont la liste déroulante n'est pas stylable. Couvre les trois
+ * usages : contrôlé (value/onChange), formulaire (name -> input caché lu par
+ * FormData) et impératif (id sur l'input caché, lu via getElementById).
+ */
+export function Select({
+  options,
+  value,
+  defaultValue,
+  onChange,
+  name,
+  id,
+  placeholder = "Choisir…",
+  className,
+  disabled,
+}: {
+  options: SelectOption[];
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  name?: string;
+  id?: string;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+}) {
+  const opts = options.map((o) => (typeof o === "string" ? { value: o, label: o } : o));
+  const controlled = value !== undefined;
+  const [internal, setInternal] = useState(defaultValue ?? "");
+  const val = controlled ? value : internal;
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const pick = (v: string) => {
+    if (!controlled) setInternal(v);
+    onChange?.(v);
+    setOpen(false);
+  };
+
+  const current = opts.find((o) => o.value === val);
+
   return (
-    <select {...props} className={cn(selectField, className)}>
-      {children}
-    </select>
+    <div ref={ref} className={cn("relative w-full", className)}>
+      <input type="hidden" id={id} name={name} value={val} readOnly />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={cn(
+          "flex w-full items-center justify-between gap-2 rounded-field border bg-background px-3 py-2 text-left text-[14px] text-foreground outline-none transition-colors hover:border-sable-400 disabled:cursor-not-allowed disabled:opacity-60",
+          open ? "border-coral-500 ring-2 ring-coral-500/15" : "border-line",
+        )}
+      >
+        <span className={cn("truncate", !current && "text-muted-foreground/70")}>{current?.label ?? placeholder}</span>
+        <Icon name="chevron" size={15} className={cn("flex-none text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="glass-panel absolute z-50 mt-1.5 max-h-64 w-full min-w-max overflow-auto rounded-card border border-line p-1 shadow-[0_16px_40px_rgba(20,16,8,.18)]"
+          style={{ animation: "dlMenu .14s ease-out" }}
+        >
+          {opts.map((o) => {
+            const active = o.value === val;
+            return (
+              <li key={o.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  onClick={() => pick(o.value)}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-[7px] px-2.5 py-1.5 text-left text-[14px] transition-colors",
+                    active ? "bg-tint-coral font-semibold text-coral-700 dark:text-coral-200" : "text-foreground hover:bg-muted",
+                  )}
+                >
+                  <span className="truncate">{o.label}</span>
+                  {active && <Icon name="check" size={14} className="flex-none text-coral-600" />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
 
