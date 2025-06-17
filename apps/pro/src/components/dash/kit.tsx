@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Pill } from "@dorloter/ui";
@@ -55,19 +56,38 @@ export function Select({
   const [internal, setInternal] = useState(defaultValue ?? "");
   const val = controlled ? value : internal;
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  // Position fixe calculée depuis le bouton : la liste vit dans un portal sur
+  // <body> pour échapper aux conteneurs `overflow-hidden` (ex. Panel).
+  const place = () => {
+    const el = btnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setPos({ left: r.left, top: r.bottom + 6, width: r.width, maxHeight: Math.max(160, window.innerHeight - r.bottom - 16) });
+  };
 
   useEffect(() => {
     if (!open) return;
+    place();
     const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t) || listRef.current?.contains(t)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const reposition = () => place();
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
     return () => {
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
     };
   }, [open]);
 
@@ -80,9 +100,10 @@ export function Select({
   const current = opts.find((o) => o.value === val);
 
   return (
-    <div ref={ref} className={cn("relative w-full", className)}>
+    <div className={cn("relative w-full", className)}>
       <input type="hidden" id={id} name={name} value={val} readOnly />
       <button
+        ref={btnRef}
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
@@ -94,36 +115,39 @@ export function Select({
         )}
       >
         <span className={cn("truncate", !current && "text-muted-foreground/70")}>{current?.label ?? placeholder}</span>
-        <Icon name="chevron" size={15} className={cn("flex-none text-muted-foreground transition-transform", open && "rotate-180")} />
+        <Icon name="chevron" size={15} className={cn("flex-none text-muted-foreground transition-transform", open ? "-rotate-90" : "rotate-90")} />
       </button>
-      {open && (
-        <ul
-          role="listbox"
-          className="glass-panel absolute z-50 mt-1.5 max-h-64 w-full min-w-max overflow-auto rounded-card border border-line p-1 shadow-[0_16px_40px_rgba(20,16,8,.18)]"
-          style={{ animation: "dlMenu .14s ease-out" }}
-        >
-          {opts.map((o) => {
-            const active = o.value === val;
-            return (
-              <li key={o.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={active}
-                  onClick={() => pick(o.value)}
-                  className={cn(
-                    "flex w-full items-center justify-between gap-3 rounded-[7px] px-2.5 py-1.5 text-left text-[14px] transition-colors",
-                    active ? "bg-tint-coral font-semibold text-coral-700 dark:text-coral-200" : "text-foreground hover:bg-muted",
-                  )}
-                >
-                  <span className="truncate">{o.label}</span>
-                  {active && <Icon name="check" size={14} className="flex-none text-coral-600" />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {open && pos &&
+        createPortal(
+          <ul
+            ref={listRef}
+            role="listbox"
+            style={{ position: "fixed", left: pos.left, top: pos.top, width: pos.width, maxHeight: pos.maxHeight, animation: "dlMenu .14s ease-out" }}
+            className="z-[70] overflow-auto rounded-card border border-line bg-card p-1 shadow-[0_16px_40px_rgba(20,16,8,.18)]"
+          >
+            {opts.map((o) => {
+              const active = o.value === val;
+              return (
+                <li key={o.value}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    onClick={() => pick(o.value)}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-3 rounded-[7px] px-2.5 py-1.5 text-left text-[14px] transition-colors",
+                      active ? "bg-tint-coral font-semibold text-coral-700 dark:text-coral-200" : "text-foreground hover:bg-muted",
+                    )}
+                  >
+                    <span className="truncate">{o.label}</span>
+                    {active && <Icon name="check" size={14} className="flex-none text-coral-600" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>,
+          document.body,
+        )}
     </div>
   );
 }
