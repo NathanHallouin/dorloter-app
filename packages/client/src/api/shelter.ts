@@ -4,9 +4,29 @@ import type {
   Message,
   ShelterApplication,
   ShelterConversation,
+  ShelterDetail,
   ShelterPet,
   ShelterTeamMember,
 } from "./types";
+
+/** Champs editables de la fiche publique du refuge (back-office). */
+export interface ShelterProfileInput {
+  name: string;
+  description?: string | null;
+  missionLong?: string | null;
+  foundedYear?: number | null;
+  siret?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  visitHours?: string | null;
+  donationUrl?: string | null;
+  donationLabel?: string | null;
+  donationDescription?: string | null;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
+}
 
 export interface ShelterPetInput {
   name: string;
@@ -21,6 +41,14 @@ export interface ShelterPetInput {
   isSterilized?: boolean;
   isChipped?: boolean;
   isVaccinated?: boolean;
+  okWithCats?: string;
+  okWithDogs?: string;
+  okWithChildren?: string;
+  specialNeeds?: string;
+  /** Chat uniquement (ignoré côté API pour les autres espèces). */
+  fivFelv?: string;
+  /** Chat uniquement. */
+  indoorOnly?: boolean;
 }
 
 export const shelterApi = {
@@ -76,6 +104,13 @@ export const shelterApi = {
 
   removeMember: (id: string) =>
     api.del<void>(`/api/v1/shelter/members/${id}`),
+
+  // Fiche publique du refuge (back-office)
+  profile: () =>
+    api.get<ApiResponse<ShelterDetail>>("/api/v1/shelter/profile").then((r) => r.data),
+
+  updateProfile: (input: ShelterProfileInput) =>
+    api.patch<ApiResponse<ShelterDetail>>("/api/v1/shelter/profile", input).then((r) => r.data),
 
   // Réglages back-office
   settings: () =>

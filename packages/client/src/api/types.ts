@@ -235,7 +235,12 @@ export interface ShelterConversation {
 export interface ShelterApplication {
   id: string;
   petId: string;
+  petName: string | null;
+  petSpecies: string | null;
   userId: string;
+  applicantName: string | null;
+  applicantEmail: string | null;
+  applicantPhone: string | null;
   status: string;
   housingType: string | null;
   hasOutdoorAccess: boolean | null;
@@ -424,6 +429,24 @@ export interface ShelterDetail extends ShelterListItem {
   visitHours: string | null;
   isVerified: boolean;
   acceptsFosterApplications: boolean;
+}
+
+/** Événement public à venir d'un refuge (annonce sur la fiche publique). */
+export interface ShelterPublicEvent {
+  id: string;
+  title: string;
+  type: string;
+  startsAt: string;
+  endsAt: string | null;
+  location: string | null;
+  needs: string | null;
+}
+
+/** Besoin du refuge (article de stock en alerte). */
+export interface ShelterNeed {
+  name: string;
+  category: string;
+  urgent: boolean;
 }
 
 // ─── Modération ─────────────────────────────────────────────────────────────
