@@ -47,7 +47,7 @@ export function ShelterCommunicationPage() {
   return (
     <div>
       <DashPageHead
-        title="Communication"
+        title="Campagnes"
         desc="Composez une newsletter et envoyez-la à vos bénévoles et abonnés. Idéal pour annoncer une collecte, un événement ou de nouvelles adoptions."
       />
 

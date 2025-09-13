@@ -40,7 +40,24 @@ Base de données : PostgreSQL 16 + PostGIS (schéma `dorloter_api`). Stockage im
 
 ## Démarrage rapide
 
-Lancer dans cet ordre : base de données, puis API, puis front.
+Installer les dépendances JS **une seule fois** à la racine (bun workspaces · installe `web`, `pro`, `mobile` et les packages partagés en une commande) :
+
+```bash
+bun install
+```
+
+Puis lancer les services **dans cet ordre**, chacun dans son propre terminal :
+
+| # | Service | Commande | URL |
+|---|---|---|---|
+| 1 | Base de données + MinIO | `docker compose up -d` | Postgres `:5438` · MinIO `:9000` (console `:9001`) |
+| 2 | API | `cd apps/api && bun dev` | http://localhost:8080 · `/api/v1` |
+| 3 | Front public (vitrine) | `cd apps/web && bun dev` | http://localhost:5173 |
+| 4 | Front pro (back-office) | `cd apps/pro && bun dev` | http://localhost:5174 |
+
+> Après l'API (étape 2), `bun db:seed` peuple la base d'un jeu de démo : optionnel, mais recommandé pour pouvoir se connecter (voir l'étape 3 ci-dessous).
+
+Le détail de chaque étape suit.
 
 ### 1. Base de données (+ stockage MinIO)
 
@@ -82,11 +99,13 @@ Deux SPA distinctes, chacune dans son terminal (les deux proxifient `/api` vers 
 
 ```bash
 # Vitrine publique (adoptants)
-cd apps/web && bun install && bun dev    # http://localhost:5173
+cd apps/web && bun dev    # http://localhost:5173
 
 # Espace pro (consoles refuge / pension / vétérinaire + admin plateforme)
-cd apps/pro && bun install && bun dev    # http://localhost:5174
+cd apps/pro && bun dev    # http://localhost:5174
 ```
+
+Astuce : depuis la racine, `bun dev` est un raccourci qui lance uniquement la vitrine publique (`apps/web`).
 
 Pour l'espace pro, connecte-toi avec un compte pro (ex. `camille.roussel@dorloter.fr`, console refuge).
 

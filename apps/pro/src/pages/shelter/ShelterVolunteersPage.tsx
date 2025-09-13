@@ -1,161 +1,216 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  volunteeringApi,
-  type ShiftKind,
-  type SignupStatus,
-  type VolunteerStatus,
+  volunteeringApi, shelterApi, useAuth, ApiClientError,
+  type VolunteerStatus, type Volunteer, type CreateVolunteerInput, type UpdateVolunteerInput,
 } from "@dorloter/client";
-import { cn } from "@dorloter/ui";
-import { DashPageHead, Panel, MiniBtn, field, Select } from "@/components/dash/kit";
+import { cn, Icon, Pill, Btn, Field, Input, Textarea } from "@dorloter/ui";
+import { DashPageHead, MiniBtn, Select, Avatar, Table, Td } from "@/components/dash/kit";
 
 const VOL_STATUS: Record<VolunteerStatus, string> = { candidate: "Candidat", active: "Actif", inactive: "Inactif" };
-const KIND: Record<ShiftKind, string> = {
-  permanence: "Permanence", promenade: "Promenade", nettoyage: "Nettoyage",
-  accueil: "Accueil", transport: "Transport", autre: "Autre",
-};
-const KINDS = Object.keys(KIND) as ShiftKind[];
-const SIGN: Record<SignupStatus, string> = { inscrit: "Inscrit", present: "Présent", absent: "Absent" };
-
-const dt = (s: string) => new Date(s).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+const VOL_TONE: Record<VolunteerStatus, string> = { candidate: "lavande", active: "green", inactive: "sable" };
+const STATUS_OPTS = (Object.keys(VOL_STATUS) as VolunteerStatus[]).map((s) => ({ value: s, label: VOL_STATUS[s] }));
+const FILTERS: { v: string; label: string }[] = [
+  { v: "tous", label: "Tous" }, { v: "active", label: "Actifs" }, { v: "candidate", label: "Candidats" }, { v: "inactive", label: "Inactifs" },
+];
+const skillTags = (s: string | null) => (s ?? "").split(/[,;]/).map((t) => t.trim()).filter(Boolean);
 
 export function ShelterVolunteersPage() {
+  const { user } = useAuth();
   const qc = useQueryClient();
-  const [openShift, setOpenShift] = useState<string | null>(null);
+  const [filter, setFilter] = useState("tous");
+  const [search, setSearch] = useState("");
+  const [modal, setModal] = useState<null | "new" | Volunteer>(null);
 
   const volunteers = useQuery({ queryKey: ["volunteers"], queryFn: () => volunteeringApi.listVolunteers() });
-  const shifts = useQuery({ queryKey: ["shifts"], queryFn: () => volunteeringApi.listShifts() });
-  const signups = useQuery({
-    queryKey: ["signups", openShift],
-    queryFn: () => volunteeringApi.listSignups(openShift!),
-    enabled: !!openShift,
-  });
+  const members = useQuery({ queryKey: ["shelter-members"], queryFn: () => shelterApi.members() });
+  const myRole = members.data?.find((m) => m.userId === user?.id)?.role;
+  const canManage = myRole === "owner" || myRole === "gestionnaire";
 
   const invVol = () => qc.invalidateQueries({ queryKey: ["volunteers"] });
-  const invShifts = () => qc.invalidateQueries({ queryKey: ["shifts"] });
-  const invSignups = () => qc.invalidateQueries({ queryKey: ["signups", openShift] });
-
-  const createVol = useMutation({ mutationFn: volunteeringApi.createVolunteer, onSuccess: invVol });
+  const createVol = useMutation({ mutationFn: (input: CreateVolunteerInput) => volunteeringApi.createVolunteer(input), onSuccess: () => { setModal(null); invVol(); } });
+  const updVol = useMutation({ mutationFn: (v: { id: string; input: UpdateVolunteerInput }) => volunteeringApi.updateVolunteer(v.id, v.input), onSuccess: () => { setModal(null); invVol(); } });
   const delVol = useMutation({ mutationFn: (id: string) => volunteeringApi.removeVolunteer(id), onSuccess: invVol });
-  const createShift = useMutation({ mutationFn: volunteeringApi.createShift, onSuccess: invShifts });
-  const delShift = useMutation({ mutationFn: (id: string) => volunteeringApi.removeShift(id), onSuccess: invShifts });
-  const signup = useMutation({ mutationFn: (v: { shiftId: string; volunteerId: string }) => volunteeringApi.signup(v.shiftId, v.volunteerId), onSuccess: invSignups });
-  const updSignup = useMutation({ mutationFn: (v: { id: string; status?: SignupStatus; hours?: number }) => volunteeringApi.updateSignup(v.id, { status: v.status, hours: v.hours }), onSuccess: invSignups });
-  const delSignup = useMutation({ mutationFn: (id: string) => volunteeringApi.removeSignup(id), onSuccess: invSignups });
+  const busy = updVol.isPending || delVol.isPending;
 
-  const vols = volunteers.data ?? [];
+  const all = volunteers.data ?? [];
+  const counts: Record<string, number> = { tous: all.length, active: 0, candidate: 0, inactive: 0 };
+  for (const v of all) counts[v.status] = (counts[v.status] ?? 0) + 1;
 
-  function onAddVol(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const s = (k: string) => (f.get(k) ? String(f.get(k)) : undefined);
-    createVol.mutate({ name: String(f.get("name") ?? ""), email: s("email"), phone: s("phone"), skills: s("skills"), availability: s("availability"), status: (f.get("status") as VolunteerStatus) || "active" });
-    e.currentTarget.reset();
-  }
-  function onAddShift(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const s = (k: string) => (f.get(k) ? String(f.get(k)) : undefined);
-    const start = String(f.get("startsAt"));
-    createShift.mutate({
-      title: String(f.get("title") ?? ""),
-      kind: (f.get("kind") as ShiftKind) || "permanence",
-      startsAt: new Date(start).toISOString(),
-      location: s("location"),
-      capacity: f.get("capacity") ? Number(f.get("capacity")) : undefined,
-    });
-    e.currentTarget.reset();
-  }
-
-  const input = field;
+  const q = search.trim().toLowerCase();
+  const list = all
+    .filter((v) => filter === "tous" || v.status === filter)
+    .filter((v) => !q || v.name.toLowerCase().includes(q) || (v.skills ?? "").toLowerCase().includes(q) || (v.email ?? "").toLowerCase().includes(q));
 
   return (
     <div>
-      <DashPageHead title="Bénévoles & planning" desc="Recrutez vos bénévoles, organisez les permanences, suivez les heures." />
+      <DashPageHead title="Bénévoles" desc="Votre vivier de bénévoles : coordonnées, compétences et disponibilités. Les permanences se planifient dans l'Agenda."
+        action={canManage ? <Btn icon="plus" onClick={() => setModal("new")}>Ajouter un bénévole</Btn> : undefined} />
 
-      <Panel title="Bénévoles" hint={`${vols.length} bénévole(s)`}>
-        <form onSubmit={onAddVol} className="mb-4 grid gap-2 rounded-card border border-line p-3 md:grid-cols-4">
-          <input name="name" required placeholder="Nom" className={input} />
-          <input name="email" type="email" placeholder="Email" className={input} />
-          <input name="phone" placeholder="Téléphone" className={input} />
-          <Select name="status" defaultValue="active" options={(Object.keys(VOL_STATUS) as VolunteerStatus[]).map((s) => ({ value: s, label: VOL_STATUS[s] }))} />
-          <input name="skills" placeholder="Compétences" className={cn(input, "md:col-span-2")} />
-          <input name="availability" placeholder="Disponibilités" className={cn(input, "md:col-span-2")} />
-          <div className="md:col-span-4"><MiniBtn label="Ajouter le bénévole" icon="check" tone="green" /></div>
-        </form>
-        {volunteers.isError && <p className="text-brick-600">Accès refuge requis.</p>}
-        <ul className="flex flex-col gap-2">
-          {vols.map((v) => (
-            <li key={v.id} className="flex flex-wrap items-center gap-2 rounded-field border border-line px-3 py-2 text-sm">
-              <span className="font-semibold">{v.name}</span>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">{VOL_STATUS[v.status]}</span>
-              {v.email && <span className="text-muted-foreground">{v.email}</span>}
-              {v.skills && <span className="text-muted-foreground">· {v.skills}</span>}
-              {v.availability && <span className="mono text-[11px] text-muted-foreground">· {v.availability}</span>}
-              <button type="button" onClick={() => delVol.mutate(v.id)} className="ml-auto text-xs text-brick-600 hover:underline">Retirer</button>
-            </li>
+      {volunteers.isError && <p className="mb-3 text-brick-600">Accès refuge requis.</p>}
+
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap gap-2">
+          {FILTERS.map(({ v, label }) => (
+            <button key={v} onClick={() => setFilter(v)}
+              className={cn("inline-flex h-[34px] cursor-pointer items-center gap-2 rounded-[8px] border px-[13px] text-[13px] font-semibold transition-colors",
+                filter === v ? "border-coral-600 bg-coral-600 text-sable-50" : "border-line bg-card text-muted-foreground hover:border-sable-400")}>
+              {label}
+              <span className={cn("font-mono tabular grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[10.5px] font-bold",
+                filter === v ? "bg-sable-50/25 text-sable-50" : "bg-muted text-muted-foreground")}>{counts[v] ?? 0}</span>
+            </button>
           ))}
-        </ul>
-      </Panel>
+        </div>
+        <label className="relative ml-auto">
+          <Icon name="search" size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher (nom, compétence…)"
+            className="h-[34px] w-[230px] rounded-[8px] border border-line bg-card pl-9 pr-3 text-[13px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-sable-400 focus:border-coral-500 focus:ring-2 focus:ring-coral-500/15" />
+        </label>
+      </div>
 
-      <div className="mt-6">
-        <Panel title="Planning des permanences" hint="Créneaux à venir et inscriptions">
-          <form onSubmit={onAddShift} className="mb-4 grid gap-2 rounded-card border border-line p-3 md:grid-cols-5">
-            <input name="title" required placeholder="Intitulé" className={cn(input, "md:col-span-2")} />
-            <Select name="kind" defaultValue="permanence" options={KINDS.map((k) => ({ value: k, label: KIND[k] }))} />
-            <input name="startsAt" type="datetime-local" required className={input} />
-            <input name="capacity" type="number" min="1" placeholder="Places" className={input} />
-            <input name="location" placeholder="Lieu" className={cn(input, "md:col-span-4")} />
-            <div className="md:col-span-5"><MiniBtn label="Créer le créneau" icon="check" tone="green" /></div>
-          </form>
-
-          <div className="flex flex-col gap-2">
-            {(shifts.data ?? []).map((s) => (
-              <div key={s.id} className="rounded-card border border-line p-3">
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-semibold">{s.title}</span>
-                  <span className="rounded-full bg-tint-coral px-2 py-0.5 text-[11px] font-semibold text-coral-700">{KIND[s.kind]}</span>
-                  <span className="mono text-[12px] text-muted-foreground">{dt(s.startsAt)}</span>
-                  {s.location && <span className="text-muted-foreground">· {s.location}</span>}
-                  {s.capacity != null && <span className="text-muted-foreground">· {s.capacity} places</span>}
-                  <div className="ml-auto flex gap-2">
-                    <MiniBtn label={openShift === s.id ? "Masquer" : "Inscriptions"} icon="user" onClick={() => setOpenShift(openShift === s.id ? null : s.id)} />
-                    <button type="button" onClick={() => delShift.mutate(s.id)} className="text-xs text-brick-600 hover:underline">Supprimer</button>
-                  </div>
-                </div>
-                {openShift === s.id && (
-                  <div className="mt-3 border-t border-line pt-3">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <Select id={`vol-${s.id}`} placeholder="Inscrire un bénévole…" options={vols.map((v) => ({ value: v.id, label: v.name }))} />
-                      <MiniBtn label="Inscrire" icon="check" onClick={() => {
-                        const sel = document.getElementById(`vol-${s.id}`) as HTMLSelectElement | null;
-                        if (sel?.value) signup.mutate({ shiftId: s.id, volunteerId: sel.value });
-                      }} disabled={signup.isPending} />
-                    </div>
-                    {(signups.data ?? []).length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Aucune inscription.</p>
-                    ) : (
-                      <ul className="flex flex-col gap-1.5">
-                        {(signups.data ?? []).map((su) => (
-                          <li key={su.id} className="flex flex-wrap items-center gap-2 text-sm">
-                            <span className="font-medium">{su.volunteerName}</span>
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px]">{SIGN[su.status]}</span>
-                            {su.hours != null && <span className="text-muted-foreground">{su.hours} h</span>}
-                            <div className="ml-auto flex items-center gap-2">
-                              {su.status !== "present" && <button type="button" onClick={() => updSignup.mutate({ id: su.id, status: "present", hours: su.hours ?? 2 })} className="text-xs text-coral-700 hover:underline">Présent</button>}
-                              {su.status !== "absent" && <button type="button" onClick={() => updSignup.mutate({ id: su.id, status: "absent" })} className="text-xs text-muted-foreground hover:underline">Absent</button>}
-                              <button type="button" onClick={() => delSignup.mutate(su.id)} className="text-xs text-brick-600 hover:underline">Retirer</button>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
-              </div>
+      {volunteers.isLoading ? (
+        <div className="h-[200px] animate-pulse rounded-card border border-line bg-card" />
+      ) : all.length === 0 ? (
+        <div className="grid place-items-center rounded-card border border-dashed border-line py-16 text-center">
+          <Icon name="star" size={26} className="text-muted-foreground" />
+          <p className="mt-2 text-muted-foreground">Aucun bénévole pour l'instant.</p>
+          {canManage && <Btn className="mt-3" size="sm" icon="plus" onClick={() => setModal("new")}>Ajouter un bénévole</Btn>}
+        </div>
+      ) : list.length === 0 ? (
+        <p className="rounded-card border border-dashed border-line py-10 text-center text-muted-foreground">Aucun bénévole dans cette catégorie.</p>
+      ) : (
+        <div className="rounded-card border border-line bg-card p-1.5">
+          <Table head={["Bénévole", "Coordonnées", "Compétences & disponibilités", "Statut", ""]}>
+            {list.map((v) => (
+              <VolunteerRow key={v.id} v={v} canManage={canManage} busy={busy}
+                onEdit={() => setModal(v)}
+                onStatus={(status) => updVol.mutate({ id: v.id, input: { status } })}
+                onRemove={() => delVol.mutate(v.id)} />
             ))}
+          </Table>
+        </div>
+      )}
+
+      <p className="mono mt-4 text-[11px] uppercase tracking-[0.05em] text-muted-foreground">
+        Pour inscrire un bénévole à une permanence ou un événement, rendez-vous dans <Link to="/refuge/evenements" className="text-coral-700 hover:underline">l'Agenda</Link>.
+      </p>
+
+      {modal && canManage && (
+        <VolunteerModal
+          initial={modal === "new" ? null : modal}
+          saving={createVol.isPending || updVol.isPending}
+          error={createVol.error ?? updVol.error}
+          onClose={() => setModal(null)}
+          onSave={(input) => modal === "new" ? createVol.mutate(input) : updVol.mutate({ id: modal.id, input })} />
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------- table row -------------------------------- */
+function VolunteerRow({ v, canManage, busy, onEdit, onStatus, onRemove }: {
+  v: Volunteer; canManage: boolean; busy: boolean;
+  onEdit: () => void; onStatus: (s: VolunteerStatus) => void; onRemove: () => void;
+}) {
+  const [confirm, setConfirm] = useState(false);
+  const tags = skillTags(v.skills);
+  return (
+    <tr className="group">
+      <Td>
+        <div className="flex items-center gap-3">
+          <Avatar name={v.name} size={38} />
+          <div className="min-w-0">
+            <div className="font-semibold text-foreground">{v.name}</div>
+            {v.notes && <div className="truncate text-[12px] text-muted-foreground" title={v.notes}>{v.notes}</div>}
           </div>
-        </Panel>
+        </div>
+      </Td>
+      <Td>
+        <div className="flex flex-col gap-0.5">
+          {v.email && <a href={`mailto:${v.email}`} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground hover:text-coral-700"><Icon name="mail" size={12} className="text-muted-foreground" /> {v.email}</a>}
+          {v.phone && <a href={`tel:${v.phone}`} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground hover:text-coral-700"><Icon name="phone" size={12} className="text-muted-foreground" /> {v.phone}</a>}
+          {!v.email && !v.phone && <span className="text-[12.5px] text-muted-foreground">—</span>}
+        </div>
+      </Td>
+      <Td>
+        <div className="flex flex-wrap gap-1">
+          {tags.length > 0 ? tags.map((t) => <Pill key={t} tone="sable">{t}</Pill>) : <span className="text-[12.5px] text-muted-foreground">—</span>}
+        </div>
+        {v.availability && <div className="mono mt-1 text-[11px] uppercase tracking-[0.04em] text-muted-foreground">{v.availability}</div>}
+      </Td>
+      <Td>
+        {canManage
+          ? <Select value={v.status} onChange={(s) => onStatus(s as VolunteerStatus)} disabled={busy} options={STATUS_OPTS} className="w-[140px]" />
+          : <Pill tone={VOL_TONE[v.status]}>{VOL_STATUS[v.status]}</Pill>}
+      </Td>
+      <Td right>
+        {canManage && (
+          confirm ? (
+            <div className="inline-flex items-center gap-1.5">
+              <MiniBtn icon="trash" tone="brick" label="Retirer" onClick={() => { onRemove(); setConfirm(false); }} disabled={busy} />
+              <MiniBtn label="Annuler" onClick={() => setConfirm(false)} />
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5">
+              <MiniBtn icon="edit" label="Modifier" onClick={onEdit} />
+              <MiniBtn icon="trash" tone="brick" onClick={() => setConfirm(true)} disabled={busy} />
+            </div>
+          )
+        )}
+      </Td>
+    </tr>
+  );
+}
+
+/* -------------------------------- create/edit ------------------------------ */
+function VolunteerModal({ initial, saving, error, onClose, onSave }: {
+  initial: Volunteer | null;
+  saving: boolean;
+  error: unknown;
+  onClose: () => void;
+  onSave: (input: CreateVolunteerInput) => void;
+}) {
+  const [form, setForm] = useState({
+    name: initial?.name ?? "", status: initial?.status ?? "active",
+    email: initial?.email ?? "", phone: initial?.phone ?? "",
+    skills: initial?.skills ?? "", availability: initial?.availability ?? "", notes: initial?.notes ?? "",
+  });
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+  const clean = (s: string) => (s.trim() === "" ? undefined : s.trim());
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    onSave({
+      name: form.name.trim(), status: form.status as VolunteerStatus,
+      email: clean(form.email), phone: clean(form.phone),
+      skills: clean(form.skills), availability: clean(form.availability), notes: clean(form.notes),
+    });
+  }
+  const msg = error instanceof ApiClientError ? error.message : error ? "Enregistrement impossible." : null;
+
+  return (
+    <div onClick={onClose} className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(12,22,16,.45)] p-6 backdrop-blur-[3px] [animation:dlFade_.12s_ease]">
+      <div onClick={(e) => e.stopPropagation()} className="w-[min(540px,100%)] rounded-[10px] border border-line bg-card p-[22px] shadow-[0_30px_80px_rgba(0,0,0,.4)] [animation:dlPop_.18s_ease]">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[20px] font-semibold text-foreground">{initial ? "Modifier le bénévole" : "Nouveau bénévole"}</h3>
+          <button onClick={onClose} aria-label="Fermer" className="grid h-8 w-8 cursor-pointer place-items-center rounded-[6px] border border-line bg-background text-muted-foreground"><Icon name="x" size={16} /></button>
+        </div>
+        <form onSubmit={submit} className="mt-4 grid gap-3.5 sm:grid-cols-2">
+          <Field label="Nom"><Input required autoFocus value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="Marie Lambert" /></Field>
+          <Field label="Statut"><Select value={form.status} onChange={(s) => set({ status: s as VolunteerStatus })} options={STATUS_OPTS} /></Field>
+          <Field label="Email"><Input type="email" value={form.email} onChange={(e) => set({ email: e.target.value })} placeholder="marie@exemple.fr" /></Field>
+          <Field label="Téléphone"><Input value={form.phone} onChange={(e) => set({ phone: e.target.value })} placeholder="06 12 34 56 78" /></Field>
+          <div className="sm:col-span-2"><Field label="Compétences" hint="Séparez par des virgules (Promenade, Accueil, Transport…)"><Input value={form.skills} onChange={(e) => set({ skills: e.target.value })} placeholder="Promenade, accueil" /></Field></div>
+          <div className="sm:col-span-2"><Field label="Disponibilités"><Input value={form.availability} onChange={(e) => set({ availability: e.target.value })} placeholder="Week-ends, mercredis après-midi" /></Field></div>
+          <div className="sm:col-span-2"><Field label="Notes internes"><Textarea rows={2} value={form.notes} onChange={(e) => set({ notes: e.target.value })} placeholder="Permis B, allergique aux chats…" /></Field></div>
+          {msg && <p className="text-[13px] text-brick-600 sm:col-span-2">{msg}</p>}
+          <div className="flex justify-end gap-2.5 sm:col-span-2">
+            <Btn variant="ghost" type="button" onClick={onClose}>Annuler</Btn>
+            <Btn type="submit" icon="check" disabled={saving || !form.name.trim()}>{saving ? "Enregistrement…" : initial ? "Enregistrer" : "Ajouter"}</Btn>
+          </div>
+        </form>
       </div>
     </div>
   );

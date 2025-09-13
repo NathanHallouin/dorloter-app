@@ -11,18 +11,20 @@ export function ShelterConsoleLayout() {
 
   const nav: DashNavItem[] = [
     { to: "/refuge", label: "Tableau de bord", icon: "gauge", end: true, group: "Pilotage" },
-    { to: "/refuge/animaux", label: "Mes annonces", icon: "heart", group: "Animaux & adoption" },
-    { to: "/refuge/sante", label: "Santé", icon: "syringe", group: "Animaux & adoption" },
+
+    // « Animaux » est désormais un hub : fiche, santé et registre vivent dans la page de chaque animal.
+    { to: "/refuge/animaux", label: "Animaux", icon: "heart", group: "Animaux & adoption" },
     { to: "/refuge/candidatures", label: "Candidatures", icon: "inbox", count: pending, group: "Animaux & adoption" },
-    { to: "/refuge/adoptions", label: "Adoptions", icon: "badgeCheck", group: "Animaux & adoption" },
     { to: "/refuge/contrats", label: "Contrats", icon: "shieldCheck", group: "Animaux & adoption" },
     { to: "/refuge/familles", label: "Familles d'accueil", icon: "home", group: "Animaux & adoption" },
+
     { to: "/refuge/benevoles", label: "Bénévoles", icon: "star", group: "Vie associative" },
-    { to: "/refuge/evenements", label: "Événements", icon: "map", group: "Vie associative" },
+    { to: "/refuge/evenements", label: "Agenda", icon: "calendar", group: "Vie associative" },
     { to: "/refuge/stock", label: "Stock & besoins", icon: "sliders", group: "Vie associative" },
-    { to: "/refuge/communication", label: "Communication", icon: "send", group: "Vie associative" },
-    { to: "/refuge/registre", label: "Registre & stats", icon: "compass", group: "Suivi" },
-    { to: "/refuge/messages", label: "Messagerie", icon: "message", group: "Suivi" },
+
+    { to: "/refuge/messages", label: "Messagerie", icon: "message", group: "Communication" },
+    { to: "/refuge/communication", label: "Campagnes", icon: "send", group: "Communication" },
+
     { to: "/refuge/equipe", label: "Équipe", icon: "users", group: "Réglages" },
     { to: "/refuge/profil", label: "Profil du refuge", icon: "settings", group: "Réglages" },
   ];

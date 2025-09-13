@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shelterApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
-import { DashPageHead } from "@/components/dash/kit";
 
 export function ShelterMessagesPage() {
   const queryClient = useQueryClient();
@@ -24,9 +23,7 @@ export function ShelterMessagesPage() {
   const convs = conversations.data ?? [];
 
   return (
-    <div>
-      <DashPageHead title="Messagerie" desc="Répondez aux adoptants intéressés par vos animaux." />
-      <div className="grid h-[calc(100vh-280px)] min-h-[380px] grid-cols-[300px_1fr] overflow-hidden rounded-card border border-line bg-card">
+    <div className="-mx-5 -mt-7 -mb-16 grid h-[calc(100dvh-64px)] min-h-[420px] grid-cols-[300px_1fr] overflow-hidden bg-card md:-mx-[34px] md:-mt-8">
         <aside className="overflow-y-auto border-r border-line">
           {convs.length === 0 && <p className="p-4 text-[13px] text-muted-foreground">Aucune conversation.</p>}
           {convs.map((c) => (
@@ -57,7 +54,6 @@ export function ShelterMessagesPage() {
             </>
           )}
         </section>
-      </div>
     </div>
   );
 }

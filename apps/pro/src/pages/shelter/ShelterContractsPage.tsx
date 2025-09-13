@@ -7,7 +7,7 @@ import {
   type Contract,
   type ContractStatus,
 } from "@dorloter/client";
-import { cn } from "@dorloter/ui";
+import { cn, DatePicker } from "@dorloter/ui";
 import { DashPageHead, Panel, MiniBtn, Select } from "@/components/dash/kit";
 import { clausesFor } from "./contract-clauses";
 
@@ -208,12 +208,12 @@ export function ShelterContractsPage() {
                       )}
                       <label className="text-xs text-muted-foreground">
                         {c.type === "adoption" ? "Date d'adoption" : "Début d'accueil"}
-                        <input type="date" value={draft.effectiveDate ?? ""} onChange={(e) => setDraft((d) => d && ({ ...d, effectiveDate: e.target.value || undefined }))} className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                        <DatePicker dense className="mt-1" value={draft.effectiveDate ?? ""} onChange={(v) => setDraft((d) => d && ({ ...d, effectiveDate: v || undefined }))} />
                       </label>
                       {c.type === "foster" && (
                         <label className="text-xs text-muted-foreground">
                           Fin prévue
-                          <input type="date" value={draft.endDate ?? ""} onChange={(e) => setDraft((d) => d && ({ ...d, endDate: e.target.value || undefined }))} className="mt-1 w-full rounded-field border border-line bg-background px-2 py-1.5 text-sm" />
+                          <DatePicker dense className="mt-1" value={draft.endDate ?? ""} onChange={(v) => setDraft((d) => d && ({ ...d, endDate: v || undefined }))} />
                         </label>
                       )}
                     </div>
