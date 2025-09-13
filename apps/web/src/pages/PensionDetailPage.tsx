@@ -6,7 +6,7 @@ import { useAuth } from "@dorloter/client";
 import { ApiClientError } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Btn, Pill, Rule } from "@dorloter/ui";
-import { Field, Input, Select } from "@dorloter/ui";
+import { Field, Input, Select, DatePicker } from "@dorloter/ui";
 
 const SERVICE_LABELS: Record<string, string> = {
   medication: "Médication", grooming: "Toilettage", outdoorAccess: "Accès extérieur",
@@ -110,8 +110,8 @@ export function PensionDetailPage() {
               )}
               <Field label="Nom de l'animal"><Input value={petName} onChange={(e) => setPetName(e.target.value)} placeholder="Nala…" /></Field>
               <div className="grid grid-cols-2 gap-2.5">
-                <Field label="Arrivée"><Input type="date" required value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
-                <Field label="Départ"><Input type="date" required value={to} onChange={(e) => setTo(e.target.value)} /></Field>
+                <Field label="Arrivée"><DatePicker value={from} onChange={setFrom} /></Field>
+                <Field label="Départ"><DatePicker value={to} onChange={setTo} min={from || undefined} /></Field>
               </div>
               {total != null && (
                 <div className="flex items-baseline justify-between border-t border-line pt-3">

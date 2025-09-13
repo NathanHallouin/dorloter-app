@@ -8,7 +8,7 @@ import { LocationPickerMap } from "@/components/LocationPickerMap";
 import { ApiClientError } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
 import { Btn, Eyebrow } from "@dorloter/ui";
-import { Field, Input, Textarea, Select, Segmented } from "@dorloter/ui";
+import { Field, Input, Textarea, Select, Segmented, DatePicker } from "@dorloter/ui";
 
 export function CreateReportPage() {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ export function CreateReportPage() {
           <Field label="Sexe"><Select value={form.sex} onChange={(e) => update({ sex: e.target.value as typeof form.sex })} options={[{ value: "inconnu", label: "Inconnu" }, { value: "male", label: "Mâle" }, { value: "femelle", label: "Femelle" }]} /></Field>
           <Field label="Couleur / robe"><Input value={form.color} onChange={(e) => update({ color: e.target.value })} placeholder="Tigré, noir…" /></Field>
           <Field label="Race"><Input value={form.breed} onChange={(e) => update({ breed: e.target.value })} placeholder="Européen…" /></Field>
-          <Field label="Date"><Input type="date" value={form.dateEvent} onChange={(e) => update({ dateEvent: e.target.value })} /></Field>
+          <Field label="Date"><DatePicker value={form.dateEvent} onChange={(v) => update({ dateEvent: v })} /></Field>
           <Field label="Téléphone de contact"><Input value={form.contactPhone} onChange={(e) => update({ contactPhone: e.target.value })} placeholder="06 12 34 56 78" /></Field>
           <Field label="Adresse (texte)" full><Input value={form.address} onChange={(e) => update({ address: e.target.value })} placeholder="Parc, rue, quartier…" /></Field>
           <Field label="Description" full><Textarea required value={form.description} onChange={(e) => update({ description: e.target.value })} placeholder="Décrivez l'animal et les circonstances…" /></Field>
