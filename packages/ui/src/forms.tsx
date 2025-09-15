@@ -7,6 +7,7 @@ export { Field } from "./field";
 export { Input } from "./input";
 export { Textarea } from "./textarea";
 export { Select } from "./select";
+export { DatePicker } from "./date-picker";
 export { PageHead } from "./page-head";
 export { EmptyState } from "./empty-state";
 export { PageBody } from "./page-body";
