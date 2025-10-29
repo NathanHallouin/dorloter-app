@@ -120,6 +120,9 @@ function AnimalHeader({ pet, qc }: { pet: ShelterPet; qc: ReturnType<typeof useQ
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to={`/refuge/animaux/${pet.id}/fiche-cage`}>
+            <MiniBtn icon="grid" label="Fiche cage" />
+          </Link>
           {pet.status === "disponible" ? (
             <MiniBtn icon="pause" label="Mettre en pause" onClick={() => setStatus.mutate("retire")} disabled={setStatus.isPending} />
           ) : pet.status !== "adopte" ? (

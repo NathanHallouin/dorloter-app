@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shelterApi, type ShelterApplication } from "@dorloter/client";
+import { shelterApi, templatesApi, fillTemplate, type ShelterApplication, type ResponseTemplate } from "@dorloter/client";
 import { cn, Icon, Pill } from "@dorloter/ui";
 import { Tag, MiniBtn, DashPageHead, Avatar } from "@/components/dash/kit";
 
@@ -22,6 +22,9 @@ export function ShelterCandidaturesPage() {
   const [search, setSearch] = useState("");
 
   const apps = useQuery({ queryKey: ["shelter-applications"], queryFn: () => shelterApi.applications() });
+  const templates = useQuery({ queryKey: ["response-templates"], queryFn: () => templatesApi.list() });
+  const profile = useQuery({ queryKey: ["shelter-profile"], queryFn: () => shelterApi.profile() });
+  const shelterName = profile.data?.name ?? "notre refuge";
 
   const update = useMutation({
     mutationFn: (v: { id: string; status: string; shelterNotes?: string }) =>
@@ -85,6 +88,8 @@ export function ShelterCandidaturesPage() {
       <div className="flex flex-col gap-3">
         {list.map((c) => (
           <Card key={c.id} c={c}
+            templates={templates.data ?? []}
+            shelterName={shelterName}
             onStatus={(status) => update.mutate({ id: c.id, status })}
             onNotes={(notes) => update.mutate({ id: c.id, status: c.status, shelterNotes: notes })}
             pending={update.isPending} />
@@ -94,8 +99,10 @@ export function ShelterCandidaturesPage() {
   );
 }
 
-function Card({ c, onStatus, onNotes, pending }: {
+function Card({ c, templates, shelterName, onStatus, onNotes, pending }: {
   c: ShelterApplication;
+  templates: ResponseTemplate[];
+  shelterName: string;
   onStatus: (status: string) => void;
   onNotes: (notes: string) => void;
   pending: boolean;
@@ -103,6 +110,24 @@ function Card({ c, onStatus, onNotes, pending }: {
   const [open, setOpen] = useState(false);
   const [confirmRefuse, setConfirmRefuse] = useState(false);
   const [notes, setNotes] = useState(c.shelterNotes ?? "");
+
+  function respondWith(t: ResponseTemplate) {
+    const vars = {
+      prenomCandidat: (c.applicantName ?? "").split(" ")[0] ?? "",
+      nomAnimal: c.petName ?? "l'animal",
+      nomRefuge: shelterName,
+    };
+    const subject = fillTemplate(t.subject ?? "", vars);
+    const body = fillTemplate(t.body, vars);
+    if (c.applicantEmail) {
+      const parts: string[] = [];
+      if (subject) parts.push(`subject=${encodeURIComponent(subject)}`);
+      parts.push(`body=${encodeURIComponent(body)}`);
+      window.location.href = `mailto:${c.applicantEmail}?${parts.join("&")}`;
+    } else {
+      void navigator.clipboard?.writeText(body);
+    }
+  }
 
   const facts: string[] = [];
   if (c.housingType) facts.push(HOUSING[c.housingType] ?? c.housingType);
@@ -202,6 +227,29 @@ function Card({ c, onStatus, onNotes, pending }: {
             <div className="mt-2">
               <MiniBtn label="Enregistrer la note" icon="check" onClick={() => onNotes(notes)} disabled={pending || notes === (c.shelterNotes ?? "")} />
             </div>
+          </div>
+
+          {/* Répondre à l'adoptant avec un modèle (variables auto-remplies) */}
+          <div className="mt-4 border-t border-line pt-4">
+            <label className="mono mb-1.5 block text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              Répondre avec un modèle
+            </label>
+            {templates.length === 0 ? (
+              <p className="text-[13px] text-muted-foreground">
+                Aucun modèle. Créez-en dans{" "}
+                <Link to="/refuge/modeles" className="font-semibold text-coral-700 hover:underline">Modèles de réponses</Link>.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {templates.map((t) => (
+                  <button key={t.id} type="button" onClick={() => respondWith(t)}
+                    title={c.applicantEmail ? "Ouvrir un email pré-rempli" : "Copier le texte (pas d'email renseigné)"}
+                    className="inline-flex items-center gap-1.5 rounded-[6px] border border-line px-2.5 py-1 text-[12px] text-foreground hover:border-coral-300 hover:text-coral-700">
+                    <Icon name={c.applicantEmail ? "mail" : "paperclip"} size={12} /> {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
