@@ -1,6 +1,6 @@
 # apps/pro · Espace pro Dorloter
 
-SPA React 19 + Vite + React Router + TanStack Query. C'est le **back-office des professionnels** : consoles refuge / association, pension, vétérinaire, et administration plateforme. Distinct de la vitrine publique (`apps/web`), avec son propre shell console (sidebar dense, orientée gestion).
+SPA React 19 + Vite + React Router + TanStack Query. C'est le **back-office des professionnels** : consoles refuge / association, pension, et administration plateforme. Distinct de la vitrine publique (`apps/web`), avec son propre shell console (sidebar dense, orientée gestion).
 
 En prod : servi en statique derrière Caddy sur **`pro.dorloter.fr`** (`/api/v1` proxifié vers l'API).
 
@@ -8,7 +8,7 @@ En prod : servi en statique derrière Caddy sur **`pro.dorloter.fr`** (`/api/v1`
 
 - React 19, Vite, React Router, TanStack Query, Tailwind v4
 - Design system partagé `@dorloter/ui` · couche API partagée `@dorloter/client`
-- Consomme l'API via `/api/v1`
+- Consomme l'API NestJS via `/api/v1`
 
 ## Structure
 
