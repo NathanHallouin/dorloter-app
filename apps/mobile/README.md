@@ -1,7 +1,7 @@
 # Dorloter · application mobile (Expo)
 
 Application **Expo / React Native** du monorepo. Elle consomme l'API
-(`apps/api`) via le client typé `@dorloter/api-client` et partage le même
+(`apps/api`, NestJS) via le client typé `@dorloter/api-client` et partage le même
 contrat `/api/v1` que le front web.
 
 ## Stack
