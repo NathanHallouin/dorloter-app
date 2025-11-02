@@ -2,7 +2,7 @@
   "name": "dorloter",
   "version": "0.1.0",
   "private": true,
-  "description": "Dorloter · adoption + perdus/trouvés + pensions. Monorepo (apps/api NestJS, apps/web SPA, apps/mobile, packages/api-client).",
+  "description": "Dorloter · adoption + perdus/trouvés + pensions. Monorepo (apps/api NestJS, apps/web SPA, apps/pro SPA, apps/mobile, packages partagés).",
   "packageManager": "bun@1.3.5",
   "workspaces": [
     "apps/*",
