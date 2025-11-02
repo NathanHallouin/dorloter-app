@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -9,8 +9,13 @@ import { PageHead, PageBody, Field, Input, Textarea } from "@dorloter/ui";
 import { Btn, Pill, Rule } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 
+// Carte de sélection : MapLibre est volumineux, chargé à la demande.
+const LocationPickerMap = lazy(() =>
+  import("@/components/LocationPickerMap").then((m) => ({ default: m.LocationPickerMap })),
+);
+
 const ROLE_LABEL: Record<string, string> = {
-  user: "Membre", shelter_admin: "Refuge", pension_admin: "Pension", veterinarian_admin: "Vétérinaire", platform_admin: "Administration",
+  user: "Membre", shelter_admin: "Refuge", pension_admin: "Pension", platform_admin: "Administration",
 };
 
 const LINKS: { to: string; icon: string; label: string }[] = [
@@ -24,6 +29,10 @@ const LINKS: { to: string; icon: string; label: string }[] = [
 export function ProfilePage() {
   const { user, setUser } = useAuth();
   const [form, setForm] = useState({ name: user?.name ?? "", phone: user?.phone ?? "", city: user?.city ?? "", bio: user?.bio ?? "" });
+  const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(
+    user?.latitude != null && user?.longitude != null ? { lat: user.latitude, lng: user.longitude } : null,
+  );
+  const [radius, setRadius] = useState(user?.notificationRadiusKm ?? 25);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,6 +47,8 @@ export function ProfilePage() {
 
   const onSubmit = (e: FormEvent) => { e.preventDefault(); setError(null); save.mutate(form); };
   const toggleVisibility = () => save.mutate({ isPublic: !user.isPublic });
+  const toggleDigest = () => save.mutate({ digestOptin: !user.digestOptin });
+  const saveZone = () => { setError(null); save.mutate({ latitude: geo?.lat, longitude: geo?.lng, notificationRadiusKm: radius }); };
 
   return (
     <div>
@@ -104,6 +115,55 @@ export function ProfilePage() {
             </div>
           </aside>
         </div>
+
+        {/* Alertes de proximité : localisation + rayon + digest (feature 5.2) */}
+        <section className="mt-7 rounded-[8px] border border-line bg-card p-[22px]">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-[18px] font-semibold text-foreground">Alertes de proximité</h3>
+              <p className="mt-1 max-w-[520px] text-[13.5px] leading-[1.5] text-muted-foreground">
+                Indiquez votre secteur : nous vous suggérons les nouveaux animaux à adopter publiés près de chez vous,
+                choisis selon vos coups de cœur. Cliquez sur la carte pour poser votre point.
+              </p>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 rounded-[6px] border border-line px-3 py-2 text-[13px] font-semibold text-foreground">
+              <input type="checkbox" checked={user.digestOptin} onChange={toggleDigest} disabled={save.isPending} />
+              Recevoir le digest
+            </label>
+          </div>
+
+          <div className="mt-4 grid grid-cols-[1fr_260px] gap-5 max-md:grid-cols-1">
+            <div className="h-[280px] overflow-hidden rounded-[8px] border border-line">
+              <Suspense fallback={<div className="grid h-full place-items-center bg-muted text-[13px] text-muted-foreground">Chargement de la carte…</div>}>
+                <LocationPickerMap value={geo} onChange={(lat, lng) => setGeo({ lat, lng })} />
+              </Suspense>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Field label={`Rayon d'alerte : ${radius} km`}>
+                <input
+                  type="range" min={5} max={100} step={5} value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                  className="w-full accent-coral-600"
+                />
+              </Field>
+              <div className="rounded-[6px] bg-muted px-3 py-2.5 text-[12.5px] text-muted-foreground">
+                {geo ? (
+                  <>Point posé : <span className="tabular font-semibold text-foreground">{geo.lat.toFixed(3)}, {geo.lng.toFixed(3)}</span></>
+                ) : (
+                  "Aucun point encore. Cliquez sur la carte."
+                )}
+              </div>
+              <Btn icon="marker" onClick={saveZone} disabled={save.isPending || !geo}>
+                {save.isPending ? "Enregistrement…" : "Enregistrer ma zone"}
+              </Btn>
+              {user.latitude != null && (
+                <Link to="/adopter" className="text-center text-[12.5px] text-coral-700 hover:underline">
+                  Voir les nouveautés près de moi →
+                </Link>
+              )}
+            </div>
+          </div>
+        </section>
       </PageBody>
     </div>
   );

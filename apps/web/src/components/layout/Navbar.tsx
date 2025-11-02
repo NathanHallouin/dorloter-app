@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@dorloter/client";
 import { messagingApi } from "@dorloter/client";
 import { notificationsApi } from "@dorloter/client";
+import { shelterApi } from "@dorloter/client";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { CommandPalette } from "@/components/CommandPalette";
@@ -48,7 +49,21 @@ export function Navbar() {
   // L'espace pro est une autre application (autre domaine) : navigation externe.
   const goPro = (to: string) => { window.location.href = `${PRO_URL}${to}`; };
   const onLogout = async () => { setPanel(null); await logout(); navigate("/"); };
-  const pro = user ? PRO_BY_ROLE[user.role] : undefined;
+  const proByRole = user ? PRO_BY_ROLE[user.role] : undefined;
+  // Un membre d'équipe refuge a le rôle global `user` (permissions via
+  // shelter_members) : on sonde l'API pour lui proposer quand même l'accès pro.
+  const memberProbe = useQuery({
+    queryKey: ["pro-access"],
+    queryFn: () => shelterApi.pets(),
+    enabled: !!user && !proByRole,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+  const pro =
+    proByRole ??
+    (memberProbe.isSuccess
+      ? { to: "/refuge", icon: "shield", label: "Espace refuge", desc: "Vos animaux & candidatures" }
+      : undefined);
   const isConsole = /^\/(refuge|pension|admin)(\/|$)/.test(path);
 
   const dot = <span className="absolute right-[9px] top-2 h-[7px] w-[7px] rounded-full border-2 border-card bg-coral-600" />;

@@ -2,19 +2,19 @@ export type MenuItem = { to: string; icon: string; title: string; desc: string }
 export type NavGroup = { id: string; label: string; to: string | null; match: string[]; menu: MenuItem[] };
 
 export const PRIMARY: NavGroup[] = [
-  { id: "adopt", label: "Adopter", to: "/adopter", match: ["/adopter", "/quiz"], menu: [
+  { id: "adopt", label: "Adopter", to: "/adopter", match: ["/adopter", "/quiz", "/evenements"], menu: [
     { to: "/adopter", icon: "cat", title: "Catalogue des animaux", desc: "Tous les chats & chiens à adopter" },
     { to: "/adopter/swipe", icon: "paw", title: "Mode swipe", desc: "Un coup de cœur d'un geste" },
     { to: "/quiz", icon: "sparkles", title: "Quiz de compatibilité", desc: "Le bon profil en 7 questions" },
+    { to: "/evenements", icon: "calendar", title: "Événements", desc: "Portes ouvertes & journées adoption" },
   ] },
   { id: "lost", label: "Perdus & trouvés", to: "/perdus-trouves", match: ["/perdus-trouves"], menu: [
     { to: "/perdus-trouves", icon: "map", title: "Carte des signalements", desc: "Les alertes autour de vous" },
     { to: "/perdus-trouves/nouveau", icon: "radio", title: "Signaler un animal", desc: "Publier une alerte en 3 étapes" },
   ] },
-  { id: "annuaires", label: "Annuaires", to: null, match: ["/refuges", "/pensions", "/veterinaires", "/a-propos"], menu: [
+  { id: "annuaires", label: "Annuaires", to: null, match: ["/refuges", "/pensions", "/a-propos"], menu: [
     { to: "/refuges", icon: "shield", title: "Refuges", desc: "Associations & SPA partenaires" },
     { to: "/pensions", icon: "home", title: "Pensions", desc: "Garde vérifiée pour vos absences" },
-    { to: "/veterinaires", icon: "stethoscope", title: "Vétérinaires", desc: "Cabinets & urgences 24/7" },
   ] },
 ];
 

@@ -15,7 +15,6 @@ const PAGES: Cmd[] = [
   { label: "Signaler un animal", to: "/perdus-trouves/nouveau", icon: "marker", hint: "Perdus & trouvés" },
   { label: "Refuges & associations", to: "/refuges", icon: "building", hint: "Annuaire" },
   { label: "Pensions agréées", to: "/pensions", icon: "home", hint: "Annuaire" },
-  { label: "Vétérinaires", to: "/veterinaires", icon: "stethoscope", hint: "Annuaire" },
   { label: "Mon profil", to: "/profil", icon: "user", hint: "Compte" },
   { label: "Mes favoris", to: "/favoris", icon: "heart", hint: "Compte" },
   { label: "Mes candidatures", to: "/mes-candidatures", icon: "inbox", hint: "Compte" },

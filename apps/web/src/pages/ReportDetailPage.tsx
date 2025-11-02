@@ -60,6 +60,7 @@ export function ReportDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             <ReportContentButton contentType="report" contentId={r.id} />
+            {!resolved && <Btn size="sm" variant="soft" icon="download" onClick={() => window.open(`/perdus-trouves/${r.id}/affiche`, "_blank")}>Affiche</Btn>}
             {user && !resolved && <Btn size="sm" variant="soft" icon="check" onClick={() => resolve.mutate()} disabled={resolve.isPending}>Marquer résolu</Btn>}
           </div>
         </div>

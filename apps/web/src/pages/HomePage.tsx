@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { petsApi } from "@dorloter/client";
 import { PetCard } from "@/components/PetCard";
+import { NearbyDigest } from "@/components/NearbyDigest";
 import { cn } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 import { Btn, Eyebrow, Marquee, Rule, Stamp } from "@dorloter/ui";
@@ -79,6 +80,9 @@ export function HomePage() {
       </section>
 
       <Marquee tone="prune" items={["Adoption responsable", "Refuges partenaires", "+1 200 adoptions / an", "Perdus & trouvés", "Pensions agréées", "Association loi 1901"]} />
+
+      {/* ===================== NOUVEAUTÉS PRÈS DE VOUS ===================== */}
+      <NearbyDigest />
 
       {/* ===================== AU SOMMAIRE ===================== */}
       <section className="mx-auto max-w-[1180px] px-8 pb-2 pt-12">

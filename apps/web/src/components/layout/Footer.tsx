@@ -3,9 +3,9 @@ import { Icon } from "@dorloter/ui";
 
 export function Footer() {
   const COLS: [string, [string, string][]][] = [
-    ["Adopter", [["Catalogue", "/adopter"], ["Mode swipe", "/adopter/swipe"], ["Quiz de compatibilité", "/quiz"], ["Mes favoris", "/favoris"]]],
-    ["Communauté", [["Perdus & trouvés", "/perdus-trouves"], ["Signaler un animal", "/perdus-trouves/nouveau"], ["Messagerie", "/messages"], ["Notre mission", "/a-propos"]]],
-    ["Annuaires", [["Refuges", "/refuges"], ["Pensions", "/pensions"], ["Vétérinaires", "/veterinaires"], ["Mon compte", "/profil"]]],
+    ["Adopter", [["Catalogue", "/adopter"], ["Mode swipe", "/adopter/swipe"], ["Quiz de compatibilité", "/quiz"], ["Événements", "/evenements"], ["Mes favoris", "/favoris"]]],
+    ["Communauté", [["Perdus & trouvés", "/perdus-trouves"], ["Signaler un animal", "/perdus-trouves/nouveau"], ["Notre mission", "/a-propos"], ["Espace presse", "/presse"]]],
+    ["Annuaires", [["Refuges", "/refuges"], ["Pensions", "/pensions"], ["Mon compte", "/profil"]]],
   ];
   return (
     <footer className="mt-5 bg-prune-900 text-sable-100">

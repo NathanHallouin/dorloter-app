@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@dorloter/client";
 import { favoritesApi } from "@dorloter/client";
 import { Icon } from "@dorloter/ui";
+import { cn } from "@dorloter/ui";
 import { Pill, FavoriteButton, CompatPills } from "@dorloter/ui";
 import type { PetSummary } from "@dorloter/client";
+import { useCompare, toggleCompare, COMPARE_MAX } from "@/lib/compare";
 
 const AGE_LABEL: Record<string, string> = { chaton: "Chaton", jeune: "Jeune", adulte: "Adulte", senior: "Senior" };
 
@@ -12,6 +14,9 @@ export function PetCard({ pet, initialFavorite = false }: { pet: PetSummary; ini
   const { user } = useAuth();
   const navigate = useNavigate();
   const [fav, setFav] = useState(initialFavorite);
+  const compare = useCompare();
+  const inCompare = compare.some((c) => c.id === pet.id);
+  const compareFull = compare.length >= COMPARE_MAX && !inCompare;
 
   const toggleFav = () => {
     if (!user) { navigate("/login"); return; }
@@ -34,8 +39,24 @@ export function PetCard({ pet, initialFavorite = false }: { pet: PetSummary; ini
           <Pill tone="white" icon={pet.species === "chat" ? "cat" : "dog"}>{pet.species}</Pill>
           {pet.ageCategory === "senior" && <Pill tone="lavande">Senior</Pill>}
         </div>
-        <div className="absolute right-2.5 top-2.5">
+        <div className="absolute right-2.5 top-2.5 flex flex-col items-end gap-1.5">
           <FavoriteButton active={fav} onToggle={toggleFav} />
+          <button
+            type="button"
+            title={compareFull ? `Comparaison limitée à ${COMPARE_MAX} animaux` : inCompare ? "Retirer de la comparaison" : "Ajouter à la comparaison"}
+            aria-pressed={inCompare}
+            disabled={compareFull}
+            onClick={(e) => { e.preventDefault(); toggleCompare(pet); }}
+            className={cn(
+              "grid h-[34px] w-[34px] place-items-center rounded-full border shadow-[0_2px_8px_rgba(20,16,8,.14)] transition-colors",
+              inCompare
+                ? "border-coral-500 bg-coral-500 text-white"
+                : "border-line bg-white/95 text-stone-600 hover:border-coral-400 hover:text-coral-600",
+              compareFull && "cursor-not-allowed opacity-40",
+            )}
+          >
+            <Icon name={inCompare ? "check" : "columns"} size={16} />
+          </button>
         </div>
       </div>
       <div className="px-[15px] pb-[15px] pt-[13px]">
