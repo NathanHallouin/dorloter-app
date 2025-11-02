@@ -16,7 +16,6 @@ export * from "./api/pensions";
 export * from "./api/reports";
 export * from "./api/shelters";
 export * from "./api/shelter";
-export * from "./api/vets";
 export * from "./api/applications";
 export * from "./api/favorites";
 export * from "./api/foster";
@@ -30,6 +29,9 @@ export * from "./api/events";
 export * from "./api/registre";
 export * from "./api/inventory";
 export * from "./api/communications";
+export * from "./api/templates";
+export * from "./api/followups";
+export * from "./api/digest";
 
 // Auth & data layer
 export * from "./auth/AuthContext";

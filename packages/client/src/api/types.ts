@@ -1,5 +1,5 @@
 /**
- * Types du contrat d'API (/api/v1), maintenus à la main pour le front web.
+ * Types du contrat d'API (/api/v1), maintenus à la main pour les fronts web et pro.
  *
  * Enveloppes :
  *   - succès        : { data: T }
@@ -7,7 +7,7 @@
  *   - erreur        : { error: { code, message, details? } }
  *
  * NB : ces types sont parallèles au client typé généré `@dorloter/api-client`
- * (types.gen.ts, source de vérité OpenAPI) que consomme le mobile. À terme,
+ * (types.gen.ts, généré depuis l'OpenAPI) que consomme le mobile. À terme,
  * unifier le web dessus pour supprimer cette duplication maintenue à la main.
  */
 
@@ -45,6 +45,10 @@ export interface User {
   bio: string | null;
   city: string | null;
   isPublic: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  notificationRadiusKm: number;
+  digestOptin: boolean;
   createdAt: string | null;
   emailVerified: boolean;
 }
@@ -55,6 +59,31 @@ export interface UpdateProfileInput {
   city?: string;
   bio?: string;
   isPublic?: boolean;
+  latitude?: number;
+  longitude?: number;
+  notificationRadiusKm?: number;
+  digestOptin?: boolean;
+}
+
+/** Digest « Nouveautés dans votre rayon » (feature 5.2). */
+export interface DigestItem {
+  id: string;
+  name: string;
+  species: Species;
+  breed: string | null;
+  ageCategory: AgeCategory | null;
+  sex: Sex;
+  photoUrl: string | null;
+  shelterName: string;
+  shelterSlug: string;
+  distanceMeters: number | null;
+  createdAt: string;
+}
+
+export interface MyDigest {
+  hasLocation: boolean;
+  radiusKm: number;
+  items: DigestItem[];
 }
 
 export interface AuthTokens {
@@ -374,35 +403,6 @@ export interface Message {
   createdAt: string;
 }
 
-// ─── Vétérinaires ───────────────────────────────────────────────────────────
-
-export interface VetSummary {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  address: string | null;
-  logoUrl: string | null;
-  coverUrl: string | null;
-  acceptsCats: boolean;
-  acceptsDogs: boolean;
-  acceptsNac: boolean;
-  emergencyAvailable: boolean;
-  consultationPrice: number | null;
-}
-
-export interface VetDetail extends VetSummary {
-  siret: string;
-  orderNumber: string;
-  phone: string | null;
-  email: string | null;
-  website: string | null;
-  location: { latitude: number; longitude: number } | null;
-  services: Record<string, boolean> | null;
-  openingHours: string | null;
-  photos: PetPhoto[];
-}
-
 // ─── Refuges ────────────────────────────────────────────────────────────────
 
 export interface ShelterListItem {
@@ -685,6 +685,27 @@ export interface EventSignup {
   status: SignupStatus;
 }
 
+/** Événement public agrégé (calendrier public /evenements). */
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  type: EventType;
+  startsAt: string;
+  endsAt: string | null;
+  location: string | null;
+  needs: string | null;
+  capacity: number | null;
+  shelter: {
+    id: string;
+    slug: string;
+    name: string;
+    latitude: number | null;
+    longitude: number | null;
+  };
+  /** Distance au point de recherche, en mètres (si lat/lng fournis). */
+  distanceMeters: number | null;
+}
+
 export interface CreateEventInput {
   title: string;
   type?: EventType;
@@ -776,6 +797,65 @@ export interface CreateInventoryItemInput {
   notes?: string;
 }
 export type UpdateInventoryItemInput = Partial<CreateInventoryItemInput>;
+
+// ── Modèles de réponses aux candidatures (back-office refuge) ──────────────────
+export type TemplateCategory = "acceptation" | "refus" | "infos" | "rdv" | "generique";
+
+export interface ResponseTemplate {
+  id: string;
+  category: TemplateCategory;
+  name: string;
+  subject: string | null;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTemplateInput {
+  category?: TemplateCategory;
+  name: string;
+  subject?: string;
+  body: string;
+}
+export type UpdateTemplateInput = Partial<CreateTemplateInput>;
+
+// ── Statistiques refuge avancées ──────────────────────────────────────────────
+export interface ShelterStats {
+  totals: { pets: number; available: number; adopted: number; reserved: number };
+  adoptions: { thisMonth: number; thisYear: number; total: number };
+  applications: { total: number; pending: number };
+  /** Taux de conversion candidatures -> adoptions signées, en % (0-100). */
+  conversionRate: number;
+  /** Durée moyenne publication -> adoption, en jours. */
+  avgDaysToAdoption: number | null;
+  hardToPlace: { id: string; name: string; species: string; daysListed: number; applications: number }[];
+  adoptionsByMonth: { month: string; count: number }[];
+}
+
+// ── Suivi post-adoption ───────────────────────────────────────────────────────
+export type FollowupStatus = "a_faire" | "fait" | "annule";
+
+export interface AdoptionFollowup {
+  id: string;
+  contractId: string;
+  contractReference: string;
+  petId: string | null;
+  petName: string | null;
+  species: Species | null;
+  userId: string;
+  adopterName: string | null;
+  adopterEmail: string | null;
+  adopterPhone: string | null;
+  label: string;
+  dueDate: string;
+  status: FollowupStatus;
+  /** true si à faire et échéance dépassée. */
+  overdue: boolean;
+  notes: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 // Communication : campagnes email (newsletter)
 export type CampaignAudience = "benevoles" | "abonnes" | "tous";

@@ -1,5 +1,5 @@
 /**
- * Client HTTP de l'API Dorloter .
+ * Client HTTP de l'API Dorloter (NestJS, `/api/v1`).
  *
  * - Injecte `Authorization: Bearer <access>` quand un token est présent.
  * - Sur 401, tente UNE fois un refresh (dédupliqué entre requêtes concurrentes)
@@ -122,6 +122,8 @@ export const api = {
   get: <T>(path: string, auth?: boolean) => request<T>(path, { method: "GET", auth }),
   post: <T>(path: string, body?: unknown, auth?: boolean) =>
     request<T>(path, { method: "POST", body, auth }),
+  put: <T>(path: string, body?: unknown, auth?: boolean) =>
+    request<T>(path, { method: "PUT", body, auth }),
   patch: <T>(path: string, body?: unknown, auth?: boolean) =>
     request<T>(path, { method: "PATCH", body, auth }),
   del: <T>(path: string, auth?: boolean) =>

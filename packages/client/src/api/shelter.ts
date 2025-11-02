@@ -6,6 +6,7 @@ import type {
   ShelterConversation,
   ShelterDetail,
   ShelterPet,
+  ShelterStats,
   ShelterTeamMember,
 } from "./types";
 
@@ -118,4 +119,8 @@ export const shelterApi = {
 
   setFosteringOpen: (acceptsFosterApplications: boolean) =>
     api.patch<ApiResponse<{ acceptsFosterApplications: boolean }>>("/api/v1/shelter/settings", { acceptsFosterApplications }).then((r) => r.data),
+
+  // Statistiques avancées (aide à la décision)
+  stats: () =>
+    api.get<ApiResponse<ShelterStats>>("/api/v1/shelter/stats").then((r) => r.data),
 };

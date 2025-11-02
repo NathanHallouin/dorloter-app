@@ -1,11 +1,34 @@
 import { api } from "./client";
+import { toQuery } from "./qs";
 import type {
   ApiResponse,
+  CalendarEvent,
   CreateEventInput,
   EventSignup,
+  PageResponse,
   ShelterEvent,
   UpdateEventInput,
 } from "./types";
+
+/** Filtres du calendrier public d'événements. */
+export interface CalendarFilters {
+  type?: string;
+  /** Borne basse (yyyy-mm-dd) · défaut : à venir. */
+  from?: string;
+  /** Borne haute (yyyy-mm-dd). */
+  to?: string;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
+  cursor?: string;
+  limit?: number;
+}
+
+/** Public : calendrier des événements adoption (tous refuges). */
+export const publicEventsApi = {
+  list: (filters: CalendarFilters = {}) =>
+    api.get<PageResponse<CalendarEvent>>(`/api/v1/events${toQuery(filters)}`, false),
+};
 
 /** Back-office refuge : événements et opérations terrain (collectes, journées d'adoption...). */
 export const eventsApi = {
