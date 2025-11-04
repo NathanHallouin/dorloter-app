@@ -6,3 +6,4 @@ export * from "./cn";
 export * from "./Icon";
 export * from "./primitives";
 export * from "./forms";
+export * from "./qr";
