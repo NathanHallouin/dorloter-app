@@ -8,10 +8,6 @@ out/
 .vite/
 *.tsbuildinfo
 
-# NestJS (filet ; apps/api a aussi son propre .gitignore)
-bin/
-obj/
-
 # Tests / couverture
 coverage/
 test-results/

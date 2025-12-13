@@ -4,7 +4,7 @@ name: dorloter
 
 services:
   postgres:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:18-3.6
     restart: unless-stopped
     environment:
       POSTGRES_USER: dorloter
@@ -13,7 +13,24 @@ services:
     ports:
       - "5438:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
+
+  # API NestJS. Opt-in via le profil "api" : `docker compose --profile api up`.
+  # En dev on lance plutôt l'API en local (bun dev) ; ce service sert au test
+  # d'intégration de l'image et au déploiement.
+  api:
+    profiles: ["api"]
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=dorloter;Username=dorloter;Password=dorloter;Search Path=dorloter_api,public"
+      Dorloter__Security__Jwt__Secret: "dev-only-insecure-secret-please-change-0123456789abcdef"
+      Dorloter__Security__CorsAllowedOrigins: "http://localhost:5173,http://localhost:5174"
+    ports:
+      - "8080:8080"
 
   minio:
     image: minio/minio:latest

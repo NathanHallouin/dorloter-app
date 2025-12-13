@@ -4,20 +4,20 @@
 #
 #   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 #
-# Topologie : Caddy (edge TLS) -> SPA Vite statique (web) + API (api) ;
+# Topologie : Caddy (edge TLS) -> SPA Vite statiques (web, pro) + API NestJS (api) ;
 # Postgres/PostGIS + MinIO (object storage images, expose en CDN).
 
 services:
   # ─── Base de donnees ───────────────────────────────────────────────────────
   postgres:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:18-3.6
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_SUPERUSER:-dorloter}
       POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD in .env.production}
       POSTGRES_DB: dorloter
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER:-dorloter} -d dorloter"]
       interval: 10s
@@ -58,9 +58,9 @@ services:
     restart: "no"
     networks: [internal]
 
-  # ─── API (le service API) ───────────────────────────────────────────────
+  # ─── API NestJS ────────────────────────────────────────────────────────────
   # Mappe le schema dorloter_api existant et applique ses migrations SQL au
-  # demarrage (DatabaseMigrator). Ecoute en interne, sans port publie.
+  # demarrage (migrateur maison). Ecoute en interne, sans port publie.
   api:
     build:
       context: ./apps/api
@@ -71,22 +71,12 @@ services:
       # search_path dorloter_api,public : PostGIS vit dans public (partage).
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=dorloter;Username=dorloter_app;Password=${DORLOTER_APP_PASSWORD:?set DORLOTER_APP_PASSWORD};Search Path=dorloter_api,public"
       # Migrations DDL : role dedie (le superuser). Optionnel ; si absent,
-      # AutoMigrate utilise la connexion Default.
+      # le migrateur utilise la connexion Default.
       ConnectionStrings__Migrations: "Host=postgres;Port=5432;Database=dorloter;Username=${POSTGRES_SUPERUSER:-dorloter};Password=${POSTGRES_SUPERUSER_PASSWORD};Search Path=dorloter_api,public"
       Dorloter__Security__Jwt__Secret: "${API_JWT_SECRET:?set API_JWT_SECRET in .env.production}"
       Dorloter__Security__Jwt__Issuer: "dorloter-api"
-      Dorloter__Security__Jwt__AccessTokenTtl: "00:15:00"
-      Dorloter__Security__Jwt__RefreshTokenTtl: "30.00:00:00"
       Dorloter__Security__CorsAllowedOrigins: "https://${DOMAIN},https://pro.${DOMAIN}"
-      # Email transactionnel (SMTP) · ex. Brevo : smtp-relay.brevo.com:587.
-      Dorloter__Email__Host: ${EMAIL_SMTP_HOST:-}
-      Dorloter__Email__Port: ${EMAIL_SMTP_PORT:-587}
-      Dorloter__Email__User: ${EMAIL_SMTP_USER:-}
-      Dorloter__Email__Password: ${EMAIL_SMTP_PASSWORD:-}
-      Dorloter__Email__FromEmail: ${EMAIL_FROM:-no-reply@${DOMAIN}}
-      Dorloter__Email__FromName: ${EMAIL_FROM_NAME:-Dorloter}
-      ASPNETCORE_ENVIRONMENT: "Production"
-      ASPNETCORE_URLS: "http://+:8080"
+      BIND_ADDR: "0.0.0.0:8080"
     depends_on:
       postgres:
         condition: service_healthy
