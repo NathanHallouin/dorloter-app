@@ -27,7 +27,7 @@ fi
 export COMPOSE_PROJECT_NAME=dorloter-prod
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
 
-echo "📦 Build images web + pro (SPA Vite) + api  (sur le VPS)…"
+echo "📦 Build images web + pro (SPA Vite) + api (Rust/Axum) (sur le VPS)…"
 $COMPOSE build web pro api
 
 echo "🗄  Services d'infra up (postgres + minio)…"
@@ -50,8 +50,8 @@ done
 echo "🔐 Grants PG (rôles dorloter_app / dorloter_admin)…"
 ./scripts/prod-init-roles.sh
 
-# Les migrations de schéma sont appliquées par l'API au démarrage
-# (DatabaseMigrator, fichiers .sql embarqués) via le rôle DDL
+# Les migrations de schéma sont appliquées par l'API Rust au démarrage
+# (migrateur maison, fichiers .sql embarqués) via le rôle DDL
 # ConnectionStrings__Migrations. Pas d'étape de migration séparée ici.
 echo "🚀 Recreate web + pro + api + caddy avec les nouvelles images…"
 $COMPOSE up -d --force-recreate --no-deps web pro api caddy

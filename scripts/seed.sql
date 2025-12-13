@@ -24,24 +24,15 @@ VALUES ('b0000000-0000-0000-0000-000000000001', 'Les Coussinets Dorés', 'les-co
         true, true, 6, 4, 22.00, 28.00, true, true, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO veterinarians (id, name, slug, description, siret, order_number, address, phone, email,
-        accepts_cats, accepts_dogs, accepts_nac, emergency_available, consultation_price, is_verified, is_demo, created_at, updated_at)
-VALUES ('c0000000-0000-0000-0000-000000000001', 'Clinique Vétérinaire Gerland', 'clinique-veto-gerland',
-        'Clinique généraliste avec urgences.', '45678912300021', 'ORD-69-0001',
-        '88 avenue Jean Jaurès, 69007 Lyon', '0478111111', 'contact@veto-gerland.fr',
-        true, true, true, true, 45.00, true, true, now(), now())
-ON CONFLICT (id) DO NOTHING;
-
 -- ─── Utilisateurs ────────────────────────────────────────────────────────────
 -- Équipe refuge : rôle GLOBAL = user, permissions via shelter_members.
-INSERT INTO users (id, email, email_verified, name, role, pension_id, vet_id, is_public, created_at, updated_at) VALUES
-  ('d0000000-0000-0000-0000-000000000001', 'camille.roussel@dorloter.fr', true, 'Camille Roussel', 'user',        NULL, NULL, false, now(), now()),
-  ('d0000000-0000-0000-0000-000000000002', 'thomas.girard@dorloter.fr',   true, 'Thomas Girard',   'user',        NULL, NULL, false, now(), now()),
-  ('d0000000-0000-0000-0000-000000000003', 'sarah.lefevre@dorloter.fr',   true, 'Sarah Lefèvre',   'user',        NULL, NULL, false, now(), now()),
-  ('d0000000-0000-0000-0000-000000000004', 'lea.marchand@dorloter.fr',    true, 'Léa Marchand',    'user',        NULL, NULL, true,  now(), now()),
-  ('d0000000-0000-0000-0000-000000000005', 'julien.moreau@dorloter.fr',   true, 'Julien Moreau',   'pension_admin', 'b0000000-0000-0000-0000-000000000001', NULL, false, now(), now()),
-  ('d0000000-0000-0000-0000-000000000006', 'claire.petit@dorloter.fr',    true, 'Dr Claire Petit', 'veterinarian_admin', NULL, 'c0000000-0000-0000-0000-000000000001', false, now(), now()),
-  ('d0000000-0000-0000-0000-000000000007', 'admin@dorloter.fr',           true, 'Admin Dorloter',  'platform_admin', NULL, NULL, false, now(), now())
+INSERT INTO users (id, email, email_verified, name, role, pension_id, is_public, created_at, updated_at) VALUES
+  ('d0000000-0000-0000-0000-000000000001', 'camille.roussel@dorloter.fr', true, 'Camille Roussel', 'user',        NULL, false, now(), now()),
+  ('d0000000-0000-0000-0000-000000000002', 'thomas.girard@dorloter.fr',   true, 'Thomas Girard',   'user',        NULL, false, now(), now()),
+  ('d0000000-0000-0000-0000-000000000003', 'sarah.lefevre@dorloter.fr',   true, 'Sarah Lefèvre',   'user',        NULL, false, now(), now()),
+  ('d0000000-0000-0000-0000-000000000004', 'lea.marchand@dorloter.fr',    true, 'Léa Marchand',    'user',        NULL, true,  now(), now()),
+  ('d0000000-0000-0000-0000-000000000005', 'julien.moreau@dorloter.fr',   true, 'Julien Moreau',   'pension_admin', 'b0000000-0000-0000-0000-000000000001', false, now(), now()),
+  ('d0000000-0000-0000-0000-000000000007', 'admin@dorloter.fr',           true, 'Admin Dorloter',  'platform_admin', NULL, false, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Comptes Better Auth (credential) : même hash scrypt pour motdepasse12.
@@ -49,7 +40,7 @@ INSERT INTO accounts (id, user_id, account_id, provider_id, password, created_at
 SELECT gen_random_uuid(), u.id, u.id::text, 'credential', :'pwd', now(), now()
 FROM users u
 WHERE u.email IN ('camille.roussel@dorloter.fr','thomas.girard@dorloter.fr','sarah.lefevre@dorloter.fr',
-                  'lea.marchand@dorloter.fr','julien.moreau@dorloter.fr','claire.petit@dorloter.fr','admin@dorloter.fr')
+                  'lea.marchand@dorloter.fr','julien.moreau@dorloter.fr','admin@dorloter.fr')
   AND NOT EXISTS (SELECT 1 FROM accounts a WHERE a.user_id = u.id AND a.provider_id = 'credential');
 
 -- ─── Équipe du refuge (shelter_members) ──────────────────────────────────────
@@ -100,5 +91,4 @@ COMMIT;
 \echo 'Seed appliqué. Comptes (mot de passe motdepasse12) :'
 \echo '  camille.roussel@dorloter.fr  (refuge · owner)'
 \echo '  julien.moreau@dorloter.fr    (pension_admin)'
-\echo '  claire.petit@dorloter.fr     (veterinarian_admin)'
 \echo '  admin@dorloter.fr            (platform_admin)'
