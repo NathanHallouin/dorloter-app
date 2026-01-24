@@ -1,153 +1,230 @@
 # Dorloter
 
-Plateforme française d'adoption et de retrouvailles d'animaux domestiques : **adoption** (vitrine des refuges, candidatures), **perdus / trouvés** (signalements géolocalisés + matching PostGIS), **pensions** professionnelles agréées.
+Plateforme française d'adoption et de retrouvailles d'animaux domestiques.
+Monorepo TypeScript : une API NestJS, deux SPA React, une application mobile
+Expo, PostgreSQL/PostGIS, auto-hébergeable sur un VPS européen.
 
-Voir [CLAUDE.md](CLAUDE.md) pour le détail produit et l'architecture, et [`docs/`](docs/README.md) pour la documentation technique et produit.
+Projet solo, périmètre MVP livré. Code en TypeScript strict, interface et
+commentaires en français.
 
-## Structure du monorepo
+`NestJS 11` · `Kysely` · `PostgreSQL 18 + PostGIS` · `React 19` · `Vite` ·
+`TanStack Query` · `Tailwind v4` · `Expo` · `Docker` · `Caddy`
+
+## Le produit
+
+**Adoption.** Vitrine des refuges et fiches animaux, catalogue filtrable, swipe
+et quiz de compatibilité, candidatures en ligne. Côté refuge, un back-office
+complet : registre légal d'entrée et de sortie, contrats, familles d'accueil,
+suivi médical, bénévoles, stock.
+
+**Perdus et trouvés.** Signalements géolocalisés sur carte, avec rapprochement
+automatique entre un animal perdu et les animaux trouvés à proximité.
+
+**Pensions.** Annuaire de pensions professionnelles agréées, avec demandes de
+réservation et avis.
+
+## Architecture
+
+```
+                          ┌────────────────────────────────────┐
+   dorloter.fr ──────────▶│  apps/web     SPA React + Vite     │──┐
+                          └────────────────────────────────────┘  │
+                          ┌────────────────────────────────────┐  │
+   pro.dorloter.fr ──────▶│  apps/pro     SPA React + Vite     │──┤  @dorloter/ui
+                          └────────────────────────────────────┘  │  @dorloter/client
+                          ┌────────────────────────────────────┐  │
+   iOS / Android ────────▶│  apps/mobile  Expo / React Native  │──┤  @dorloter/api-client
+                          └────────────────────────────────────┘  │
+                                                                  │
+                                                     ┌────────────▼──────────────┐
+                                                     │  apps/api      /api/v1    │
+                                                     │  NestJS · monolithe       │
+                                                     │  modulaire (9 contextes)  │
+                                                     └────────────┬──────────────┘
+                                                                  │ Kysely (SQL-first)
+                                                     ┌────────────▼──────────────┐
+                                                     │  PostgreSQL 18 + PostGIS  │
+                                                     │  schéma dorloter_api      │
+                                                     └───────────────────────────┘
+```
 
 ```
 apps/
-  api/         API REST NestJS (le service API) · monolithe modulaire · port 8080 · /api/v1
-  web/         Front SPA public (vitrine adoptants) · React 19 + Vite · port 5173
-  pro/         Front SPA espace pro (consoles refuge/pension/véto + admin) · port 5174
+  api/         API REST NestJS (Kysely + PostGIS) · monolithe modulaire · :8080 · /api/v1
+  web/         SPA publique (vitrine adoptants) · React 19 + Vite · :5173
+  pro/         SPA espace pro (consoles refuge/pension + admin) · :5174
   mobile/      App Expo / React Native · consomme /api/v1
 packages/
   ui/          Design system partagé (primitives, Icon, thème) · web + pro
-  client/      Couche API partagée (client JWT+refresh, types, auth) · web + pro
+  client/      Couche API partagée (client JWT + refresh, types, auth) · web + pro
   api-client/  Client openapi-fetch typé (mobile), généré depuis l'OpenAPI
 docs/          Documentation technique, produit et design
 scripts/       Génération de types, build/déploiement mobile, ops prod
 ```
 
-| Composant | Stack | README |
+| Composant | Stack | Détail |
 |---|---|---|
-| API | NestJS 10, Kysely + PostGIS, JWT, OpenAPI | [apps/api](apps/api/README.md) |
-| Web (public) | React 19, Vite, React Router, TanStack Query, Tailwind v4 | [apps/web](apps/web/README.md) |
+| API | NestJS 11, Kysely, PostGIS, JWT, OpenAPI | [apps/api](apps/api/README.md) |
+| Web (public) | React 19, Vite, React Router, TanStack Query, Tailwind v4, MapLibre | [apps/web](apps/web/README.md) |
 | Pro (back-office) | React 19, Vite · `pro.dorloter.fr` | [apps/pro](apps/pro/README.md) |
 | Mobile | Expo, React Native, MapLibre | [apps/mobile](apps/mobile/README.md) |
 | Design system | primitives partagées web + pro | [packages/ui](packages/ui) |
 | Couche API | client HTTP + types + auth, web + pro | [packages/client](packages/client) |
 | Client API typé | openapi-fetch (mobile, généré) | [packages/api-client](packages/api-client/README.md) |
 
-Base de données : PostgreSQL 16 + PostGIS (schéma `dorloter_api`). Stockage images : S3-compatible (MinIO en dev). Reverse proxy + HTTPS en prod : Caddy.
+En production, Caddy sert les deux SPA en statique, termine le TLS et proxifie
+`/api/v1` vers l'API. Les images vivent sur un stockage S3-compatible (MinIO en
+dev, OVH ou Scaleway en prod).
 
-## Prérequis
+## Choix techniques
 
-- **Docker** + Docker Compose (PostgreSQL/PostGIS + MinIO)
-- **NestJS 10 SDK** pour l'API · https://dot.net
-- **Bun** (ou Node 20+) pour le front, le mobile et les scripts
+**Le rapprochement perdu / trouvé est en PostGIS.** À chaque signalement créé,
+l'API cherche les signalements du type opposé dans un rayon de 30 km et calcule
+un score sur 100 : distance géodésique (40 points), couleur du pelage (25), race
+(15), sexe (10), fenêtre temporelle (10). Au-delà de 40, la correspondance est
+proposée. Le géo est en SQL natif (`ST_DWithin`, `ST_Distance` sur
+`::geography`) ; le scoring, lui, est une fonction pure, donc testable sans base.
+
+**Pas d'ORM.** Kysely donne des requêtes typées à la compilation sans s'interposer
+entre le code et le SQL, ce qui compte quand une bonne partie des requêtes est
+géospatiale. Le schéma est décrit dans
+[`schema.ts`](apps/api/src/infra/database/schema.ts) et les migrations restent
+des fichiers `.sql` versionnés, appliqués au démarrage.
+
+**Deux fronts, un seul socle.** La vitrine adoptants et le back-office pro ont
+des besoins d'UX opposés, donc deux SPA sur deux domaines. Elles partagent le
+design system (`@dorloter/ui`) et la couche d'accès API (`@dorloter/client`) : la
+séparation coûte deux points d'entrée, pas deux codebases.
+
+**L'autorisation refuge passe par l'équipe, pas par le rôle du token.** Un
+bénévole invité dans un refuge a le rôle JWT global `user`. Les accès au
+back-office sont donc résolus via l'appartenance à l'équipe et une matrice de
+permissions fines (`pets:write`, `applications:read`…).
+
+**Un contrat d'API stable.** Enveloppes `{data}`, `{data, pagination}` et
+`{error: {code, message}}`, codes d'erreur figés, pagination par curseur keyset.
+Le backend a d'ailleurs été réécrit deux fois (le service API, puis Rust, puis
+NestJS) sans changer ce contrat ni le format des hashes de mots de passe, donc
+sans rien casser côté clients.
 
 ## Démarrage rapide
 
-Installer les dépendances JS **une seule fois** à la racine (bun workspaces · installe `web`, `pro`, `mobile` et les packages partagés en une commande) :
+**Prérequis** : Docker + Docker Compose, et Bun (ou Node 20+).
 
 ```bash
-bun install
+bun install                  # une seule fois, à la racine (bun workspaces)
 ```
 
-Puis lancer les services **dans cet ordre**, chacun dans son propre terminal :
+Puis, chaque service dans son terminal :
 
 | # | Service | Commande | URL |
 |---|---|---|---|
 | 1 | Base de données + MinIO | `docker compose up -d` | Postgres `:5438` · MinIO `:9000` (console `:9001`) |
-| 2 | API | `cd apps/api && bun dev` | http://localhost:8080 · `/api/v1` |
-| 3 | Front public (vitrine) | `cd apps/web && bun dev` | http://localhost:5173 |
-| 4 | Front pro (back-office) | `cd apps/pro && bun dev` | http://localhost:5174 |
+| 2 | API NestJS | `cd apps/api && bun dev` | http://localhost:8080 · `/api/v1` |
+| 3 | Front public | `cd apps/web && bun dev` | http://localhost:5173 |
+| 4 | Front pro | `cd apps/pro && bun dev` | http://localhost:5174 |
 
-> Après l'API (étape 2), `bun db:seed` peuple la base d'un jeu de démo : optionnel, mais recommandé pour pouvoir se connecter (voir l'étape 3 ci-dessous).
-
-Le détail de chaque étape suit.
-
-### 1. Base de données (+ stockage MinIO)
-
-À la racine du repo :
-
-```bash
-docker compose up -d
-```
-
-Démarre :
-
-- **PostgreSQL 16 + PostGIS** sur `localhost:5438` (base `dorloter`, user/mdp `dorloter` / `dorloter`)
-- **MinIO** (stockage S3) sur `localhost:9000`, console sur `localhost:9001` (`minioadmin` / `minioadmin`)
-
-### 2. API 
-
-```bash
-cd apps/api
-bun dev
-```
-
-- Écoute sur **http://localhost:8080** (base des routes : `/api/v1`).
-- Les migrations de schéma (`dorloter_api`) sont appliquées automatiquement au démarrage (`DatabaseMigrator`).
-- Vérifier : `curl http://localhost:8080/api/v1/health`.
-
-### 3. Données de démo (optionnel)
-
-Une fois l'API lancée (le schéma est créé), peuple la base avec un jeu de test (refuge « Quatre Pattes » + équipe, animaux, candidature acceptée, famille d'accueil) :
+Une fois l'API démarrée (elle crée le schéma), peupler la base de démo :
 
 ```bash
 bun db:seed      # scripts/seed.sql, idempotent
 ```
 
-Comptes créés · mot de passe commun `motdepasse12` (voir [docs/COMPTES-TEST.md](docs/COMPTES-TEST.md)).
+Comptes de test · mot de passe commun `motdepasse12` · par exemple
+`camille.roussel@dorloter.fr` (console refuge) ou `lea.marchand@dorloter.fr`
+(adoptante). Liste complète : [docs/COMPTES-TEST.md](docs/COMPTES-TEST.md).
 
-### 4. Fronts (Vite)
+<details>
+<summary>Détail de chaque étape, mobile, client typé, arrêt</summary>
 
-Deux SPA distinctes, chacune dans son terminal (les deux proxifient `/api` vers `http://localhost:8080` en dev) :
-
-```bash
-# Vitrine publique (adoptants)
-cd apps/web && bun dev    # http://localhost:5173
-
-# Espace pro (consoles refuge / pension / vétérinaire + admin plateforme)
-cd apps/pro && bun dev    # http://localhost:5174
-```
-
-Astuce : depuis la racine, `bun dev` est un raccourci qui lance uniquement la vitrine publique (`apps/web`).
-
-Pour l'espace pro, connecte-toi avec un compte pro (ex. `camille.roussel@dorloter.fr`, console refuge).
-
-### Mobile (optionnel)
+### 1. Base de données (+ stockage MinIO)
 
 ```bash
-cd apps/mobile
-bun install
-bun start        # Expo (voir apps/mobile/README.md pour dev-client / EAS)
+docker compose up -d
 ```
 
-## Client API typé
+- **PostgreSQL 18 + PostGIS** sur `localhost:5438` (base `dorloter`, user/mdp `dorloter` / `dorloter`)
+- **MinIO** (stockage S3) sur `localhost:9000`, console sur `localhost:9001` (`minioadmin` / `minioadmin`)
 
-Le client `packages/api-client` est généré depuis l'OpenAPI de l'API (API lancée sur `:8080`) :
+### 2. API
 
 ```bash
-bun api:types    # régénère packages/api-client/src/types.gen.ts
+cd apps/api && bun dev
 ```
 
-## Comptes de test
+Les migrations du schéma `dorloter_api` sont appliquées automatiquement au
+démarrage (migrateur maison, `.sql` de `apps/api/migrations`).
+Vérifier : `curl http://localhost:8080/api/v1/health`.
 
-Comptes de démonstration (adoptants, équipe refuge, pensions, vétérinaire) : voir [docs/COMPTES-TEST.md](docs/COMPTES-TEST.md) · mot de passe commun `motdepasse12`.
+### 3. Fronts
 
-## Tests & build
+Les deux SPA proxifient `/api` vers `http://localhost:8080` en dev, donc pas de
+CORS à gérer. Depuis la racine, `bun dev` est un raccourci qui lance uniquement
+la vitrine publique.
+
+### 4. Mobile (optionnel)
 
 ```bash
-# API : tests d'intégration (Testcontainers PostGIS, nécessite Docker)
-cd apps/api && bun run test
-
-# Front : typecheck + build de production
-cd apps/web && bun run build
+cd apps/mobile && bun start     # Expo · voir apps/mobile/README.md pour dev-client / EAS
 ```
 
-## Déploiement
+### Client API typé
 
-Production sur **VPS européen** (France privilégiée : OVH Gravelines ou Scaleway Paris), via un seul `docker-compose.prod.yml` : `postgres` (PostGIS), `minio`, `api` , `web` (vitrine), `pro` (espace pro), `caddy` (edge TLS). Caddy sert les SPA statiques (`dorloter.fr` et `pro.dorloter.fr`) et proxifie `/api/v1` vers l'API ; le CDN images est sur `cdn.dorloter.fr` (MinIO).
+```bash
+bun api:types    # régénère packages/api-client/src/types.gen.ts depuis /api/v1/openapi
+```
 
-Email transactionnel via SMTP (Brevo recommandé · français), configuré par les variables `EMAIL_SMTP_*`. Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/ENV.md](docs/ENV.md) et `.env.production.example`.
+L'OpenAPI servi est encore partiel ; le client committé reste valide (contrat
+identique), donc ne pas régénérer tant que l'annotation n'est pas complète.
 
-## Arrêter
+### Arrêter
 
 ```bash
 docker compose down        # stoppe la base et MinIO (données conservées)
 docker compose down -v     # + supprime les volumes (réinitialise la base)
 ```
+
+</details>
+
+## Tests et qualité
+
+```bash
+bun run typecheck            # tsc --noEmit sur les 7 workspaces
+bun run build                # build de production de tous les workspaces
+cd apps/api && bun test src  # tests unitaires (interop scrypt, scoring du matching)
+```
+
+TypeScript strict partout. Les tests unitaires couvrent les deux endroits où une
+régression passerait inaperçue : le format des hashes de mots de passe et le
+scoring du matching. Les flux métier sont exercés de bout en bout contre une base
+PostGIS.
+
+CI GitHub Actions (portable vers Forgejo/Codeberg) : typecheck, build, tests et
+build de l'image Docker de l'API sur chaque PR.
+
+## Ce qui reste à faire
+
+- **Upload d'images** : le presign S3/MinIO n'est pas encore côté API.
+- **Email transactionnel** : gabarits et déclencheurs en place, transport SMTP à
+  brancher (l'émetteur est un no-op loggé).
+- **Web Push** : le centre de notifications in-app existe, le push navigateur non.
+- **OpenAPI** : le document décrit le contrat mais n'énumère pas encore chaque
+  route.
+
+## Déploiement
+
+Un seul `docker-compose.prod.yml` sur un VPS européen : `postgres` (PostGIS),
+`minio`, `api`, `web`, `pro`, `caddy`. L'API applique ses migrations au
+démarrage, via une connexion DDL dédiée (le rôle applicatif n'a pas les
+privilèges DDL en production).
+
+Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/ENV.md](docs/ENV.md) et
+`.env.production.example`.
+
+## Documentation
+
+| | |
+|---|---|
+| [CLAUDE.md](CLAUDE.md) | Source de vérité : produit, stack, modèle de données, conventions |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture de référence détaillée |
+| [docs/](docs/README.md) | Contrat d'API, déploiement, variables d'env, roadmap, design |
