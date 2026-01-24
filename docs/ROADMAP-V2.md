@@ -21,18 +21,139 @@ Trois principes structurent les choix V2 :
 2. **Pragmatisme** · chaque feature doit apporter une valeur immédiate et
    mesurable. Pas de surcouche technique « parce que c'est cool ».
 3. **Frugalité** · on tire au maximum sur les briques déjà en place
-   (Postgres/PostGIS + API + auth JWT + Resend + Web Push). Tant que la
-   base utilisateurs n'a pas trouvé son public, **zéro coût externe ajouté**.
+   (Postgres/PostGIS + API + auth JWT). Tant que la base utilisateurs n'a
+   pas trouvé son public, **zéro coût externe ajouté**.
+
+---
+
+## Stack actuelle et conventions de développement
+
+> **À lire avant d'implémenter tout item de cette roadmap.** Ce document a été
+> rédigé à l'origine pour une stack Next.js + Drizzle + Better Auth (front) qui
+> a été **retirée**. Les mentions de routes `/shelter-...`, de segments
+> `[id]`, de tables Drizzle, de Resend, de Supabase ou de « cron » dans les
+> sections ci-dessous sont **historiques** : elles décrivent l'intention, pas
+> l'implémentation. La stack réelle est décrite ici et fait foi.
+
+### Architecture réelle
+
+- **API · `apps/api`** : NestJS (Kysely + PostGIS), monolithe modulaire à bounded
+  contexts dans `src/modules/` (`identity`, `adoption`, `shelters`, `lostfound`,
+  `pensions`, `notifications`, `gamification`, `moderation`, `messaging`).
+  Un module = `*.module.ts` + `*.service.ts` (métier + SQL) + `*.controller.ts`
+  (routes, DTOs, mapping) ; les petits modules tiennent en un fichier. Contrat
+  stable : enveloppe `{ data }` / `{ data, pagination }` / `{ error: { code, message } }`.
+- **Fronts** : deux SPA React 19 + Vite + TanStack Query, partageant
+  `@dorloter/ui` (design system) et `@dorloter/client` (couche API). `apps/web`
+  = site public (`dorloter.fr`, port 5173) ; `apps/pro` = back-office consoles
+  refuge/pension + admin (`pro.dorloter.fr`, port 5174). `apps/mobile` =
+  Expo + `@dorloter/api-client`.
+- **Base** : PostgreSQL 18 + PostGIS, schéma `dorloter_api`, migrations `.sql`
+  numérotées `V<n>__nom.sql` dans `apps/api/migrations`, appliquées au démarrage.
+
+### Recette pour ajouter une feature back-office refuge
+
+1. **Migration** `V<n>__<nom>.sql` (nouvelle table ou colonne). Géo en
+   `geometry(Point,4326)` + index GIST ; écriture via `ST_SetSRID(ST_MakePoint(lng,lat),4326)`,
+   lecture via `ST_Y`/`ST_X` ; proximité en `ST_DWithin(...::geography, ..., mètres)`.
+2. **Enums** : ajouter la constante dans `shared/db-enum.ts` et valider via
+   `bodyEnumReq`/`bodyEnumOpt` (corps → `VALIDATION_FAILED`), `validateFilter`
+   (query → `INVALID_PARAM`) ou `ensureValue` (service → `UNPROCESSABLE`).
+3. **Module NestJS** : DTOs `class-validator` (messages français), sorties en
+   camelCase, autorisation refuge par **permission** via
+   `membership.requireAccess(userId, 'pets:write')` (jamais par rôle JWT). Pour
+   une capacité **optionnelle** par refuge, ajouter un flag `participates_*` et
+   une porte dédiée. Déclarer le contrôleur dans le module Nest, puis le module
+   dans `app.module.ts`.
+4. **Client** : module dans `packages/client/src/api/` + types dans `types.ts`,
+   exporté depuis `index.ts`.
+5. **Front pro** : page dans `apps/pro/src/pages/shelter/`, composants du kit
+   (`@/components/dash/kit`) + `@dorloter/ui`, route dans `apps/pro/src/App.tsx`,
+   entrée de nav dans `ShelterConsoleLayout.tsx`.
+6. **Test** : `bun test src` + validation end-to-end contre PostGIS ; `bun run typecheck`
+   --all-targets -- -D warnings` (0 warning) ; `bun run typecheck` sur les
+   workspaces touchés.
+
+### Patterns transverses établis (à réutiliser)
+
+- **Pas de planificateur interne** : pour tout ce qui serait « périodique »
+  (relances, digests), on crée les échéances en base et on les remonte par
+  requête dans le back-office (liste de tâches que le refuge coche), ou on
+  expose un endpoint `POST /api/v1/admin/…/run` réservé plateforme, qu'un **cron
+  externe** pourra appeler. Voir `adoption/adoption-followups.service.ts` et `adoption/adoption-digest.controller.ts`.
+- **Notifications** : le centre in-app est porté (`notifications::publish`).
+  Le **Web Push (VAPID) n'est pas branché** (gap infra) : livrer d'abord en
+  in-app, le push viendra ensuite.
+- **Documents imprimables** : `window.print()` + `@page` CSS, route hors shell
+  pour une impression propre (fiche cage, affiche, contrat). QR via
+  `@dorloter/ui` (`<QR>`, `qrcode.react`).
+- **Cartes** : MapLibre via `react-map-gl`, réservées à `apps/web` (composants
+  `LostFoundMap`, `LocationPickerMap`), chargées en `lazy`. `apps/pro` n'embarque
+  pas MapLibre.
+
+### Gaps infra non couverts (prérequis de plusieurs items)
+
+- **Upload d'images** : presign S3/MinIO à porter sur l'API.
+- **Web Push (VAPID)** : à porter (prérequis de 5.2 push réel, 4.2, 6.2).
+- **Email transactionnel réel** : émetteur `infra/email` en no-op loggé ;
+  transport SMTP (Brevo recommandé) à brancher. **Resend n'est pas
+  utilisé** (mention historique).
+- **OpenAPI exhaustif** (`@nestjs/swagger`) : document partiel ; le client mobile reste
+  valide car iso-contrat.
+
+### Règle de typographie (absolue)
+
+Jamais de cadratin `—` ni de demi-cadratin `–`, ni dans le code ni dans le texte
+visible ni dans la doc. Remplacer par `·`, `:`, `,` ou `.`. Seule exception : le
+placeholder « donnée absente » `—` standalone dans un tableau.
+
+---
+
+## État d'avancement
+
+> Récapitulatif au fil de l'eau. **Attention** : les marqueurs ✅ / LIVRÉ de la
+> section « Priorisation » plus bas qui concernent la Phase 1.5 datent de la
+> stack Next.js retirée et sont **à re-auditer** (ex. recherches sauvegardées,
+> pré-RDV, carte France, stats publiques temps réel : **non réimplémentés** dans
+> la stack NestJS/Vite actuelle).
+
+**Socle livré (modules API + consoles)** : auth JWT + rôles, refuges (CRUD +
+fiche publique + équipe/permissions), animaux à adopter (CRUD + catalogue +
+favoris), candidatures, contrats adoption/foster, familles d'accueil, santé
+animale (`health_events`), registre entrée/sortie, bénévoles, événements,
+inventaire/stocks, communications/campagnes, perdus-trouvés + matching PostGIS,
+pensions, messagerie, notifications in-app, gamification, modération.
+
+**Livré dans le cycle courant** :
+
+| Item | Description | Emplacement |
+|------|-------------|-------------|
+| 8.1.1 | Templates de réponses candidatures | API `shelters/shelter-templates.controller.ts` (V25) · pro `/refuge/modeles` |
+| 2.7 | Statistiques refuge avancées | API `shelters/shelter-stats.controller.ts` · pro `/refuge/stats` |
+| 8.2.1 | Comparateur d'animaux | web `/adopter/compare` |
+| 8.1.2 | Fiche cage imprimable + QR | pro `/refuge/animaux/:id/fiche-cage` |
+| 4.1 | Affiche perdus/trouvés (A4 + languettes) | web `/perdus-trouves/:id/affiche` |
+| 8.3.5 | Espace presse | web `/presse` |
+| 2.6 | Suivi post-adoption (sans cron) | API `adoption/adoption-followups.service.ts` (V26) · pro `/refuge/suivi` |
+| 8.3.4 | Calendrier public d'événements | API `shelters/public-events.controller.ts` · web `/evenements` |
+| 5.2 | Digest « Nouveautés dans votre rayon » (in-app) | API `adoption/adoption-digest.controller.ts` (V27) · web profil + accueil |
+| 2.8 | Gestion TNR / chats libres (opt-in) | RETIRÉ du produit (voir 2.8 ci-dessous) |
 
 ---
 
 ## Partie 2 · Outils refuges avancés
 
-### 2.1 · Gestion médicale animal ⭐⭐⭐
+### 2.1 · Gestion médicale animal ⭐⭐⭐ · LIVRÉ (base)
+
+**État** : livré côté back-office (module `adoption/adoption-health.controller.ts`, table
+`health_events` en migration V19, saisie dans la fiche animal du pro). Types
+d'événement : vaccin, vermifuge, antiparasitaire, stérilisation, test FIV/FeLV,
+visite, traitement, pesée, autre. **Restent à faire** : export PDF « carnet de
+santé » et partage au vétérinaire partenaire.
 
 **Valeur** : très haute. Demande forte du terrain refuge.
 
-**Comment** :
+**Comment** (intention initiale, noms de tables historiques) :
 
 - Nouvelle table `pet_medical_events` :
   - FK pet, type (`vaccin`, `vermifuge`, `antiparasitaire`,
@@ -52,11 +173,15 @@ Trois principes structurent les choix V2 :
 
 ---
 
-### 2.2 · Gestion stocks alimentaires ⭐⭐
+### 2.2 · Gestion stocks alimentaires ⭐⭐ · LIVRÉ (base)
+
+**État** : livré côté back-office (module `shelters/shelter-inventory.controller.ts`, migration
+V23, console pro `/refuge/stock`). **Reste à faire** : page publique de besoins
+sur la fiche refuge pour attirer les dons.
 
 **Valeur** : moyenne, demande de plusieurs refuges. Différenciant.
 
-**Comment** :
+**Comment** (intention initiale) :
 
 - Nouvelle table `shelter_food_inventory` :
   - FK shelter, type (`croquettes chat`, `croquettes chien`, `pâtée`, ...),
@@ -74,11 +199,18 @@ Trois principes structurent les choix V2 :
 
 ---
 
-### 2.3 · Gestion bénévoles et planning ⭐⭐
+### 2.3 · Gestion bénévoles et planning ⭐⭐ · LIVRÉ (base)
+
+**État** : livré côté back-office (modules `shelters/shelter-volunteering.controller.ts` +
+`shelters/shelter-events.controller.ts`, migrations V20/V21, consoles pro `/refuge/benevoles` et
+`/refuge/evenements` avec inscriptions aux événements). L'autorisation passe par
+les permissions d'équipe (`ShelterMembership`), pas par un rôle global
+`shelter_volunteer`. **Restent à faire** : créneaux récurrents en libre-service
+et comptage d'heures fin, check-in mobile.
 
 **Valeur** : moyenne à haute pour les refuges actifs.
 
-**Comment** :
+**Comment** (intention initiale) :
 
 - Nouveau rôle utilisateur : `shelter_volunteer` (accès limité, par
   invitation d'un shelter_admin).
@@ -95,11 +227,16 @@ Trois principes structurent les choix V2 :
 
 ---
 
-### 2.4 · Gestion familles d'accueil (FA) ⭐⭐
+### 2.4 · Gestion familles d'accueil (FA) ⭐⭐ · LIVRÉ
+
+**État** : livré (module `adoption/adoption-foster.controller.ts`, tables `foster_families` +
+placements en migrations V15/V16, conventions d'accueil via le module contrats,
+console pro `/refuge/familles` + espace adoptant `/famille-accueil`). Ouverture
+des candidatures FA réglable par refuge (`accepts_foster_applications`).
 
 **Valeur** : moyenne. Modèle hybride associatif courant.
 
-**Comment** :
+**Comment** (intention initiale) :
 
 - Nouveau rôle : `foster_family` (FA bénévole, validée par refuge).
 - Profil FA : capacité d'accueil, espèces, restrictions (pas de chien avec
@@ -153,8 +290,12 @@ de présentation).
 - Le refuge voit l'historique du suivi sur la fiche de l'adoption.
 - Témoignages publiés : alimentation directe de la home.
 
-**État** : livré (table `adoption_followups`, trigger sur acceptation,
-cron `/api/cron/send-adoption-followups`).
+**État** : livré (module `adoption/adoption-followups.service.ts`, table `adoption_followups`
+en migration V26, console pro `/refuge/suivi`). Implémentation réelle **sans
+cron ni email automatique** : à la signature d'un contrat d'adoption, trois
+relances (J+7, J+30, J+90) sont créées et remontées comme une **liste de tâches**
+que le refuge traite et coche (contact adoptant en un clic). L'email de relance
+automatisé dépend du transport SMTP réel (gap infra).
 
 ---
 
@@ -173,6 +314,63 @@ cron `/api/cron/send-adoption-followups`).
 - Graphiques CSS pure, alertes actionnables (candidatures sans réponse).
 
 **État** : livré.
+
+---
+
+### 2.8 · Gestion TNR / chats libres ⭐⭐⭐ · RETIRÉ
+
+**État** : retiré du produit lors de la réécriture de l'API en NestJS. Le module
+API `tnr`, la migration V28 (tables `colonies` / `free_cats` /
+`tnr_interventions`, colonne `shelters.participates_tnr`) et les pages pro
+`/refuge/tnr` ont été supprimés. La section ci-dessous documente la valeur
+métier et reste le point de départ si la feature est réintroduite.
+
+**Valeur** : haute. Le TNR (Trap-Neuter-Return, en français « Capturer,
+Stériliser, Relâcher ») est le cœur de métier d'une grande partie des
+associations félines françaises : gestion des colonies de chats errants
+et libres, campagnes de stérilisation, suivi des nourrisseurs. Aucun
+outil grand public ne le couvre bien, c'est un vrai différenciateur pour
+attirer ces associations sur Dorloter. À distinguer nettement de
+l'adoption : un chat libre n'est pas un animal à adopter mais un individu
+suivi sur le terrain.
+
+**Comment** :
+
+- Nouveau bounded context `tnr` (module API dédié), distinct de
+  l'adoption. Les chats libres ne sont **pas** des `pets` et n'apparaissent
+  pas au catalogue.
+- **Colonies** : table `colonies` (nom, localisation PostGIS, description
+  du site, statut `active`/`stabilisee`/`fermee`, refuge gestionnaire,
+  nombre estimé de chats). Vue carte des colonies (MapLibre, réservée au
+  back-office refuge) et rayon d'action.
+- **Chats libres** : table `free_cats` (colonie, description, robe,
+  sexe estimé, statut `a_steriliser`/`sterilise`/`adoptable`/`decede`/
+  `disparu`, marquage `oreille coupée` gauche/droite, pucé oui/non,
+  photo). Un chat socialisable peut être « bascule » vers un `pet`
+  adoptable en un clic (conserve son historique).
+- **Interventions** : table `tnr_interventions` (chat, date de capture,
+  date de stérilisation, identification tatouage/puce, vaccination,
+  date de relâcher ou issue, vétérinaire, coût). Historique complet par
+  chat et par colonie.
+- **Nourrisseurs / référents** : bénévoles rattachés à une colonie
+  (réutilise le module `volunteers`), avec fréquence de passage et notes
+  terrain.
+- **Campagnes de stérilisation** : regroupement d'interventions sur une
+  période (objectif de N chats, budget, partenaire vétérinaire), avec
+  suivi d'avancement.
+- **Signalement public de colonie** (optionnel, phase 2) : un particulier
+  signale un groupe de chats errants ; le signalement est routé vers
+  l'association du secteur (réutilise la logique géo de perdus/trouvés).
+- **Statistiques TNR** : nombre de chats stérilisés par mois, taux de
+  stérilisation d'une colonie, coût moyen, évolution de la population
+  estimée. Alimente les bilans que les associations doivent produire pour
+  leurs financeurs (mairies, conventions).
+- Permissions dédiées via `ShelterMembership` (`Tnr*`), réservées aux
+  refuges/associations. Rien de public par défaut (données sensibles :
+  emplacement des colonies).
+
+**Effort** : élevé (4-6 semaines). Domaine riche, mais très structurant
+pour cibler le segment associatif félin.
 
 ---
 
@@ -245,13 +443,13 @@ une partie du contenu sous forme de tableaux statiques.
 
 **Comment** :
 
-- Bouton « Télécharger l'affiche » sur la fiche signalement.
-- Génération via `window.print()` + `@page` CSS dynamique selon format
-  (A4, A5, A6, sticker).
-- QR code SVG inline (lib `qrcode-svg`) vers la fiche en ligne.
-- 4 layouts adaptés au format.
+- Bouton « Affiche » sur la fiche signalement.
+- Génération via `window.print()` + `@page` CSS.
+- QR code SVG (`@dorloter/ui` `<QR>`, `qrcode.react`) vers la fiche en ligne.
 
-**État** : livré (route `/perdus-trouves/[id]/affiche`).
+**État** : livré (route `/perdus-trouves/:id/affiche`, hors Layout pour une
+impression propre). Deux formats : **affiche A4** et **affichette à languettes
+détachables** (numéro à arracher).
 
 ---
 
@@ -328,22 +526,30 @@ une partie du contenu sous forme de tableaux statiques.
 
 ---
 
-### 5.2 · Notifications push hyper-localisées intelligentes ⭐⭐
+### 5.2 · Notifications push hyper-localisées intelligentes ⭐⭐ · LIVRÉ (in-app)
 
 **Valeur** : moyenne. Améliore l'engagement.
 
 **Comment** :
 
-- L'utilisateur reçoit déjà des push à proximité (perdus-trouvés, nouveau
-  animal dans son rayon).
-- Étendre avec un digest hebdomadaire « Nouveautés dans votre rayon » :
-  3 animaux à adopter récemment publiés, choisis par compatibilité
-  (basée sur les filtres des recherches sauvegardées de l'utilisateur,
-  ou son profil quiz).
-- Préférences granulaires (déjà existantes) à étendre avec un toggle
-  spécifique au digest.
+- Digest « Nouveautés dans votre rayon » : jusqu'à 3 animaux à adopter
+  récemment publiés (30 j) dans le rayon de l'utilisateur, priorisés par
+  compatibilité. LIVRÉ. La compatibilité s'appuie sur l'espèce la plus mise
+  en favori (les recherches sauvegardées et le stockage serveur du quiz
+  n'existent pas dans la stack actuelle) ; les animaux déjà en favori ou
+  candidatés sont exclus.
+- Géolocalisation de l'utilisateur ajoutée (migration V27 : `users.location`,
+  `notification_radius_km`, `digest_optin`), posée depuis le profil (carte).
+- Livraison : `GET /api/v1/me/digest` (calcul à la volée, bandeau
+  « Nouveautés près de vous » sur l'accueil) + `POST /api/v1/admin/digest/run`
+  (publie le digest dans le centre de notifications in-app des utilisateurs
+  opt-in ; déclenchable par un cron externe, pas de planificateur interne).
+- Toggle de préférence `digest_optin` exposé dans le profil.
+- PENDING : le push navigateur (Web Push VAPID) reste un gap infra ; le digest
+  est pour l'instant délivré in-app. Aucun envoi programmé automatique (cron à
+  brancher sur l'endpoint admin).
 
-**Effort** : faible (1 semaine, infra push + saved-searches déjà en place).
+**Effort** : faible (1 semaine).
 
 ---
 
@@ -408,14 +614,14 @@ externe lourde.
 Bibliothèque de templates de réponses pré-rédigés par catégorie
 (acceptation, refus, demande d'infos, RDV, générique) avec variables
 auto-remplies `{{prenomCandidat}}`, `{{nomAnimal}}`, `{{nomRefuge}}`.
-Page `/shelter-parametres-templates` + sélecteur dans le flow accept/refus
-des candidatures.
+Console pro `/refuge/modeles` + réutilisation via `mailto` dans le flux
+Candidatures. Variables résolues côté client (`fillTemplate`).
 
 #### 8.1.2 QR code physique par animal ⭐⭐⭐ · LIVRÉ
 
-Fiche cage imprimable (A5/A6/sticker) avec QR code pointant vers
-`/adopter/[id]`. Layouts adaptés, status badges, compatibility pills.
-Route `/shelter-animaux/[id]/fiche-cage`.
+Fiche cage imprimable avec QR code pointant vers la fiche publique
+`dorloter.fr/adopter/:id` (URL publique configurable). Route pro
+`/refuge/animaux/:id/fiche-cage`, hors shell pour l'impression.
 
 #### 8.1.3 Étiquettes/tags personnalisés ⭐⭐
 
@@ -589,16 +795,21 @@ vétos, refuges), histogramme 12 mois des retrouvailles.
 
 **Effort** : 2-3 semaines.
 
-#### 8.3.4 Calendrier d'événements adoption ⭐⭐
+#### 8.3.4 Calendrier d'événements adoption ⭐⭐ · LIVRÉ
 
 **Valeur** : moyenne. Engagement communauté.
 
 **Comment** :
 
 - Refuges et pensions publient leurs événements (portes ouvertes, courses
-  caritatives, salons animaliers).
-- Page `/evenements` avec carte + filtres date + zone.
-- Notifs push aux utilisateurs proches d'un événement à venir.
+  caritatives, salons animaliers). LIVRÉ : géré depuis le back-office refuge
+  (case « Visible sur le site public »).
+- Page `/evenements` avec carte + filtres date + zone. LIVRÉ : endpoint public
+  `GET /api/v1/events` (agrégé, filtres type/date/zone géo via `ST_DWithin` sur
+  la localisation du refuge, pagination keyset). Page web avec carte MapLibre,
+  filtres et « autour de moi » (géolocalisation navigateur).
+- Notifs push aux utilisateurs proches d'un événement à venir. PENDING : dépend
+  du Web Push (VAPID), gap infra non encore porté.
 
 **Effort** : 1-2 semaines.
 
@@ -766,9 +977,11 @@ crowdfunding existantes pour les frais lourds d'un animal précis.
 
 ### 9.1 · RGPD et transparence
 
-- Documentation des sous-traitants (Resend pour les emails, Scaleway
-  pour l'hébergement, etc.) dans le registre.
-- Option utilisateur dans `/parametres/confidentialite` :
+- Documentation des sous-traitants dans le registre : hébergeur européen
+  (OVH/Scaleway/Hetzner), stockage objet (MinIO en dev, OVH/Scaleway en prod),
+  transport SMTP à venir (Brevo recommandé, français). **Pas de Resend, pas de
+  Supabase.**
+- Option utilisateur dans le profil / réglages confidentialité :
   - Désactiver les emails marketing (digests, anniversaires)
   - Exporter toutes ses données (JSON)
   - Supprimer son compte (RGPD article 17)
@@ -784,8 +997,9 @@ crowdfunding existantes pour les frais lourds d'un animal précis.
 
 ### 9.3 · Sauvegardes et résilience
 
-- Sauvegarde Postgres quotidienne (Supabase point-in-time recovery
-  inclus).
+- Sauvegarde Postgres quotidienne (dump planifié côté VPS ; PITR à mettre
+  en place). PostgreSQL 18 + PostGIS auto-hébergé (Docker en dev, VPS en prod),
+  pas de Supabase.
 - Test de restauration mensuel.
 - Documentation `docs/DISASTER-RECOVERY.md` avec runbook.
 
@@ -793,58 +1007,67 @@ crowdfunding existantes pour les frais lourds d'un animal précis.
 
 ## Priorisation suggérée
 
-### Phase 1 · Quick wins refuge (4-6 semaines) · TERMINÉE
+> **Re-audit nécessaire.** Les phases ci-dessous mêlent des marqueurs ✅ fiables
+> (features livrées dans la stack NestJS/Vite actuelle, cf. « État d'avancement »)
+> et des ✅ **hérités de la stack Next.js retirée**, dont plusieurs ne sont
+> **pas** réimplémentés. Ces derniers sont marqués « ⚠ à re-auditer / non porté ».
 
-Objectif : améliorer ce qui est déjà là sans gros effort.
+### Phase 1 · Quick wins refuge · TERMINÉE (stack actuelle)
 
 1. **8.1.1 Templates de réponses candidatures** ✅
 2. **8.1.2 QR code physique par animal** ✅
-3. **4.1 + 8.4.2 PDF affiche multi-formats** ✅
+3. **4.1 PDF affiche multi-formats** ✅
 4. **2.6 Suivi post-adoption** ✅
 5. **2.7 Statistiques refuge avancées** ✅
 6. **8.2.1 Comparateur d'animaux côte à côte** ✅
 7. **8.3.5 Espace presse** ✅
 
-### Phase 1.5 · Engagement et acquisition (en cours)
+### Phase 1.5 · Engagement et acquisition
 
-Objectif : mobiliser la communauté et faire grandir la base utilisateurs.
+⚠ **Les 4 premiers items étaient ✅ dans l'ancienne stack Next.js et ne sont PAS
+réimplémentés** dans la stack actuelle (ni table, ni route). À reprendre à zéro
+si souhaité.
 
-1. **8.2.2 Alertes sur recherche sauvegardée** ✅
-2. **8.2.3 Pré-rendez-vous visite refuge** ✅
-3. **8.3.1 Carte France interactive des acteurs** ✅
-4. **8.3.2 Stats publiques temps réel** ✅
-5. **8.4.1 Mode « guetteur » / veille de zone** (1 sem, extension push
-   des saved-searches lost-found)
-6. **8.4.3 Carte des retrouvailles passées** ✅
-7. **8.2.4 Hub « Avant d'adopter »** ✅
+1. **8.2.2 Alertes sur recherche sauvegardée** ⚠ non porté (aucune table
+   `saved_search`). Note : 5.2 en couvre une partie via le digest de proximité.
+2. **8.2.3 Pré-rendez-vous visite refuge** ⚠ non porté
+3. **8.3.1 Carte France interactive des acteurs** ⚠ non porté (pas de route
+   `/carte`)
+4. **8.3.2 Stats publiques temps réel** ⚠ non porté (pas de route `/stats` ;
+   les chiffres de la home sont statiques)
+5. **8.4.1 Mode « guetteur » / veille de zone** · à faire (dépend Web Push)
+6. **8.4.3 Carte des retrouvailles passées** ⚠ à re-auditer
+7. **8.2.4 Hub « Avant d'adopter »** ⚠ à re-auditer
 
-### Phase 2 · Outils refuges sérieux (8-12 semaines)
+### Phase 2 · Outils refuges sérieux
 
-Objectif : devenir l'outil métier de référence.
+Déjà livrés (cf. État d'avancement) : **2.1** (base), **2.2** (base),
+**2.3** (base), **2.4**, **2.8**.
 
-1. **2.1 Gestion médicale animal** (3-4 sem)
-2. **2.2 Gestion stocks alimentaires** (2-3 sem)
-3. **2.5 Vitrine « Soutenir » avec liens externes** (3-5 jours)
-4. **3.1 Carnet de santé post-adoption** (1 sem, dépend de 2.1)
-5. **4.2 Diffusion auto aux vétos du secteur** ✅
-6. **8.1.3 Étiquettes/tags personnalisés** ✅
-7. **8.1.5 Import CSV massif** (2-3 sem), clé pour l'onboarding refuges
-8. **8.1.6 Tableau de bord pré-adoption** ✅
+1. **2.5 Vitrine « Soutenir » avec liens externes** (3-5 jours)
+2. **3.1 Carnet de santé post-adoption** (1 sem, dépend de 2.1)
+3. **4.2 Diffusion auto aux vétos du secteur** ⚠ à re-auditer (dépend du
+   Web Push + SMTP, tous deux gap infra)
+4. **8.1.3 Étiquettes/tags personnalisés** ⚠ à re-auditer
+5. **8.1.5 Import CSV massif** (2-3 sem, dépend de l'upload/presign) · clé
+   pour l'onboarding refuges
+6. **8.1.6 Tableau de bord pré-adoption** ⚠ à re-auditer (statut
+   `pre_adoptable` présent dans l'enum `PET_STATUS`)
 
 ### Phase 3 · Engagement long-terme (variable)
 
+Déjà livrés : **8.3.4** (calendrier d'événements), **5.2** (digest, in-app).
+
 1. **3.3 Programme parrainage symbolique** (2 sem)
 2. **8.6.4 Campagne « animal en besoin » avec lien externe** (3-5 jours)
-3. **8.1.9 Communication mass-email** (2-3 sem)
+3. **8.1.9 Communication mass-email** (2-3 sem, dépend SMTP réel)
 4. **8.3.3 Blog / actualités refuges** (2-3 sem)
-5. **8.3.4 Calendrier d'événements** (1-2 sem)
-6. **2.3 Gestion bénévoles** (4-6 sem)
-7. **2.4 Familles d'accueil** (3-4 sem)
-8. **5.1 Témoignages structurés** (1-2 sem)
-9. **5.2 Notifications push hyper-localisées** (1 sem)
-10. **4.3 Intégration ICAD** (à investiguer commercialement d'abord)
-11. **8.1.7 Espace documents refuge** (1-2 sem)
-12. **8.1.8 Suivi transferts inter-refuges** (2 sem)
+5. **5.1 Témoignages structurés** (1-2 sem)
+6. **5.2 (reste) push navigateur du digest** (dépend Web Push VAPID)
+7. **4.3 Intégration ICAD** (à investiguer commercialement d'abord)
+8. **8.1.7 Espace documents refuge** (1-2 sem, dépend upload)
+9. **8.1.8 Suivi transferts inter-refuges** (2 sem)
+10. **2.8 (reste) vue carte des colonies + signalement public** (1-2 sem)
 
 ### Phase 4 · Mobile, scale, monétisation soft (variable)
 

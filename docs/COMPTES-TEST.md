@@ -51,16 +51,6 @@ Accès : réservations reçues (confirmer / refuser).
 
 ---
 
-## Vétérinaire (rôle `veterinarian_admin`)
-
-| Nom | E-mail | Mot de passe | Clinique |
-|-----|--------|--------------|----------|
-| Dr Claire Petit | `claire.petit@dorloter.fr` | `motdepasse12` | Clinique Vétérinaire Gerland |
-
-> Note : la fiche véto est publique (annuaire). Le back-office vétérinaire dédié n'est pas encore développé ; ce compte sert à valider le rôle et la navigation.
-
----
-
 ## Tester la messagerie
 
 - **Côté adoptant** : se connecter en **Léa** ou **Hugo** → `/messages` (vue plein écran liste + fil).

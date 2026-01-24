@@ -6,10 +6,10 @@ Vision : faire du dashboard refuge le **système d'exploitation complet de l'ass
 Adoption (animaux, candidatures, contrats d'adoption + conventions de famille d'accueil, familles d'accueil), équipe & permissions, messagerie, profil refuge, email transactionnel (Brevo).
 
 ## Phase 0 · Socle transverse (débloque le reste)
-- Uploads / documents (presign S3 NestJS) · prérequis photos médicales, justificatifs, reçus.
+- Uploads / documents (presign S3 côté API) · prérequis photos médicales, justificatifs, reçus.
 - Génération PDF serveur (reçus fiscaux, registre, attestations).
-- Tâches planifiées / rappels (`BackgroundService` NestJS) · échéances, dons récurrents.
-- Web Push (email déjà porté).
+- Tâches planifiées / rappels (tâche de fond async / cron côté API) · échéances, dons récurrents.
+- Web Push + transport SMTP réel de l'email (gabarits déjà portés).
 - Paiements : **HelloAsso** (français, gratuit pour assos, reçus fiscaux).
 
 ## Phase 1 · Suivi médical & sanitaire — FAIT (v1)
@@ -37,4 +37,4 @@ Newsletter (Brevo), actualités sur le site public, suivi post-adoption (relance
 Phase 0 (socle, en partie en parallèle) → 1 Médical (fait) → 2 Bénévoles → 3 Événements → 4 Financement (HelloAsso) → 5 Registre/Stats → 6 Stock → 7 Communication.
 
 ## Décisions
-- Paiements : HelloAsso (recommandé). · Rappels : BackgroundService interne. · Ambition : produit de gestion d'asso assumé (au-delà du MVP adoption).
+- Paiements : HelloAsso (recommandé). · Rappels : tâche de fond interne à l'API. · Ambition : produit de gestion d'asso assumé (au-delà du MVP adoption).

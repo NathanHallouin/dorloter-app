@@ -1,108 +1,75 @@
 # Email transactionnel
 
 > Source de vérité du stack : **[CLAUDE.md](../CLAUDE.md)**. Cette doc décrit la
-> couche d'envoi d'emails de l'API (`apps/api`,
-> `Infrastructure/Email/`).
+> couche d'envoi d'emails de l'API (`apps/api`, `src/infra/email/`).
 
-## Vue d'ensemble
+## État actuel · GAP
 
-L'API envoie quelques **emails transactionnels** (pas de marketing, pas de
-newsletter) via **SMTP**, avec la bibliothèque **SMTP**. La couche est
-volontairement minimale et **provider-agnostique** : on parle SMTP standard, le
-fournisseur est choisi par configuration, sans toucher au code.
+L'API prévoit quelques **emails transactionnels** (pas de marketing hors
+newsletter refuge), mais le **transport SMTP réel n'est pas encore branché** :
+l'émetteur `infra::email::EmailSender` est aujourd'hui un **no-op loggé**. Les
+**gabarits** et les **points de déclenchement** sont, eux, portés et fonctionnels ;
+il ne reste qu'à câbler l'envoi effectif.
 
-- **Brevo** recommandé en prod : fournisseur **français** (souveraineté
-  numérique européenne · cf. CLAUDE.md), offre **gratuite ~300 emails/jour**,
-  largement suffisante pour le volume MVP.
-- **Swappable** sans changement de code vers **OVH**, **Scaleway TEM**, ou un
-  **Postfix** auto-hébergé : il suffit de changer les variables SMTP.
+Plan cible : transport **SMTP** standard (`nodemailer` ou équivalent), provider-agnostique
+(on parle SMTP standard, le fournisseur est choisi par configuration).
 
-## Architecture
+- **Brevo** recommandé en prod : fournisseur **français** (souveraineté numérique
+  européenne · cf. CLAUDE.md), offre **gratuite ~300 emails/jour**, suffisante pour
+  le volume MVP.
+- **Swappable** vers **OVH**, **Scaleway TEM** ou un **Postfix** auto-hébergé : il
+  suffira de changer les variables SMTP.
 
-`Infrastructure/Email/` :
+## Architecture (`src/infra/email/`)
 
-- **`EmailOptions`** · configuration (section `Dorloter:Email`). Champs : `Host`,
-  `Port` (défaut 587), `User`, `Password`, `FromEmail` (défaut
-  `no-reply@dorloter.fr`), `FromName` (défaut `Dorloter`). Propriété calculée
-  `Configured` = `Host` non vide.
-- **`IEmailSender`** · interface :
-  `SendAsync(toEmail, toName?, subject, htmlBody, ct)`. Contrat explicite : les
-  implémentations **ne doivent jamais lever** · un échec d'email ne casse pas
-  l'opération métier qui l'a déclenché.
-- **`SmtpEmailSender`** · implémentation SMTP. Connexion `STARTTLS` sur le
-  port configuré, authentification, envoi, déconnexion. Enveloppe le tout dans
-  un `try/catch` : toute exception est **loggée** (`LogError`) puis avalée.
-- **`EmailTemplates`** · gabarits HTML inline (un wrapper commun aux couleurs de
-  la marque + un gabarit par événement).
+- **`EmailSender`** · l'émetteur. Méthode `async fn send(to_email, to_name, subject, html_body)`.
+  Contrat explicite : **ne lève jamais** · un échec d'email ne doit pas casser
+  l'opération métier qui l'a déclenché. Implémentation actuelle : `tracing::info!`
+  (no-op loggé). Implémentation cible : connexion STARTTLS, envoi,
+  échec avalé + loggé.
+- **`email::templates`** · gabarits HTML inline (un wrapper commun aux couleurs de
+  la marque + un gabarit par événement). **Portés** :
+  `application_decision(pet_name, accepted)` et `contract_ready(pet_name, reference)`.
 
-Enregistrement DI (`Program.cs`) :
-
-```csharp
-builder.Services.Configure<EmailOptions>(
-    builder.Configuration.GetSection(EmailOptions.SectionName)); // "Dorloter:Email"
-builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
-```
+L'émetteur est un provider Nest global (`EmailService`), injecté dans les contrôleurs et services qui notifient.
 
 ### L'envoi ne lève jamais
 
-C'est une garantie de conception. Deux cas :
-
-1. **Non configuré** (`Host` vide) : `SmtpEmailSender` **n'envoie rien**, loggue
-   un `LogInformation` (« Email non configuré, envoi ignoré ») et retourne. Idéal
-   en **dev** et en **tests** : aucune dépendance SMTP requise, le code métier
-   tourne normalement.
-2. **Configuré mais échec** (SMTP injoignable, auth refusée...) : l'exception
-   est capturée, loggée en erreur, et `SendAsync` retourne sans relancer.
-
-Conséquence : les appelants peuvent faire `await emailSender.SendAsync(...)` en
-fin d'opération sans `try/catch` ni crainte de rollback.
+Garantie de conception, à préserver quand le transport SMTP sera branché : que
+l'email soit non configuré, envoyé ou en échec, `send(...)` retourne toujours sans
+paniquer. Les appelants font `state.email.send(...).await` en fin d'opération sans
+`try/catch` ni crainte de rollback.
 
 ## Événements déclencheurs
 
-Aujourd'hui, trois emails sont émis depuis le module `Adoption` :
+Deux emails sont câblés depuis le module `adoption` (l'appel a lieu, seul le
+transport est no-op) :
 
 | Événement | Déclencheur (code) | Gabarit |
 | --- | --- | --- |
-| **Candidature acceptée** | `ShelterApplicationService` · passage du statut candidature à `acceptee` | `EmailTemplates.ApplicationDecision(petName, accepted: true)` |
-| **Candidature refusée** | `ShelterApplicationService` · passage à `refusee` | `EmailTemplates.ApplicationDecision(petName, accepted: false)` |
-| **Contrat d'adoption envoyé** | `ContractService.SetStatusAsync` · adoption passant à `envoye` | `EmailTemplates.ContractReady(petName, reference)` |
+| **Candidature acceptée** | `adoption::backoffice` · passage du statut candidature à `acceptee` | `templates::application_decision(pet_name, true)` |
+| **Candidature refusée** | `adoption::backoffice` · passage à `refusee` | `templates::application_decision(pet_name, false)` |
+| **Contrat d'adoption envoyé** | `adoption::contracts` · adoption passant à `envoye` | `templates::contract_ready(pet_name, reference)` |
 
-Dans les deux services, le destinataire (email + nom) est résolu via
-`UserDirectory.FindRefAsync(userId)` ; si l'utilisateur est introuvable, aucun
-email n'est tenté. Voir aussi [CONTRATS.md](CONTRATS.md) pour le cycle de vie
-des contrats.
+Le destinataire (email + nom) est résolu via `identity::directory::find_ref(user_id)` ;
+si l'utilisateur est introuvable, aucun email n'est tenté. Voir aussi
+[CONTRATS.md](CONTRATS.md) pour le cycle de vie des contrats.
 
-Les gabarits produisent un HTML simple, en **français**, aux couleurs de la
-marque (`EmailTemplates.Wrap` · titre vert, pied de page « Dorloter · adoption
-et protection animale »).
+Les gabarits produisent un HTML simple, en **français**, aux couleurs de la marque
+(wrapper commun · titre vert, pied de page « Dorloter · adoption et protection
+animale »).
 
-## Configuration
+## Configuration (cible)
 
-Section `Dorloter:Email` (binding double-underscore en variables
-d'environnement).
+Les noms de variables gardent la convention historique (double-underscore) pour
+rester compatibles avec l'infra existante. Quand le transport SMTP sera branché,
+la configuration lira la section `Dorloter__Email__*` ; en dev, `Host` vide gardera
+le comportement « emails seulement loggés ».
 
-**Dev** · défauts dans `apps/api/.../appsettings.json` :
-
-```json
-"Dorloter": {
-  "Email": {
-    "Host": "",
-    "Port": 587,
-    "User": "",
-    "Password": "",
-    "FromEmail": "no-reply@dorloter.fr",
-    "FromName": "Dorloter"
-  }
-}
-```
-
-`Host` vide par défaut → en dev, **les emails sont seulement loggés** (voir
-ci-dessus). Rien à configurer pour développer.
-
-**Prod** · les variables `EMAIL_SMTP_*` du fichier d'environnement sont mappées
+**Prod** · les variables `EMAIL_SMTP_*` du fichier d'environnement seront mappées
 vers `Dorloter__Email__*` dans `docker-compose.prod.yml` :
 
-| Variable env (`.env.production`) | Clé NestJS |
+| Variable env (`.env.production`) | Clé API |
 | --- | --- |
 | `EMAIL_SMTP_HOST` | `Dorloter__Email__Host` |
 | `EMAIL_SMTP_PORT` (défaut 587) | `Dorloter__Email__Port` |
@@ -111,13 +78,12 @@ vers `Dorloter__Email__*` dans `docker-compose.prod.yml` :
 | `EMAIL_FROM` (défaut `no-reply@${DOMAIN}`) | `Dorloter__Email__FromEmail` |
 | `EMAIL_FROM_NAME` (défaut `Dorloter`) | `Dorloter__Email__FromName` |
 
-Modèle : `.env.production.example`. Laisser `EMAIL_SMTP_HOST` vide **désactive**
-l'envoi (emails loggés) · utile pour un premier déploiement sans email.
+Laisser `EMAIL_SMTP_HOST` vide **désactivera** l'envoi (emails loggés) · utile pour
+un premier déploiement sans email.
 
-### Activer Brevo en prod
+### Activer Brevo en prod (une fois le transport branché)
 
-1. Créer un compte Brevo (gratuit) et un jeu d'identifiants **SMTP** (Brevo
-   fournit un login SMTP et une clé SMTP dédiée).
+1. Créer un compte Brevo (gratuit) et un jeu d'identifiants **SMTP** (login + clé SMTP dédiée).
 2. Renseigner dans `.env.production` :
 
    ```env
@@ -129,23 +95,19 @@ l'envoi (emails loggés) · utile pour un premier déploiement sans email.
    EMAIL_FROM_NAME=Dorloter
    ```
 
-3. Vérifier le domaine / l'expéditeur côté Brevo (SPF, DKIM) pour la
-   délivrabilité.
-4. Redéployer · SMTP se connecte en STARTTLS sur le port 587.
+3. Vérifier le domaine / l'expéditeur côté Brevo (SPF, DKIM) pour la délivrabilité.
+4. Redéployer.
 
 Pour un autre fournisseur (OVH, Scaleway TEM, Postfix), seules les valeurs
 `EMAIL_SMTP_*` changent.
 
 ## Gaps restants (non portés)
 
-Ces canaux de notification, présents dans la vision produit, **ne sont pas
-encore implémentés** dans l'API :
+- **Transport SMTP de l'email transactionnel** · à brancher (ci-dessus).
+- **Web Push (VAPID)** · notifications navigateur (nouveau match perdu/trouvé, mise
+  à jour candidature, nouvel animal dans un refuge suivi). Les notifications
+  **in-app** (table `notifications`, endpoints portés) restent le canal disponible.
 
-- **Web Push (VAPID)** · notifications navigateur (nouveau match perdu/trouvé,
-  mise à jour candidature, nouvel animal dans un refuge suivi). À reloger depuis
-  l'ancien front Next.js retiré (cf. CLAUDE.md). Les notifications **in-app**
-  (table `notifications`) restent le canal disponible.
-- **Gifs** · service de gifs de l'ancien front, pas encore porté.
-
-L'email transactionnel décrit ici est le seul canal de notification **sortant**
-opérationnel à ce jour.
+Le centre de notifications **in-app** est le seul canal de notification pleinement
+opérationnel à ce jour ; l'email a ses gabarits et ses déclencheurs prêts, en
+attente du transport.

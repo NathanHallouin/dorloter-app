@@ -8,7 +8,7 @@ Ce document liste tout ce qu'il faut construire pour que Dorloter tourne de mani
 > proxy Next d'auth…). Les **fonctionnalités** listées comme livrées sont bien
 > en place, mais les **détails techniques** cités (Better Auth, `next.config`,
 > SSE, proxy Next.js, `bun audit`, etc.) renvoient à cette implémentation
-> d'origine. Le projet a depuis migré vers : **API** (auth JWT) + **front
+> d'origine. Le projet a depuis migré vers : **API NestJS** (auth JWT) + **front
 > SPA React/Vite** + **mobile Expo**. Source de vérité du stack actuel :
 > **[CLAUDE.md](../CLAUDE.md)**.
 
@@ -237,7 +237,7 @@ L'objectif n'est pas le profit mais l'autosuffisance. Coûts estimés : VPS 10-2
 ### 8.2 Production
 Stack et runbook livrés dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Le provisioning du VPS et l'achat du domaine sont des étapes manuelles (non-code).
 - [x] VPS Hetzner ou OVH (souveraineté EU) — choix et guide dans le runbook
-- [x] PostgreSQL self-hosted avec PostGIS — `postgis/postgis:16-3.4` dans [docker-compose.prod.yml](docker-compose.prod.yml)
+- [x] PostgreSQL self-hosted avec PostGIS — `postgis/postgis:18-3.6` dans [docker-compose.prod.yml](docker-compose.prod.yml)
 - [x] Object Storage self-hosted (MinIO) avec backup vers OVH Object Storage via [scripts/backup.sh](scripts/backup.sh) — la migration vers Scaleway/OVH direct se fait en changeant 5 env vars
 - [x] Reverse proxy Caddy avec HTTPS Let's Encrypt auto — [Caddyfile](Caddyfile)
 - [x] Nom de domaine configuré (DNS A records `dorloter.fr` + `cdn.dorloter.fr` documentés)

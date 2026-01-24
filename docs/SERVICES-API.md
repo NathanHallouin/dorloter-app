@@ -4,10 +4,10 @@ Document de référence rédigé pour l'ancien stack **Next.js / TypeScript**
 (Server Actions web + routes `/api/v1/*` adossées à des services de domaine).
 
 > **Statut** : **caduc dans ses détails d'implémentation.** L'API est désormais
-> un service **NestJS / le service API** (`apps/api`) : contrôleurs fins +
-> services applicatifs (namespace `.Services`), erreurs métier via
-> `DomainException` / `ErrorCode`, enveloppe `ApiResponse.Of(...)` /
-> `PageResponse.OfNextCursor(...)`, OpenAPI servi sur `/api/v1/openapi`, client
+> un service **NestJS (Kysely + PostGIS)** (`apps/api`) : contrôleurs fins +
+> services applicatifs, erreurs métier via `AppError` / `ErrorCode`,
+> enveloppe `ok(...)` / `page(..., nextCursor)`,
+> OpenAPI servi sur `/api/v1/openapi`, client
 > mobile généré dans `packages/api-client` (`bun api:types`). Tous les exemples
 > de code ci-dessous (TypeScript, `withApi`, Zod, `revalidatePath`, Drizzle,
 > Better Auth, Vitest/Playwright) reflètent l'ancien front retiré. **Ce qui

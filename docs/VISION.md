@@ -2,6 +2,14 @@
 
 Document de réflexion stratégique : idées qui transformeraient Dorloter d'une plateforme d'adoption + lost/found en **l'infrastructure de référence** pour l'ensemble de l'écosystème félin français (adoptants, refuges, associations TNR, vétérinaires, pouvoirs publics).
 
+> **Statut** : document **prospectif**, pas un état du code. Deux des pistes
+> décrites ici ont eu une première implémentation qui a été **retirée du produit
+> le 2026-03-07** : le **module TNR** (§4) et l'**annuaire vétérinaire** (§5, dont
+> le §5 va d'ailleurs plus loin que ce qui avait été construit). Elles restent
+> listées ici comme options stratégiques ; les reprendre suppose de repartir des
+> migrations et des modules supprimés. État réel de la stack et du périmètre :
+> **[../CLAUDE.md](../CLAUDE.md)**.
+
 **Philosophie** : on ne propose pas des features. On propose des **leviers systémiques** qui, cumulés, changent la donne. Chaque idée a un impact mesurable sur au moins un de ces 4 axes :
 
 1. **Plus d'adoptions réussies** (diminuer le taux de retour, augmenter le matching qualitatif)

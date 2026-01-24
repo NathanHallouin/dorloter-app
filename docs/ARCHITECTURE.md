@@ -2,7 +2,7 @@
 
 Document d'architecture de référence. Décrit la structure **actuelle** du monorepo et les choix structurants. La source de vérité du stack et du modèle de données reste **[../CLAUDE.md](../CLAUDE.md)** ; ce document en donne la vue d'ensemble et explique le « pourquoi ».
 
-Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'animaux domestiques (chats et chiens, extensible aux NAC), complétée d'un **annuaire de pensions professionnelles** agréées et d'un **annuaire vétérinaire**. Projet solo, MVP : on privilégie la simplicité et la vitesse de livraison à l'architecture parfaite. Pas de microservices, pas de message queue, pas de cache Redis.
+Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'animaux domestiques (chats et chiens, extensible aux NAC), complétée d'un **annuaire de pensions professionnelles** agréées. Projet solo, MVP : on privilégie la simplicité et la vitesse de livraison à l'architecture parfaite. Pas de microservices, pas de message queue, pas de cache Redis.
 
 ---
 
@@ -10,13 +10,13 @@ Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'
 
 Le projet est un **monorepo polyglotte** géré par **bun workspaces** (Turborepo a été retiré : un seul gestionnaire, pas de couche d'orchestration de build supplémentaire). Deux familles d'unités :
 
-- `apps/*` : les applications déployables (API, fronts web/pro, mobile).
+- `apps/*` : les applications déployables (API NestJS, fronts web/pro, mobile).
 - `packages/*` : le code partagé entre les fronts (design system, couche d'accès API, client typé mobile).
 
 ```
 dorloter/
 ├── apps/
-│   ├── api/      # API REST NestJS (le service API) · port 8080 · /api/v1
+│   ├── api/      # API REST NestJS (Kysely + PostGIS) · port 8080 · /api/v1
 │   ├── web/      # SPA publique (vitrine adoptants) · React 19 + Vite · port 5173 · dorloter.fr
 │   ├── pro/      # SPA espace pro (back-office) · React 19 + Vite · port 5174 · pro.dorloter.fr
 │   └── mobile/   # Expo / React Native
@@ -24,7 +24,7 @@ dorloter/
 ├── packages/
 │   ├── ui/          # design system partagé (primitives, Icon, cn, thème CSS) · web + pro
 │   ├── client/      # couche d'accès API partagée (HTTP JWT, types, modules, AuthContext, queryClient) · web + pro
-│   └── api-client/  # client openapi-fetch typé (généré depuis l'OpenAPI) · mobile
+│   └── api-client/  # client openapi-fetch typé (généré depuis l'OpenAPI de l'API) · mobile
 │
 ├── docs/                       # documentation (ce dossier)
 ├── scripts/                    # outillage (seed, génération types, build mobile, prod)
@@ -40,62 +40,59 @@ dorloter/
 
 ## 2. L'API · `apps/api`
 
-Le backend principal : un service **le service API** (C# / NestJS 10) organisé en **monolithe modulaire à bounded contexts**. C'est le cœur du système : tous les fronts le consomment via `/api/v1`.
+Le backend principal : un service **NestJS (Kysely + PostGIS)** organisé en **monolithe modulaire à bounded contexts**. C'est le cœur du système : tous les fronts le consomment via `/api/v1`. Il a remplacé une implémentation Rust (supprimée), elle-même issue d'un portage le service API, à contrat identique.
 
 ### 2.1 Modules (bounded contexts)
 
-Un dossier par domaine sous `src/apps/api/Modules/` :
+Un dossier (ou fichier, pour les modules courts) par domaine sous `src/modules/` :
 
 | Module | Responsabilité |
 |---|---|
-| **Identity** | users, accounts, refresh tokens, auth JWT, profil, rôles |
-| **Adoption** | pets, photos, favorites, applications, **contrats** (adoption + familles d'accueil / foster), back-office refuge |
-| **Shelters** | refuges, follows, équipes (membres + permissions) |
-| **LostFound** | reports perdu/trouvé, matching PostGIS, report_matches |
-| **Pensions** | pensions pro, bookings, reviews |
-| **Veterinarians** | annuaire vétérinaires |
-| **Notifications** | notifications persistées + device tokens |
-| **Gamification** | crédits de résolution |
-| **Moderation** | content reports (réservé `platform_admin`) |
-| **Messaging** | conversations / messages (polling) |
+| **identity** | users, accounts, refresh tokens, auth JWT, profil, rôles |
+| **adoption** | pets, photos, favorites, applications, **contrats** (adoption + familles d'accueil / foster), santé, registre, back-office refuge |
+| **shelters** | refuges, follows, équipes (membres + permissions), bénévoles, événements, inventaire, communications |
+| **lostfound** | reports perdu/trouvé, matching PostGIS, report_matches |
+| **pensions** | pensions pro, bookings, reviews |
+| **notifications** | notifications persistées + device tokens |
+| **gamification** | crédits de résolution |
+| **moderation** | content reports (réservé `platform_admin`) |
+| **messaging** | conversations / messages (polling) |
 
 Chaque module suit la même structure interne :
 
-- `Domain/` : entités EF + enums métier.
-- `Application/` : services (logique métier, namespace `.Services`).
-- `Infrastructure/` : configurations EF (mapping sur le schéma `dorloter_api` existant).
-- `Web/` : contrôleurs fins + DTOs.
-- `<Module>Module.cs` : enregistrement DI via `Add<Module>Module()`.
+- `<nom>.module.ts` : le module Nest (contrôleurs, providers, `exports`).
+- `<nom>.service.ts` : la logique métier et les requêtes Kysely.
+- `<nom>.controller.ts` : handlers fins + DTOs `class-validator` + mapping de sortie camelCase.
 
-**Frontières inter-modules.** Un module n'accède à un autre QUE via son API publique exposée au niveau du package racine du module (ex. `ShelterDirectory`, `ShelterMembership`, `UserDirectory`), jamais via ses entités internes. C'est ce qui rend le monolithe « modulaire » : les couplages sont explicites et contenus à des contrats nommés.
+**Frontières inter-modules.** Un module n'accède à un autre QUE via les providers que celui-ci **exporte** (ex. `ShelterDirectory`, `ShelterMembershipService`, `UserDirectory`, `NotificationsService`), jamais via ses structures internes. C'est ce qui rend le monolithe « modulaire » : les couplages sont explicites, déclarés dans le `exports` de chaque module et vérifiés par l'injection de dépendances.
 
 ### 2.2 Infrastructure transverse
 
-Sous `src/apps/api/Infrastructure/` :
+Sous `src/infra/` :
 
-- **Persistence** : `DorloterDbContext` (Kysely 10 mappé sur le schéma `dorloter_api`, sans migrations EF) et `DatabaseMigrator` qui applique au démarrage des fichiers `.sql` embarqués (`Migrations/`, compatible avec un schéma déjà géré par Flyway).
-- **Security** : `JwtService`, encodeur **scrypt** compatible Better Auth (import des comptes existants sans reset), `CurrentUser`.
-- **Email** : `IEmailSender` + `SmtpEmailSender` (SMTP). Provider-agnostique (Brevo, OVH, Scaleway TEM, Postfix). L'email transactionnel **est porté** sur l'API.
-- **Web** : gestionnaire global d'exceptions (formatage de l'enveloppe d'erreur).
+- **database** : pool `pg` exposé via Kysely (avec `search_path` sur `dorloter_api`, parseurs de types ajustés pour `bigint`/`numeric`/`date`) ; le schéma typé vit dans `infra/database/schema.ts`. **migrator** applique au démarrage les fichiers `.sql` de `apps/api/migrations/` (copiés dans `dist/migrations` au build, compatibles avec un schéma déjà géré par Flyway ; connexion DDL dédiée optionnelle `ConnectionStrings__Migrations`).
+- **security** : `JwtService` (HS256), `ScryptService` compatible **Better Auth** reproduit au bit près via `node:crypto` (import des comptes existants sans reset), garde `@Auth()` et décorateurs `@CurrentUser()` / `@ReqContext()`.
+- **email** : émetteur transactionnel `infra/email`. **Gap** : actuellement no-op loggé (gabarits en place) ; le transport SMTP réel (provider Brevo/OVH/Scaleway/Postfix) reste à brancher.
+- **web** : sonde de disponibilité (`/api/v1/health`) et document OpenAPI (`/api/v1/openapi`).
 
-Le dossier `Shared/` regroupe les primitives : `ApiResponse` / `PageResponse`, `DomainException` / `ErrorCode`, `CursorCodec`, `DbEnum` (+ converters JSON/EF), `GeoPoints`, `ITimestamped`.
+Le dossier `src/shared/` regroupe les primitives : `api-response` (helpers `ok` / `page`), `app-error` (`AppError` / `ErrorCode`) et son filtre d'exception global, `cursor`, `db-enum` (validation des enums en corps/filtre), `validation` (`ValidationPipe` + helpers de query-string), `format` (dates, nettoyage).
 
 ### 2.3 Contrat d'API stable
 
 Partagé par les trois clients :
 
 - Succès objet : `{ data }`.
-- Liste paginée (cursor keyset, `createdAt DESC, id DESC`) : `{ data, pagination }`.
+- Liste paginée (cursor keyset, `created_at DESC, id DESC`) : `{ data, pagination }`.
 - Erreur : `{ error: { code, message, details? } }`, codes stables (`ErrorCode`).
-- Routes sous `/api/v1`. OpenAPI servi sur `/api/v1/openapi`.
+- Routes sous `/api/v1`. OpenAPI servi sur `/api/v1/openapi` (partiel · annotation exhaustive = chantier restant).
 
 ### 2.4 PostGIS
 
-PostGIS via Npgsql. Points construits via `GeoPoints.Of(lng, lat)` (SRID 4326). Le matching perdu/trouvé et les requêtes de proximité sont en **SQL natif** (`ST_DWithin` / `ST_Distance` sur `::geography`, mètres géodésiques). PostGIS est le différenciateur technique du projet : pas d'alternative NoSQL ni de calcul géo côté client.
+Tout le géo est en **SQL natif** via le template `sql` de Kysely (pas de type géométrique côté ORM). Points écrits via `ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`, lus via `ST_Y` / `ST_X`. Le matching perdu/trouvé et les requêtes de proximité utilisent `ST_DWithin` / `ST_Distance` sur `::geography` (mètres géodésiques). PostGIS est le différenciateur technique du projet : pas d'alternative NoSQL ni de calcul géo côté client.
 
 ### 2.5 Tests
 
-xUnit + Testcontainers (PostGIS), donc une vraie base spatiale par run.
+`bun test src` : tests unitaires (interop scrypt contre des vecteurs de référence RFC 7914, scoring du matching). Les flux sont par ailleurs exercés end-to-end contre une base PostGIS.
 
 ---
 
@@ -105,9 +102,9 @@ xUnit + Testcontainers (PostGIS), donc une vraie base spatiale par run.
 
 Deux SPA distinctes, déployées sur deux domaines, mais **sans duplication de code** :
 
-- **`apps/web` · SPA publique** (`dorloter.fr`, port 5173 en dev) : la vitrine adoptants. Catalogue d'adoption, fiches animaux, signalements perdu/trouvé et carte, annuaires pensions/vétérinaires, favoris, candidatures, messagerie. Les pages publiques (catalogue, signalements) sont accessibles sans compte ; l'auth n'est requise que pour signaler, candidater, gérer ses favoris, messagerie. Inclut MapLibre GL (via react-map-gl) pour la cartographie.
+- **`apps/web` · SPA publique** (`dorloter.fr`, port 5173 en dev) : la vitrine adoptants. Catalogue d'adoption, fiches animaux, signalements perdu/trouvé et carte, annuaires pensions et refuges, calendrier d'événements, favoris, candidatures, réservations, famille d'accueil, messagerie. Les pages publiques (catalogue, signalements) sont accessibles sans compte ; l'auth n'est requise que pour signaler, candidater, gérer ses favoris, messagerie. Inclut MapLibre GL (via react-map-gl) pour la cartographie.
 
-- **`apps/pro` · SPA espace pro** (`pro.dorloter.fr`, port 5174 en dev) : le back-office. Consoles **refuge**, **pension** et **vétérinaire**, plus l'**admin plateforme**. Architecture :
+- **`apps/pro` · SPA espace pro** (`pro.dorloter.fr`, port 5174 en dev) : le back-office. Consoles **refuge** et **pension**, plus l'**admin plateforme**. Architecture :
   - `DashShell` : le shell de console commun (layout dashboard).
   - `ConsoleHome` : aiguillage selon le rôle / l'appartenance de l'utilisateur vers la bonne console.
   - `RequirePro` : garde de route (accès réservé à un rôle pro OU à l'appartenance à un refuge).
@@ -117,7 +114,7 @@ Cette séparation isole l'UX adoptant (chaleureuse, mobile-first, SEO) de l'outi
 
 ### 3.2 Mobile · `apps/mobile`
 
-Expo / React Native. Consomme l'API via `packages/api-client` (client `openapi-fetch` typé, généré depuis l'OpenAPI).
+Expo / React Native. Consomme l'API via `packages/api-client` (client `openapi-fetch` typé, généré depuis l'OpenAPI de l'API).
 
 ---
 
@@ -144,7 +141,7 @@ Point d'entrée unique `@dorloter/client`. Les deux fronts importent leurs appel
 
 ### 4.3 `packages/api-client` · client typé mobile
 
-Client `openapi-fetch` typé (`types.gen.ts`) généré depuis l'OpenAPI via `bun api:types`. Consommé par le mobile. (Voir le chantier de dérive des types : `types.gen.ts` peut être en retard sur le contrat réel ; régénérer seul peut casser le build.)
+Client `openapi-fetch` typé (`types.gen.ts`) généré depuis l'OpenAPI de l'API via `bun api:types`. Consommé par le mobile. Comme la réécriture NestJS a préservé le contrat à l'identique, le `types.gen.ts` committé reste valide sans régénération ; l'OpenAPI étant encore partiel, ne pas régénérer tant que l'annotation complète n'est pas en place (au risque d'appauvrir le client).
 
 ---
 
@@ -155,7 +152,7 @@ Le module Adoption porte un **système de contrats** unifié : table `contracts`
 - **adoption** : le contrat d'adoption entre l'adoptant et le refuge.
 - **foster** : la convention de **famille d'accueil** (foster), liée aux entités `FosterFamily` / `FosterPlacement`.
 
-Une seule table couvre les deux cas (migration `V18__contracts.sql`), branchée sur l'existant (pets, users, shelters). Les services `ContractService` et `FosterService` portent la logique ; les contrôleurs `ContractController`, `FosterController`, `MeFosterController` exposent les routes. Côté fronts, le module est exposé via `@dorloter/client` (`api/contracts.ts`, `api/foster.ts`).
+Une seule table couvre les deux cas (migration `V18__contracts.sql`), branchée sur l'existant (pets, users, shelters). Côté API, la logique vit dans `modules/adoption/adoption-contracts.controller.ts` (contrats) et `modules/adoption/adoption-foster.controller.ts` (familles d'accueil), chacun exposant ses handlers et sa `routes()`. Côté fronts, le module est exposé via `@dorloter/client` (`api/contracts.ts`, `api/foster.ts`).
 
 Détail métier : voir **[CONTRATS.md](./CONTRATS.md)**.
 
@@ -163,10 +160,10 @@ Détail métier : voir **[CONTRATS.md](./CONTRATS.md)**.
 
 ## 6. Données
 
-- **PostgreSQL 16 + PostGIS**, schéma `dorloter_api`.
-- Schéma géré par les migrations `.sql` embarquées de l'API (`DatabaseMigrator` au démarrage), compatible avec un schéma déjà suivi par Flyway. **Pas de migrations EF.**
-- Auth : JWT (access 15 min + refresh 30 j opaque en base, table `auth_refresh_tokens`, rotation). Le hash `accounts.password` est au format scrypt de Better Auth, lu et écrit à l'identique par l'API.
-- Tables `sessions` / `verifications` : héritage de l'ancien front Better Auth (Next.js retiré), non utilisées par l'API.
+- **PostgreSQL 18 + PostGIS**, schéma `dorloter_api`.
+- Schéma géré par les migrations `.sql` embarquées de l'API (migrateur maison au démarrage), compatible avec un schéma déjà suivi par Flyway.
+- Auth : JWT (access 15 min + refresh 30 j opaque en base, table `auth_refresh_tokens`, rotation). Le hash `accounts.password` est au format scrypt de Better Auth, lu et écrit à l'identique par l'API (reproduit au bit près).
+- Tables `sessions` / `verifications` : héritage de l'ancien front Better Auth (front Next.js retiré depuis), non utilisées par l'API.
 
 Modèle de données détaillé : **[../CLAUDE.md](../CLAUDE.md)**.
 
@@ -178,7 +175,7 @@ Un seul **`docker-compose.prod.yml`** orchestre toute la prod :
 
 | Service | Rôle |
 |---|---|
-| `postgres` | PostgreSQL 16 + PostGIS (`postgis/postgis:16-3.4`) |
+| `postgres` | PostgreSQL 18 + PostGIS (`postgis/postgis:18-3.6`) |
 | `minio` (+ `minio-init`) | stockage S3-compatible des images |
 | `api` | API (build local) |
 | `web` | SPA publique servie en statique (build local) |
@@ -197,18 +194,17 @@ Guide complet : **[DEPLOYMENT.md](./DEPLOYMENT.md)**.
 
 ---
 
-## 8. Gaps connus (pas encore portés sur NestJS)
-
-Services portés par l'ancien front Next.js (retiré) et **pas encore réimplémentés** dans l'API. Caddy répond actuellement `501 Not Implemented` sur leurs routes :
+## 8. Gaps connus (pas encore couverts par l'API)
 
 - **Uploads d'images** (`/api/v1/uploads/*`) : presign S3 vers MinIO / Scaleway Object Storage.
-- **Gifs** (`/api/v1/gifs/*`).
 - **Web Push** (VAPID) : abonnements et envoi des notifications navigateur.
+- **Email transactionnel** : l'émetteur `infra/email` est actuellement no-op loggé (gabarits en place) ; le transport SMTP réel (provider Brevo/OVH/Scaleway/Postfix) reste à brancher.
+- **OpenAPI exhaustif** : le document `/api/v1/openapi` est partiel ; l'annotation complète (via `@nestjs/swagger`, pour régénérer `packages/api-client`) reste à faire. Le client committé reste valide entre-temps (contrat identique).
 
-En revanche, **l'email transactionnel est porté** (`Infrastructure/Email`, SMTP via SMTP, provider Brevo/OVH/Scaleway/Postfix) et **l'auth est en JWT** côté API.
+En revanche, **l'auth (JWT + scrypt)**, **le matching PostGIS** et **tous les modules métier** sont portés et testés.
 
 ---
 
 ## 9. Principe directeur
 
-Le bon niveau d'ambition pour un projet solo qui veut grossir, c'est le **monolithe modulaire** : des frontières claires (modules à API publique, deux packages partagés pour les fronts), une seule frontière de sécurité (l'API), pas de microservices. L'objectif n'est pas une architecture parfaite, c'est une architecture qui n'empêche jamais d'ajouter un domaine (TNR, billing, communauté…) sans se battre avec le reste du code.
+Le bon niveau d'ambition pour un projet solo qui veut grossir, c'est le **monolithe modulaire** : des frontières claires (modules à API publique, deux packages partagés pour les fronts), une seule frontière de sécurité (l'API), pas de microservices. L'objectif n'est pas une architecture parfaite, c'est une architecture qui n'empêche jamais d'ajouter un domaine (billing, communauté…) sans se battre avec le reste du code.

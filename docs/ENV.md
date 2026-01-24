@@ -1,6 +1,6 @@
 # Configuration des variables d'environnement
 
-Stack en vigueur : **API** (`apps/api`, auth **JWT**), **front public** (`apps/web`), **espace pro** (`apps/pro`), **mobile Expo** (`apps/mobile`). En dev, les défauts sont dans `apps/api/src/apps/api/appsettings.json` ; en prod, tout passe par `.env.production` (voir `.env.production.example`).
+Stack en vigueur : **API NestJS** (`apps/api`, Kysely + PostGIS, auth **JWT**), **front public** (`apps/web`), **espace pro** (`apps/pro`), **mobile Expo** (`apps/mobile`). En dev, les défauts sont dans le code (`apps/api/src/config.ts`) ; en prod, tout passe par `.env.production` (voir `.env.production.example`). Les noms de variables gardent la convention historique (`ConnectionStrings__*`, `Dorloter__*`) : ils sont restés identiques à travers les réécritures successives du backend, pour ne rien changer côté infra.
 
 ## TL;DR
 
@@ -8,13 +8,13 @@ Stack en vigueur : **API** (`apps/api`, auth **JWT**), **front public** (`apps/w
 
 ```bash
 docker compose up -d                          # Postgres/PostGIS (:5438) + MinIO
-cd apps/api && bun dev   # migre le schéma au démarrage
+cd apps/api && bun dev                        # migre le schéma au démarrage
 bun db:seed                                   # données de test (idempotent)
 cd apps/web && bun dev                        # vitrine    :5173
 cd apps/pro && bun dev                        # espace pro :5174
 ```
 
-En dev, aucun secret n'est requis : `appsettings.json` fournit des valeurs locales (DB `dorloter`, secret JWT de dev, email désactivé donc loggé).
+En dev, aucun secret n'est requis : `config.ts` fournit des valeurs locales par défaut (DB `dorloter`, secret JWT de dev, email no-op loggé).
 
 ### Prod
 
@@ -24,7 +24,7 @@ bun prod:init-roles                            # crée/rote les rôles PG dorlot
 bun prod:build && bun prod:up                  # build + démarre la stack (l'API migre au démarrage)
 ```
 
-Pas d'étape de migration séparée : l'API applique ses migrations SQL au démarrage (`DatabaseMigrator`).
+Pas d'étape de migration séparée : l'API applique ses migrations SQL au démarrage (migrateur maison), via la connexion DDL dédiée `ConnectionStrings__Migrations` si fournie.
 
 ---
 
@@ -44,7 +44,7 @@ Côté API, la connexion est construite par le compose :
 - `ConnectionStrings__Default` : rôle `dorloter_app` (search_path `dorloter_api,public`)
 - `ConnectionStrings__Migrations` : rôle DDL (superuser) · optionnel, sinon `Default` est utilisé
 
-### 2. Authentification (JWT, API)
+### 2. Authentification (JWT)
 
 | Variable | Comment |
 |---|---|
@@ -72,7 +72,7 @@ MinIO en dev et en prod (auto-hébergé, exposé via Caddy sur `cdn.{DOMAIN}`).
 
 ### 5. Email transactionnel (SMTP)
 
-Provider-agnostique (SMTP). Recommandé : **Brevo** (français, offre gratuite ~300 mails/jour). Voir [EMAIL.md](EMAIL.md).
+Provider-agnostique (transport SMTP à brancher · émetteur actuellement no-op loggé). Recommandé : **Brevo** (français, offre gratuite ~300 mails/jour). Voir [EMAIL.md](EMAIL.md).
 
 ```env
 EMAIL_SMTP_HOST=smtp-relay.brevo.com    # vide = envoi désactivé (loggé)
@@ -83,7 +83,7 @@ EMAIL_FROM=no-reply@dorloter.fr
 EMAIL_FROM_NAME=Dorloter
 ```
 
-Le compose mappe ces variables vers `Dorloter__Email__Host/Port/User/Password/FromEmail/FromName`. Swappable vers OVH / Scaleway TEM / Postfix sans changer le code.
+Une fois le transport branché, le compose mappera ces variables vers `Dorloter__Email__Host/Port/User/Password/FromEmail/FromName`. Swappable vers OVH / Scaleway TEM / Postfix sans changer le code.
 
 > Web Push (VAPID) : pas encore porté sur l'API (gap).
 

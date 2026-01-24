@@ -160,7 +160,7 @@ CREATE INDEX message_reactions_message_idx ON message_reactions (message_id);
 
 - **`sender_id UUID`** : l'id du user (même pour un refuge admin — c'est lui personnellement qui a envoyé). `sender_type` donne le camp (affichage UI, permissions).
 - **`edited_at`** : pour un éventuel édit de message. Affiché « modifié » dans l'UI si non-null.
-- **`message_reactions` avec emoji Unicode direct** : évite une table de lookup pour les emojis — plus simple, utf8mb4 géré nativement par Postgres 16.
+- **`message_reactions` avec emoji Unicode direct** : évite une table de lookup pour les emojis — plus simple, utf8mb4 géré nativement par Postgres 18.
 - **Contrainte unique sur (message, user, emoji)** : un user clique 2× sur 🙏 → la 2e fois ça **toggle** (suppression) côté server action. C'est la sémantique Telegram/Slack.
 - **Limitation emoji** : on whitelistera côté server action à ~10 emojis (voir « liste ci-dessous »). Pas de clavier emoji complet pour éviter le bruit (et les emojis random type 🍆).
 

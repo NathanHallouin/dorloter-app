@@ -4,24 +4,24 @@ Guide complet pour passer de rien à une prod qui tourne, puis pour la maintenir
 
 > **Stack cible** : **Caddy** (TLS edge) sert deux SPA React/Vite statiques (`apps/web`,
 > la vitrine publique adoptants, sur le domaine ; `apps/pro`, l'espace pro refuge/pension/véto,
-> sur `pro.${DOMAIN}`) et proxifie `/api/v1/*` vers l'**API** (`apps/api`, le service API).
+> sur `pro.${DOMAIN}`) et proxifie `/api/v1/*` vers l'**API NestJS** (`apps/api`, Kysely + PostGIS).
 > S'y ajoutent **Postgres/PostGIS** et **MinIO** (object storage images, exposé en CDN sur
 > `cdn.${DOMAIN}`). Le tout dans un seul `docker-compose.prod.yml` (projet compose `dorloter-prod`).
 > L'auth est en **JWT** ; les migrations de schéma sont des fichiers SQL embarqués dans l'API,
-> appliqués au démarrage par le `DatabaseMigrator` (pas d'étape de migration séparée). Source de
+> appliqués au démarrage par le migrateur maison (pas d'étape de migration séparée). Source de
 > vérité du stack : **[CLAUDE.md](../CLAUDE.md)**.
 
 ## 0. Ce qui est déjà prêt côté code
 
 Avant de commencer, l'app est livrée avec :
 
-- **Dockerfiles** : API (`apps/api/Dockerfile`, `bun run publish`), SPA publique (`apps/web/Dockerfile`, `vite build` servi par un Caddy interne) et SPA pro (`apps/pro/Dockerfile`, idem)
-- **docker-compose.prod.yml** (unique) : `postgres` (PostGIS) + `minio` (+ `minio-init`) + `api`  + `web` (SPA publique) + `pro` (SPA espace pro) + `caddy` (edge TLS)
+- **Dockerfiles** : API NestJS (`apps/api/Dockerfile`, `nest build`, image runtime node-slim non-root), SPA publique (`apps/web/Dockerfile`, `vite build` servi par un Caddy interne) et SPA pro (`apps/pro/Dockerfile`, idem)
+- **docker-compose.prod.yml** (unique) : `postgres` (PostGIS) + `minio` (+ `minio-init`) + `api` (NestJS) + `web` (SPA publique) + `pro` (SPA espace pro) + `caddy` (edge TLS)
 - **Caddyfile** : reverse proxy + HTTPS Let's Encrypt auto ; sert `web` sur le domaine, `pro` sur `pro.${DOMAIN}`, proxifie `/api/v1/*` vers `api:8080`, expose MinIO en CDN sur `cdn.${DOMAIN}`
 - **scripts/deploy.sh** : déploiement idempotent (build `web` + `pro` + `api`, init des rôles PG, recreate)
 - **scripts/prod-init-roles.sh** : création/rotation des rôles PG `dorloter_app` / `dorloter_admin`
 - **scripts/backup.sh** : backup quotidien PG + MinIO vers un bucket S3-compatible
-- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** + **[api-ci.yml](../.github/workflows/api-ci.yml)** : build + tests sur chaque PR
+- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** + **[api-ci.yml](../.github/workflows/api-ci.yml)** (API : typecheck + build + test + docker build) : build + tests sur chaque PR
 - **[.github/workflows/deploy.yml](../.github/workflows/deploy.yml)** : déploiement auto à chaque push sur `main` (SSH vers le VPS, `scripts/deploy.sh`)
 - Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) servis par Caddy
 - `/api/v1/health` pour le monitoring externe (réponse `{"status":"UP"}`)
@@ -111,7 +111,7 @@ cd /opt/dorloter
 
 ### Installer Bun (requis pour les scripts `prod:*`, pas pour le runtime)
 
-Les images Docker buildent tout en interne (`bun run publish`, `vite build`) ; Bun ne sert qu'aux
+Les images Docker buildent tout en interne (`nest build`, `vite build`) ; Bun ne sert qu'aux
 scripts d'orchestration (`bun prod:*`).
 
 ```bash
@@ -157,7 +157,7 @@ cd /opt/dorloter
 `scripts/deploy.sh` est idempotent et fait tout le travail : build des images `web` + `pro` + `api`,
 démarrage de `postgres` + `minio`, attente que PG réponde, application des grants PG via
 `scripts/prod-init-roles.sh`, puis recreate de `web` + `pro` + `api` + `caddy`. L'API applique
-ses migrations SQL au démarrage (`DatabaseMigrator`).
+ses migrations SQL au démarrage (migrateur maison, connexion DDL dédiée).
 
 Caddy obtient automatiquement les certificats Let's Encrypt au premier hit HTTPS. Attendre ~10s puis tester :
 
@@ -186,7 +186,7 @@ Ajouter :
 0 2 * * *   cd /opt/dorloter && ./scripts/backup.sh >> /var/log/dorloter-backup.log 2>&1
 ```
 
-> Pas de cron applicatif côté NestJS pour l'instant (les anciens jobs cron étaient portés par le front
+> Pas de cron applicatif côté API pour l'instant (les anciens jobs cron étaient portés par le front
 > Next.js retiré). À reloger sur l'API le moment venu : expiration des signalements, recalcul
 > des matches, digests email.
 

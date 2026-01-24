@@ -3,7 +3,7 @@
 > **Contexte** : ce document proposait, à l'époque du monolithe **Next.js**, de
 > se doter d'une **API commune web + mobile**. Cette direction a depuis été
 > **réalisée**, mais différemment de ce qui est esquissé ici : l'API est un
-> service **NestJS / le service API** dédié (`apps/api`, routes `/api/v1`,
+> service **NestJS (Kysely + PostGIS)** dédié (`apps/api`, routes `/api/v1`,
 > OpenAPI sur `/api/v1/openapi`), l'auth est en **JWT** (et non plus Better Auth
 > avec plugin `bearer`), le front web est une **SPA React + Vite** (`apps/web`)
 > et le mobile **Expo** consomme le client typé `packages/api-client`

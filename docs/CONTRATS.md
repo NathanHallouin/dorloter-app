@@ -24,15 +24,14 @@ imprimé.
 
 ## Modèle de données
 
-Table `contracts` (migration `apps/api/.../Migrations/V18__contracts.sql`,
-entité `Modules/Adoption/Domain/Contract.cs`). Une seule table couvre les deux
-types.
+Table `contracts` (migration `apps/api/migrations/V18__contracts.sql`, mappée dans
+`modules/adoption/adoption-contracts.controller.ts`). Une seule table couvre les deux types.
 
 | Colonne | Type | Rôle |
 | --- | --- | --- |
 | `id` | uuid (pk) | identifiant |
-| `type` | varchar(20) | `adoption` ou `foster` (`ContractType`) |
-| `status` | varchar(20) | cycle de vie, défaut `brouillon` (`ContractStatus`) |
+| `type` | varchar(20) | `adoption` ou `foster` |
+| `status` | varchar(20) | cycle de vie, défaut `brouillon` |
 | `shelter_id` | uuid (fk → shelters) | refuge propriétaire, `ON DELETE CASCADE` |
 | `user_id` | uuid (fk → users) | la **contrepartie** : l'adoptant (adoption) ou le bénévole famille d'accueil (foster), `ON DELETE RESTRICT` |
 | `pet_id` | uuid (fk → pets) | animal concerné · nullable (une convention foster peut être créée sans animal précis), `ON DELETE SET NULL` |
@@ -45,7 +44,7 @@ types.
 | `terms` | jsonb | **clauses cochées** (`{ "clé": true/false }`), défaut `{}` |
 | `notes` | text | clauses particulières en texte libre, nullable |
 | `signed_at` | timestamptz | horodatage de signature / activation, nullable |
-| `created_at`, `updated_at` | timestamptz | `ITimestamped` (stampés par le DbContext) |
+| `created_at`, `updated_at` | timestamptz | horodatages (stampés en base / à l'update) |
 
 Index : `shelter_id`, `user_id`, `pet_id`, et un **unique** `(shelter_id, reference)`.
 
@@ -107,8 +106,7 @@ renvoie `Forbidden`. Les permissions sont résolues dynamiquement à partir du
 
 ## Endpoints · `/api/v1/shelter/contracts`
 
-Contrôleur `Modules/Adoption/Web/ContractController.cs`, DTOs dans
-`ContractDtos.cs`. Enveloppe standard `{ data }`.
+Handlers et DTOs dans `modules/adoption/adoption-contracts.controller.ts`. Enveloppe standard `{ data }`.
 
 | Méthode | Route | Description |
 | --- | --- | --- |

@@ -1,9 +1,23 @@
 # Handoff — Refonte « Dorloter » (DA éditoriale / gazette)
 
+> **Statut** : handoff de design **historique**, conservé tel qu'il a été livré.
+> La direction artistique décrite ici (tokens, typographies, primitives) est
+> **toujours celle du produit** et vit dans `packages/ui`. En revanche le
+> **mapping technique** évoqué au fil du document (Next.js App Router, `next/font`,
+> Server Actions, Drizzle, `domains/*`) date de l'ancien front : la cible réelle
+> est aujourd'hui **deux SPA React 19 + Vite** (`apps/web` public,
+> `apps/pro` back-office) qui consomment l'**API NestJS** via `/api/v1` avec
+> TanStack Query, et partagent `@dorloter/ui` + `@dorloter/client`.
+> Les écrans **vétérinaires** (`vet.jsx`, vue `veterinaires`/`vetDetail`) et
+> l'espace pro **vétérinaire** décrits plus bas **ne font plus partie du produit**
+> (feature retirée le 2026-03-07) ; les fichiers sont laissés intacts pour que le
+> prototype `Dorloter.html` reste affichable. Source de vérité du stack :
+> **[../../CLAUDE.md](../../CLAUDE.md)**.
+
 ## Vue d'ensemble
 Refonte complète de l'app web **Dorloter** (repo `dorloter`) : une plateforme d'adoption,
-de perdus & trouvés, de pensions, de refuges et de vétérinaires, avec messagerie,
-profils membres et back-offices professionnels.
+de perdus & trouvés, de pensions, de refuges et (à l'époque) de vétérinaires, avec
+messagerie, profils membres et back-offices professionnels.
 
 Cette maquette propose une **nouvelle direction artistique** assumée — un parti pris
 « **gazette / éditorial** » (serif de presse, libellés mono, filets, angles nets,
@@ -14,17 +28,17 @@ Le but du handoff : **recréer ces écrans à l'identique** dans l'app React exi
 Les fichiers de ce paquet sont des **références de design réalisées en HTML/JSX**
 (prototypes React via Babel inline + globals sur `window`). **Ce n'est pas du code de
 production à copier tel quel.** La tâche consiste à **reproduire ces designs dans
-l'environnement du repo** (Next.js App Router + React + Tailwind v4 + shadcn/ui +
+l'environnement du repo** (React 19 + Vite + Tailwind v4 + primitives maison +
 lucide-react) en suivant ses conventions, pas à embarquer le HTML.
 
 Le code est volontairement structuré par domaine, ce qui facilite le mapping vers les
-`domains/*` et `app/*` du repo.
+`pages/*` et `components/*` de `apps/web` et `apps/pro`.
 
 ## Fidélité
 **Haute fidélité (hifi).** Couleurs, typographies, espacements, rayons et interactions
-sont définitifs. Reproduire l'UI au pixel près en utilisant les composants shadcn et les
-patterns du codebase. Les données sont fictives (mock) — à remplacer par les vraies
-sources (Drizzle/serveur).
+sont définitifs. Reproduire l'UI au pixel près en utilisant les primitives de
+`packages/ui` et les patterns du codebase. Les données sont fictives (mock) — à
+remplacer par les vraies sources (API `/api/v1` via `@dorloter/client` + TanStack Query).
 
 ---
 
@@ -57,7 +71,7 @@ Sémantique couleur cohérente sur tout le site :
 - **Libellés / méta / chiffres** : `Geist Mono` (`.mono`), souvent UPPERCASE + `letter-spacing: .04–.16em`.
 - Lettrine éditoriale sur le hero (`::first-letter`, serif, `float:left`).
 - Échelles indicatives : h1 hero 60px, titres de page 30–40px, h3 carte 19–24px, corps 14–15.5px, méta mono 10–12px.
-- Mapping repo : charger via `next/font/google` (Newsreader, Hanken Grotesk, Geist Mono).
+- Mapping repo : polices chargées en CSS depuis `packages/ui` (Newsreader, Hanken Grotesk, Geist Mono).
 
 ### Formes & profondeur
 - **Rayons éditoriaux resserrés** : cartes/champs/boutons **4–6 px** (pages publiques),
@@ -89,7 +103,7 @@ Routeur par `view` (string) dans `app.jsx`. Mapping suggéré vers les routes du
 - **lost** + **reportDetail** — Perdus & trouvés : **carte plein écran** + bandeaux latéraux rétractables (Fiche animal / Flux d'activité), reprend la structure `ReportDetailShell`. *(/perdus-trouves)*
 - **pensions** + **reserve** — Annuaire pensions + fiche/réservation (calendrier). *(/pensions)*
 - **shelters** + **shelter** — Annuaire refuges + fiche refuge. *(/refuges)*
-- **veterinaires** + **vetDetail** — Annuaire vétérinaires + fiche (urgences 24/7, services). *(/veterinaires)*
+- ~~**veterinaires** + **vetDetail** — Annuaire vétérinaires + fiche.~~ *(feature retirée du produit)*
 - **about** — Notre mission (page éditoriale).
 
 **Compte / membre**
@@ -98,33 +112,33 @@ Routeur par `view` (string) dans `app.jsx`. Mapping suggéré vers les routes du
 - **login** — Connexion / Inscription. **report** / **apply** — formulaires multi-étapes.
 
 **Back-offices pro** (coquille console à sidebar, sélecteur de rôle)
-- **dash** — 4 espaces : **refuge** (annonces, candidatures, adoptions), **pension** (réservations, calendrier, avis), **plateforme/admin** (modération, vérif refuges/pensions/vétos, utilisateurs), **vétérinaire** (scan de puce → rapprochement perdus/trouvés, équipe). *(app/(shelter), (pension), (vet), (admin))*
+- **dash** — espaces implémentés : **refuge** (annonces, candidatures, adoptions), **pension** (réservations, calendrier, avis), **plateforme/admin** (modération, vérification refuges/pensions, utilisateurs). *(`apps/pro/src/pages/{shelter,pension,admin}`)* · l'espace **vétérinaire** de la maquette (scan de puce) n'a pas été retenu.
 
 ---
 
 ## Navigation (architecture d'information)
 Trois zones, à reproduire fidèlement (voir `nav.jsx`) :
-1. **Centre — découverte publique** : 3 menus déroulants (mega-menu icône+titre+desc) — **Adopter** / **Perdus & trouvés** / **Annuaires** (Refuges, Pensions, Vétérinaires). État actif = pastille verte ; passe en bouton **burger** ≤ 1024 px.
-2. **Droite — personnel** : **recherche globale** (palette de commandes, ouverture ⌘K/Ctrl-K, ↑↓/Entrée/Esc, indexe animaux + pages + prestataires), **Messagerie**, **Notifications** (popover + badge non-lus), **menu compte** (avatar) qui regroupe compte/favoris/candidatures/signalements **+ Espaces professionnels** (refuge/pension/véto/admin avec rôle présélectionné).
+1. **Centre — découverte publique** : 3 menus déroulants (mega-menu icône+titre+desc) — **Adopter** / **Perdus & trouvés** / **Annuaires** (Refuges, Pensions). État actif = pastille verte ; passe en bouton **burger** ≤ 1024 px.
+2. **Droite — personnel** : **recherche globale** (palette de commandes, ouverture ⌘K/Ctrl-K, ↑↓/Entrée/Esc, indexe animaux + pages + prestataires), **Messagerie**, **Notifications** (popover + badge non-lus), **menu compte** (avatar) qui regroupe compte/favoris/candidatures/signalements **+ Espaces professionnels** (refuge/pension/admin avec rôle présélectionné).
 3. **Pro** : back-offices isolés dans leur coquille, accessibles uniquement via le menu compte ; chaque espace a « Retour au site ».
 - Popovers fermables au clic extérieur ; tout est responsive (panneau mobile structuré : Rechercher / Découvrir / Mon compte / Espaces pro).
 
 ## Interactions & comportement
 - **Thème clair/sombre** : classe `.dark` sur `<html>`. Tout est dark-aware.
-- **Favoris** : store partagé (ici `window.__favs: Set`) → à câbler sur l'action serveur `toggleFavorite`.
+- **Favoris** : store partagé (ici `window.__favs: Set`) → à câbler sur `favoritesApi` (`@dorloter/client`).
 - **Swipe** : drag pointer (suivre `draggingRef` pour éviter les races), seuil ±110 px, rotation `clamp(x/18, -16, 16)`, opacité des tampons `clamp((±x-24)/110, 0, 1)`, envol 240 ms puis avance.
 - **Quiz** : `computeRecommendation(answers)` → filtres + bullet points (logique identique au repo).
-- **Profil** : visibilité publique/privée persistée (`localStorage` → à remplacer par champ user) ; mode aperçu masque les onglets privés et les actions d'édition.
+- **Profil** : visibilité publique/privée persistée (`localStorage` → remplacée par le champ `users.is_public`) ; mode aperçu masque les onglets privés et les actions d'édition.
 - **Transitions** : 0.14–0.3 s ; **respecter `prefers-reduced-motion`** (animations d'entrée gated, swipe sans tilt).
 - **Important (repaint)** : pour les états actifs animés, utiliser le **longhand `background-color`** (le raccourci `background` + `var()` + transition ne repeint pas correctement).
 
 ## State management
-État local par vue (string `view` + objets sélectionnés : pet, shelterId, pension, vetId, report, dashRole). Dans le repo : remplacer par le **routing Next** (segments + params) et les **server actions** existantes. Données fictives à brancher sur Drizzle.
+État local par vue (string `view` + objets sélectionnés : pet, shelterId, pension, report, dashRole). Dans le repo : remplacer par le **routing React Router** (segments + params) et les hooks **TanStack Query**. Données fictives à brancher sur l'API via `@dorloter/client`.
 
 ## Assets
 - **Icônes** : lucide (déjà `lucide-react` dans le repo). Les SVG inline de `ds.jsx` reprennent les paths lucide ; utiliser directement les composants lucide-react.
 - **Photos** : Unsplash (URLs `images.unsplash.com/photo-…`) — **placeholders** à remplacer par les vraies photos (refuges/animaux). Le composant `<image-slot>` marque les zones d'upload utilisateur (galerie profil).
-- **Polices** : Newsreader, Hanken Grotesk, Geist Mono (Google Fonts → `next/font`).
+- **Polices** : Newsreader, Hanken Grotesk, Geist Mono (Google Fonts, chargées en CSS).
 
 ## Fichiers (références de design)
 - `Dorloter.html` — point d'entrée (tokens CSS dans `<style>`, ordre de chargement des scripts).
@@ -133,7 +147,7 @@ Trois zones, à reproduire fidèlement (voir `nav.jsx`) :
 - `home.jsx` — accueil. `catalog.jsx` — catalogue + `PetCard` + modale fiche animal.
 - `swipe.jsx` — mode swipe. `quiz.jsx` — quiz de compatibilité.
 - `lost.jsx` — perdus & trouvés (carte + shells). `pensions.jsx` — pensions.
-- `vet.jsx` — vétérinaires (annuaire + fiche). `messages.jsx` — messagerie.
+- `vet.jsx` — vétérinaires (annuaire + fiche) · **feature retirée**, fichier conservé pour le prototype. `messages.jsx` — messagerie.
 - `pages.jsx` — refuges (annuaire + fiche), favoris, à propos, (ancien) compte.
 - `profile.jsx` — profil personnel public/privé.
 - `ui2.jsx` — en-têtes de page, états vides, données (refuges, user).
