@@ -91,7 +91,7 @@ export function LoginPage() {
         </form>
 
         <p className="mt-5 text-center text-[12.5px] text-muted-foreground">
-          Espace réservé aux refuges, pensions et vétérinaires partenaires.
+          Espace réservé aux refuges et pensions partenaires.
         </p>
       </div>
     </div>

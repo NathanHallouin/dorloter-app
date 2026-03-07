@@ -13,8 +13,8 @@ export function NoAccessPage() {
           Espace réservé aux professionnels
         </h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          Le compte {user?.email} n'est rattaché à aucun refuge, pension ou
-          cabinet vétérinaire. Si vous gérez une structure, contactez l'équipe
+          Le compte {user?.email} n'est rattaché à aucun refuge ni aucune
+          pension. Si vous gérez une structure, contactez l'équipe
           Dorloter pour l'activer.
         </p>
         <button
