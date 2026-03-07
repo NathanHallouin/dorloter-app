@@ -2,9 +2,9 @@
 #
 # Préconditions :
 #   - app installée (Dev Client OU build EAS preview)
-#   - serveur dorloter accessible depuis le device (par défaut
-#     localhost:3000 — lance `bun --cwd apps/web run dev` avant)
-#   - un user de test existe (cf. apps/web/scripts/seed.ts)
+#   - API dorloter accessible depuis le device (par défaut
+#     localhost:8080 · lance `bun --cwd apps/api dev` avant)
+#   - un user de test existe (cf. scripts/seed.sql, `bun db:seed`)
 #
 # Lancer : `bun --cwd apps/mobile run test:e2e` ou
 #          `maestro test apps/mobile/.maestro/01-signin-and-favorite.yaml`
@@ -20,7 +20,7 @@ appId: fr.dorloter.app
     id: "compte-cta-signin"
 - assertVisible: "Connexion"
 
-# 2. Saisie credentials du seed (cf. apps/web/scripts/seed.ts)
+# 2. Saisie credentials du seed (cf. scripts/seed.sql)
 - tapOn:
     id: "auth-email-input"
 - inputText: "test@dorloter.fr"

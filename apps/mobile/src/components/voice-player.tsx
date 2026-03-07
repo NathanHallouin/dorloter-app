@@ -25,8 +25,8 @@ function resolveAudioUrl(url: string): string {
   if (/^https?:\/\//.test(url)) return url;
   const apiBaseUrl =
     (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
-    "http://localhost:3000/api/v1";
-  // `apiBaseUrl` finit en /api/v1 — on enlève ce suffixe car `url`
+    "http://localhost:8080/api/v1";
+  // `apiBaseUrl` finit en /api/v1 · on enlève ce suffixe car `url`
   // commence déjà par `/api/v1/...`.
   const origin = apiBaseUrl.replace(/\/api\/v1\/?$/, "");
   return `${origin}${url}`;
