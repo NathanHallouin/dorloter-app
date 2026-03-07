@@ -4,7 +4,7 @@ import { Btn, Eyebrow, Rule } from "@dorloter/ui";
 
 const VALUES: [string, string, string][] = [
   ["heart", "Le bien-être d'abord", "Aucune adoption n'est précipitée. Chaque étape protège l'animal autant que la famille."],
-  ["shieldCheck", "Des partenaires vérifiés", "Refuges, pensions et vétérinaires sont contrôlés (SIRET, agrément) avant publication."],
+  ["shieldCheck", "Des partenaires vérifiés", "Refuges et pensions sont contrôlés (SIRET, agrément) avant publication."],
   ["radio", "La force du collectif", "Perdus & trouvés mobilise la communauté autour de chaque signalement géolocalisé."],
   ["globe", "Souveraineté numérique", "Hébergement européen, technologies ouvertes, aucune dépendance aux géants du cloud."],
 ];
@@ -20,7 +20,7 @@ export function AboutPage() {
           </h1>
           <p className="lead-drop mx-auto mt-[22px] max-w-[680px] text-left text-[18px] leading-[1.65] text-foreground">
             Dorloter réunit en un seul endroit l'adoption en refuge, le réseau de perdus & trouvés géolocalisé et
-            l'annuaire des professionnels de confiance (pensions agréées, vétérinaires). Une plateforme associative,
+            l'annuaire des pensions professionnelles agréées. Une plateforme associative,
             pensée pour être simple, chaleureuse et utile, du premier clic jusqu'aux retrouvailles.
           </p>
         </div>

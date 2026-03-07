@@ -21,7 +21,7 @@ const REPERES: [string, string, string][] = [
 const FAQ: [string, string][] = [
   [
     "Qu'est-ce que Dorloter ?",
-    "Une plateforme web française qui réunit en un seul endroit l'adoption en refuge, un réseau de perdus & trouvés géolocalisé et un annuaire de professionnels de confiance (pensions agréées, vétérinaires).",
+    "Une plateforme web française qui réunit en un seul endroit l'adoption en refuge, un réseau de perdus & trouvés géolocalisé et un annuaire de pensions professionnelles agréées.",
   ],
   [
     "Qui peut publier sur Dorloter ?",

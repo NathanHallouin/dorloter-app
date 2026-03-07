@@ -1,5 +1,5 @@
 /**
- * Client API Dorloter — wrapper fetch typé.
+ * Client API Dorloter · wrapper fetch typé.
  *
  * Source unique de vérité : `types.gen.ts` est généré depuis l'OpenAPI
  * (cf. `scripts/generate-api-types.ts`). Régénérer après chaque change
@@ -7,7 +7,7 @@
  *
  * Conçu pour être consommé identiquement par :
  *   - le web (tests, scripts internes, server-side fetch)
- *   - le mobile (Expo) — pas de dépendance Next.js / DOM
+ *   - le mobile (Expo) · pas de dépendance DOM
  *
  * Usage :
  *   const api = createApiClient({
@@ -35,7 +35,7 @@ export type { components, paths } from "./types.gen";
 export interface ApiClientOptions {
   /**
    * URL de base de l'API (sans trailing slash). Ex. en prod :
-   * `https://dorloter.fr/api/v1`. En dev local : `http://localhost:3000/api/v1`.
+   * `https://dorloter.fr/api/v1`. En dev local : `http://localhost:8080/api/v1`.
    */
   baseUrl: string;
   /**
