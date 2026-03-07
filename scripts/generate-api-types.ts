@@ -1,6 +1,6 @@
 /**
- * Génère les types TypeScript du client API depuis l'OpenAPI de l'API
- * (le service API). La source de vérité du contrat est l'API (apps/api).
+ * Génère les types TypeScript du client API depuis l'OpenAPI de l'API NestJS.
+ * La source de vérité du contrat est l'API (apps/api).
  *
  * Usage :
  *   1. Lancer l'API :        cd apps/api && bun dev
@@ -25,10 +25,10 @@ const OPENAPI_URL =
   process.env.OPENAPI_URL ?? "http://localhost:8080/api/v1/openapi";
 
 const HEADER = `/**
- * Types TypeScript du client API Dorloter — GÉNÉRÉS AUTOMATIQUEMENT.
+ * Types TypeScript du client API Dorloter · GÉNÉRÉS AUTOMATIQUEMENT.
  * Ne pas éditer à la main. Régénérer via : \`bun api:types\`.
  *
- * Source : OpenAPI de l'API (le service API) servi sur /api/v1/openapi
+ * Source : OpenAPI de l'API NestJS servi sur /api/v1/openapi
  */
 
 `;

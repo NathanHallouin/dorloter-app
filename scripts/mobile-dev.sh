@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Session dev mobile en UNE commande — Metro tunnel + cloudflared backend auto.
+# Session dev mobile en UNE commande · Metro tunnel + cloudflared backend auto.
 #
 # Workflow EAS dev-client cloud (pas de USB, pas de WSL2 adb) :
 #   1. Tu as installé le dev-client APK sur ton phone (`bun mobile:build`).
-#   2. Tu lances Next.js dans un terminal séparé : `cd apps/web && bun run dev`.
+#   2. Tu lances l'API dans un terminal séparé : `cd apps/api && bun dev`.
 #   3. Tu lances ce script. Il :
-#        a. vérifie que Next.js répond sur :3000
+#        a. vérifie que l'API NestJS répond sur :8080
 #        b. lance cloudflared quick tunnel en background (backend → https public)
 #        c. extrait l'URL trycloudflare.com depuis les logs
 #        d. exporte EXPO_PUBLIC_API_BASE_URL = <cf>/api/v1
@@ -44,25 +44,25 @@ EOF
   exit 1
 fi
 
-# ─── 1. Backend Next.js joignable ────────────────────────────────────────────
+# ─── 1. API Dorloter joignable ───────────────────────────────────────────────
 
-if ! curl -fsS --max-time 2 http://localhost:3000/api/v1/openapi.json >/dev/null 2>&1; then
+if ! curl -fsS --max-time 2 http://localhost:8080/api/v1/health >/dev/null 2>&1; then
   cat <<EOF
-✗ Backend Next.js injoignable sur http://localhost:3000.
+✗ API Dorloter injoignable sur http://localhost:8080.
 
 Lance d'abord dans un autre terminal :
-  cd apps/web && bun run dev
+  cd apps/api && bun dev
 
 Puis relance ce script.
 EOF
   exit 1
 fi
-echo "✓ Backend Next.js OK sur :3000"
+echo "✓ API Dorloter OK sur :8080"
 
 # ─── 2. Tunnel cloudflared backend ───────────────────────────────────────────
 
 CF_LOG="$(mktemp -t dorloter-cf.XXXXXX)"
-cloudflared tunnel --url http://localhost:3000 --no-autoupdate \
+cloudflared tunnel --url http://localhost:8080 --no-autoupdate \
   >"${CF_LOG}" 2>&1 &
 CF_PID=$!
 
@@ -75,7 +75,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# Cloudflared imprime l'URL après quelques secondes — poll max ~15s.
+# Cloudflared imprime l'URL après quelques secondes · poll max ~15s.
 CF_URL=""
 for _ in $(seq 1 30); do
   CF_URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "${CF_LOG}" \
@@ -97,7 +97,7 @@ echo "✓ Tunnel backend : ${CF_URL}"
 # Smoke test : le tunnel met parfois quelques secondes à se propager.
 SMOKE_OK=false
 for _ in $(seq 1 10); do
-  if curl -fsS --max-time 3 "${API_BASE_URL}/openapi.json" >/dev/null 2>&1; then
+  if curl -fsS --max-time 3 "${API_BASE_URL}/health" >/dev/null 2>&1; then
     SMOKE_OK=true
     break
   fi
@@ -106,7 +106,7 @@ done
 if [ "${SMOKE_OK}" = true ]; then
   echo "✓ API joignable via cloudflared"
 else
-  echo "⚠ API pas encore joignable via ${CF_URL} — Metro tournera, réessaie depuis l'app si erreur réseau."
+  echo "⚠ API pas encore joignable via ${CF_URL} · Metro tournera, réessaie depuis l'app si erreur réseau."
 fi
 echo ""
 
