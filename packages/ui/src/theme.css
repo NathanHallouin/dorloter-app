@@ -44,7 +44,7 @@
 
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
-  --font-mono: "Geist Mono", monospace;
+  --font-mono: "Geist Mono Variable", monospace;
 
   --radius-card: 12px;
   --radius-field: 6px;
@@ -79,8 +79,8 @@
   --primary: #1f6f4f; --primary-fg: #fbf8f1; --muted: #ece4d4; --muted-fg: #7c6c50;
   --border: #e0d7c4; --ring: #1f6f4f; --radius: 0.25rem;
   --tint-coral: #eaf1ec; --tint-lavande: #fbf2df; --tint-prune: #eef2ee;
-  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
-  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+  --font-display: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  --font-body: "Hanken Grotesk Variable", system-ui, sans-serif;
 }
 
 .dark {
@@ -131,7 +131,14 @@ button { font-family: inherit; }
 }
 
 .tabular { font-variant-numeric: tabular-nums; }
-.mono { font-family: "Geist Mono", monospace; }
+.mono { font-family: "Geist Mono Variable", monospace; }
+/* Lien inline visible dans un bloc de texte (documents légaux, prose).
+   Défini ici et non via des utilitaires Tailwind : le reset `a` ci-dessus
+   n'est pas dans une cascade layer, il gagnerait donc sur `@layer utilities`. */
+.inline-link {
+  color: var(--coral-700); font-weight: 600;
+  text-decoration: underline; text-decoration-color: var(--coral-400); text-underline-offset: 2px;
+}
 .serif-i { font-family: var(--font-display); font-style: italic; }
 .lead-drop::first-letter {
   font-family: var(--font-display); font-weight: 700; font-size: 3.3em;

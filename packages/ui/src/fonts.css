@@ -1,0 +1,25 @@
+/* =========================================================================
+   Polices auto-hébergées du design system Dorloter.
+
+   RGPD : les fichiers sont servis par notre propre domaine, jamais par un CDN
+   tiers. Charger les polices depuis fonts.googleapis.com transmettait l'IP de
+   chaque visiteur à Google avant tout consentement, ce qui est un traitement
+   sans base légale (et contraire à la règle de souveraineté du projet).
+
+   Polices variables : un seul fichier couvre toute la plage de graisses
+   utilisée par le thème, donc moins d'octets que les 3 à 5 fichiers statiques
+   qu'il aurait fallu sinon. Les familles s'appellent « … Variable » côté
+   @fontsource : c'est ce nom qu'utilise theme.css.
+
+   Importé par apps/web et apps/pro, avant le thème.
+   ========================================================================= */
+
+/* Newsreader (titres) · axes opsz + wght, romain et italique (.serif-i). */
+@import "@fontsource-variable/newsreader/opsz.css";
+@import "@fontsource-variable/newsreader/opsz-italic.css";
+
+/* Hanken Grotesk (texte courant). */
+@import "@fontsource-variable/hanken-grotesk/index.css";
+
+/* Geist Mono (libellés mono, chiffres tabulaires). */
+@import "@fontsource-variable/geist-mono/index.css";
