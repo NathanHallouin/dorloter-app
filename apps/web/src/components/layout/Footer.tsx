@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import { Icon } from "@dorloter/ui";
 
+const LEGAL: [string, string][] = [
+  ["Mentions légales", "/mentions-legales"],
+  ["Confidentialité", "/confidentialite"],
+  ["CGU", "/cgu"],
+];
+
 export function Footer() {
   const COLS: [string, [string, string][]][] = [
     ["Adopter", [["Catalogue", "/adopter"], ["Mode swipe", "/adopter/swipe"], ["Quiz de compatibilité", "/quiz"], ["Événements", "/evenements"], ["Mes favoris", "/favoris"]]],
@@ -38,7 +44,7 @@ export function Footer() {
         <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-5">
           <p className="mono text-[11.5px] tracking-[0.04em] text-sable-300">© 2026 Dorloter · Association loi 1901</p>
           <div className="flex gap-5">
-            {["Mentions légales", "Confidentialité", "CGU"].map((l) => <span key={l} className="mono cursor-pointer text-[11.5px] tracking-[0.04em] text-sable-300">{l}</span>)}
+            {LEGAL.map(([l, to]) => <Link key={l} to={to} className="mono text-[11.5px] tracking-[0.04em] text-sable-300">{l}</Link>)}
           </div>
         </div>
       </div>

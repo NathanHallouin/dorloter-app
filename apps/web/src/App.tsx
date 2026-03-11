@@ -16,6 +16,9 @@ import { SwipePage } from "@/pages/SwipePage";
 import { QuizPage } from "@/pages/QuizPage";
 import { AboutPage } from "@/pages/AboutPage";
 import { PressPage } from "@/pages/PressPage";
+import { LegalNoticePage } from "@/pages/LegalNoticePage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
+import { TermsPage } from "@/pages/TermsPage";
 import { FavoritesPage } from "@/pages/FavoritesPage";
 import { MyFosterPage } from "@/pages/MyFosterPage";
 import { ApplicationsPage } from "@/pages/ApplicationsPage";
@@ -68,6 +71,9 @@ export function App() {
           <Route path="/refuges/:slug" element={<ShelterDetailPage />} />
           <Route path="/a-propos" element={<AboutPage />} />
           <Route path="/presse" element={<PressPage />} />
+          <Route path="/mentions-legales" element={<LegalNoticePage />} />
+          <Route path="/confidentialite" element={<PrivacyPage />} />
+          <Route path="/cgu" element={<TermsPage />} />
           <Route path="/evenements" element={<EventsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
