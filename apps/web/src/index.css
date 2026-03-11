@@ -1,3 +1,6 @@
+/* Polices auto-hébergées (RGPD : aucune requête vers un CDN tiers).
+   Doit rester en tête, les @import CSS précèdent toute autre règle. */
+@import "../../../packages/ui/src/fonts.css";
 @import "tailwindcss";
 
 /* Le design system vit dans packages/ui (hors node_modules scanné par défaut) :
