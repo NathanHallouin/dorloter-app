@@ -7,7 +7,7 @@
  * - Parse l'enveloppe d'erreur `{ error: { code, message } }` en `ApiClientError`.
  */
 
-import type { ApiResponse, AuthTokens } from "./types";
+import type { ApiErrorBody, ApiResponse, AuthTokens } from "./types";
 import { tokenStore } from "./tokenStore";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
@@ -109,10 +109,11 @@ async function request<T>(
   const json = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    const code = json?.error?.code ?? `HTTP_${res.status}`;
+    const body = json as Partial<ApiErrorBody> | null;
+    const code = body?.error?.code ?? `HTTP_${res.status}`;
     const message =
-      json?.error?.message ?? "Une erreur réseau est survenue. Réessayez.";
-    throw new ApiClientError(message, code, res.status, json?.error?.details);
+      body?.error?.message ?? "Une erreur réseau est survenue. Réessayez.";
+    throw new ApiClientError(message, code, res.status, body?.error?.details);
   }
 
   return json as T;

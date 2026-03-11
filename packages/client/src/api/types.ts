@@ -53,6 +53,35 @@ export interface User {
   emailVerified: boolean;
 }
 
+/** Usage d'un fichier déposé : détermine le préfixe de rangement côté stockage. */
+export type UploadKind = "report" | "pet" | "shelter" | "pension" | "voice";
+
+export interface PresignResult {
+  uploadUrl: string;
+  publicUrl: string;
+  key: string;
+  expiresInSec: number;
+  maxBytes: number;
+}
+
+/** Photo d'une galerie d'animal (console refuge). */
+export interface PetPhoto {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  order: number;
+}
+
+/**
+ * Résultat d'une suppression de compte. `anonymise` signale qu'un contrat
+ * d'adoption signé devait être conservé : la fiche a été vidée de toute donnée
+ * identifiante plutôt que supprimée.
+ */
+export interface AccountDeletionResult {
+  outcome: "supprime" | "anonymise";
+  message: string;
+}
+
 export interface UpdateProfileInput {
   name?: string;
   phone?: string;
