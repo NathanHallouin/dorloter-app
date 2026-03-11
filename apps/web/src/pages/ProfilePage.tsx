@@ -9,6 +9,8 @@ import { PageHead, PageBody, Field, Input, Textarea } from "@dorloter/ui";
 import { Btn, Pill, Rule } from "@dorloter/ui";
 import { Icon } from "@dorloter/ui";
 
+import { PrivacyControls } from "@/components/PrivacyControls";
+
 // Carte de sélection : MapLibre est volumineux, chargé à la demande.
 const LocationPickerMap = lazy(() =>
   import("@/components/LocationPickerMap").then((m) => ({ default: m.LocationPickerMap })),
@@ -164,6 +166,8 @@ export function ProfilePage() {
             </div>
           </div>
         </section>
+
+        <PrivacyControls />
       </PageBody>
     </div>
   );
