@@ -23,6 +23,9 @@ import type { UpdateProfileDto } from './dto/update-profile.dto';
 /** Provider des comptes email/mot de passe (Better Auth). */
 const CREDENTIAL_PROVIDER = 'credential';
 
+/** Fréquence maximale d'écriture de `last_seen_at` (une fois par jour). */
+const LAST_SEEN_THROTTLE_MS = 24 * 60 * 60 * 1000;
+
 /** Utilisateur tel que lu en base (géo décomposée en lat/lng). */
 export interface UserRecord {
   id: string;
@@ -41,6 +44,8 @@ export interface UserRecord {
   digest_optin: boolean;
   shelter_id: string | null;
   pension_id: string | null;
+  last_seen_at: Date;
+  inactivity_notified_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -211,12 +216,33 @@ export class IdentityService {
       })
       .execute();
 
+    await this.touchLastSeen(user);
+
     return {
       user,
       accessToken,
       refreshToken: rawRefresh,
       accessExpiresInSeconds: this.config.jwt.accessTtlSeconds,
     };
+  }
+
+  /**
+   * Marque le compte comme actif (connexion ou renouvellement de jeton).
+   *
+   * Écriture au plus quotidienne : le renouvellement survient toutes les 15
+   * minutes d'usage, il ne doit pas générer autant d'UPDATE. Toute activité
+   * annule une éventuelle relance pour inactivité en cours, sans quoi une
+   * personne revenue entre la relance et l'échéance serait supprimée.
+   */
+  private async touchLastSeen(user: UserRecord): Promise<void> {
+    const staleSince = Date.now() - LAST_SEEN_THROTTLE_MS;
+    if (user.last_seen_at.getTime() > staleSince && user.inactivity_notified_at === null) return;
+
+    await this.db
+      .updateTable('users')
+      .set({ last_seen_at: new Date(), inactivity_notified_at: null })
+      .where('id', '=', user.id)
+      .execute();
   }
 }
 
@@ -239,6 +265,8 @@ function userColumns() {
     'digest_optin',
     'shelter_id',
     'pension_id',
+    'last_seen_at',
+    'inactivity_notified_at',
     'created_at',
     'updated_at',
   ] as const;

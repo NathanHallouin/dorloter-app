@@ -40,6 +40,39 @@ export function applicationDecision(petName: string, accepted: boolean): EmailTe
   };
 }
 
+/**
+ * Relance avant suppression d'un compte inactif (RGPD art. 5.1.e).
+ *
+ * Il ne s'agit pas d'une relance commerciale : le message annonce une
+ * suppression et indique comment s'y opposer, à savoir simplement se
+ * reconnecter. Ne rien faire conduit à l'effacement, ce qui doit être dit sans
+ * ambiguïté.
+ */
+export function inactiveAccountWarning(
+  name: string,
+  inactiveYears: number,
+  graceDays: number,
+  loginUrl: string,
+): EmailTemplate {
+  return {
+    subject: 'Votre compte Dorloter va être supprimé',
+    html: wrap(
+      'Votre compte va être supprimé',
+      `<p>Bonjour ${name},</p>` +
+        `<p>Votre compte Dorloter n'a pas été utilisé depuis plus de ` +
+        `<strong>${inactiveYears} ans</strong>. Nous ne conservons pas les données ` +
+        'des comptes devenus inactifs : le vôtre sera donc supprimé, ainsi que les ' +
+        'contenus qui y sont rattachés, dans ' +
+        `<strong>${graceDays} jours</strong>.</p>` +
+        '<p><strong>Pour le conserver, il suffit de vous reconnecter.</strong> ' +
+        'Aucune autre démarche n\'est nécessaire.</p>' +
+        `<p><a href="${loginUrl}" style="color: #1f6f4f;">Se connecter à Dorloter</a></p>` +
+        "<p>Si vous préférez que votre compte soit supprimé, vous n'avez rien à faire. " +
+        'Vous pouvez aussi le supprimer vous-même depuis votre profil, à tout moment.</p>',
+    ),
+  };
+}
+
 /** Contrat d'adoption prêt. */
 export function contractReady(petName: string, reference: string): EmailTemplate {
   return {
