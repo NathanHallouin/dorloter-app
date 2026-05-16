@@ -26,6 +26,41 @@ export interface JwtConfig {
   refreshTtlSeconds: number;
 }
 
+/**
+ * Transport SMTP des emails transactionnels. `host` vide désactive l'envoi :
+ * l'émetteur se contente alors de loguer, et les traitements qui dépendent
+ * d'une remise effective (relance avant suppression d'un compte inactif) ne
+ * s'exécutent pas.
+ */
+export interface EmailConfig {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  fromAddress: string;
+  fromName: string;
+  /** STARTTLS sur 587 (défaut) ou TLS implicite sur 465. */
+  secure: boolean;
+}
+
+/**
+ * Stockage objet S3-compatible. `endpoint` doit être l'URL **publiquement
+ * joignable** du service : c'est l'hôte que le client contactera, et il entre
+ * dans la signature. En dev, MinIO sur :9000 ; en prod, le sous-domaine `cdn.`
+ * servi par Caddy (MinIO connaît cette URL via `MINIO_SERVER_URL`).
+ */
+export interface S3Config {
+  endpoint: string;
+  region: string;
+  bucket: string;
+  accessKey: string;
+  secretKey: string;
+  /** Base des URL publiques des objets (`<endpoint>/<bucket>` par défaut). */
+  publicBaseUrl: string;
+  /** Validité d'une URL signée : assez pour uploader, court pour l'interception. */
+  presignTtlSeconds: number;
+}
+
 export interface Config {
   bindAddress: string;
   port: number;
@@ -35,6 +70,10 @@ export interface Config {
   dbMigrations: DbConfig | null;
   jwt: JwtConfig;
   corsOrigins: string[];
+  email: EmailConfig;
+  s3: S3Config;
+  /** URL publique du site, utilisée dans les liens des emails. */
+  publicWebUrl: string;
 }
 
 const DEFAULT_CONNECTION =
@@ -46,7 +85,6 @@ const DEFAULT_CORS_ORIGINS = [
   'http://localhost:5174',
   'http://localhost:4173',
   'http://localhost:4174',
-  'http://localhost:3000',
   'http://localhost:8081',
 ].join(',');
 
@@ -74,6 +112,31 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       .split(',')
       .map((o) => o.trim())
       .filter((o) => o.length > 0),
+    email: {
+      host: env.EMAIL_SMTP_HOST?.trim() ?? '',
+      port: Number.parseInt(env.EMAIL_SMTP_PORT ?? '587', 10) || 587,
+      user: env.EMAIL_SMTP_USER ?? '',
+      password: env.EMAIL_SMTP_PASSWORD ?? '',
+      fromAddress: env.EMAIL_FROM ?? 'no-reply@dorloter.fr',
+      fromName: env.EMAIL_FROM_NAME ?? 'Dorloter',
+      secure: (env.EMAIL_SMTP_PORT ?? '587') === '465',
+    },
+    s3: loadS3Config(env),
+    publicWebUrl: (env.Dorloter__PublicWebUrl ?? 'https://dorloter.fr').replace(/\/+$/, ''),
+  };
+}
+
+function loadS3Config(env: NodeJS.ProcessEnv): S3Config {
+  const endpoint = (env.S3_ENDPOINT ?? 'http://localhost:9000').replace(/\/+$/, '');
+  const bucket = env.S3_BUCKET ?? 'dorloter-photos';
+  return {
+    endpoint,
+    region: env.S3_REGION ?? 'us-east-1',
+    bucket,
+    accessKey: env.S3_ACCESS_KEY ?? 'minioadmin',
+    secretKey: env.S3_SECRET_KEY ?? 'minioadmin',
+    publicBaseUrl: (env.S3_PUBLIC_BASE_URL ?? `${endpoint}/${bucket}`).replace(/\/+$/, ''),
+    presignTtlSeconds: 5 * 60,
   };
 }
 

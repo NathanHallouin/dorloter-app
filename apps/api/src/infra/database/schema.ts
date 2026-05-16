@@ -48,6 +48,10 @@ export interface UsersTable {
   location: Geometry | null;
   notification_radius_km: Generated<number>;
   digest_optin: Generated<boolean>;
+  /** Dernière activité réelle (connexion ou renouvellement de jeton). */
+  last_seen_at: TimestampDefault;
+  /** Date de la relance envoyée avant suppression pour inactivité. */
+  inactivity_notified_at: Timestamp | null;
   created_at: TimestampDefault;
   updated_at: TimestampDefault;
 }
