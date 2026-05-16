@@ -77,6 +77,24 @@ services:
       Dorloter__Security__Jwt__Issuer: "dorloter-api"
       Dorloter__Security__CorsAllowedOrigins: "https://${DOMAIN},https://pro.${DOMAIN}"
       BIND_ADDR: "0.0.0.0:8080"
+      # URL publique, utilisee dans les liens des emails transactionnels.
+      Dorloter__PublicWebUrl: "https://${DOMAIN}"
+      # SMTP transactionnel. EMAIL_SMTP_HOST vide = envoi desactive (emails
+      # seulement loggues) ; dans ce cas la relance avant suppression d'un
+      # compte inactif ne part pas, et aucun compte n'est supprime.
+      EMAIL_SMTP_HOST: "${EMAIL_SMTP_HOST:-}"
+      EMAIL_SMTP_PORT: "${EMAIL_SMTP_PORT:-587}"
+      EMAIL_SMTP_USER: "${EMAIL_SMTP_USER:-}"
+      EMAIL_SMTP_PASSWORD: "${EMAIL_SMTP_PASSWORD:-}"
+      EMAIL_FROM: "${EMAIL_FROM:-no-reply@${DOMAIN}}"
+      EMAIL_FROM_NAME: "${EMAIL_FROM_NAME:-Dorloter}"
+      # Stockage objet. S3_ENDPOINT doit etre l'URL PUBLIQUE de MinIO : elle
+      # entre dans la signature des URL d'upload, et c'est l'hote que le
+      # navigateur contactera. MINIO_SERVER_URL (service minio) vaut la meme.
+      S3_ENDPOINT: "https://cdn.${DOMAIN}"
+      S3_BUCKET: "${S3_BUCKET:-dorloter-photos}"
+      S3_ACCESS_KEY: "${S3_ACCESS_KEY}"
+      S3_SECRET_KEY: "${S3_SECRET_KEY}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,6 +139,9 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+      # Journaux d'acces (contiennent des IP) : purges au bout de 12 mois par
+      # Caddy lui-meme, cf. les directives `log` du Caddyfile.
+      - caddy_logs:/var/log/caddy
     depends_on:
       - api
       - web
@@ -133,6 +154,7 @@ volumes:
   miniodata:
   caddy_data:
   caddy_config:
+  caddy_logs:
 
 networks:
   internal:
