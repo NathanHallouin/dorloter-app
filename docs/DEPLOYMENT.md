@@ -24,11 +24,12 @@ Avant de commencer, l'app est livrée avec :
 - **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** + **[api-ci.yml](../.github/workflows/api-ci.yml)** (API : typecheck + build + test + docker build) : build + tests sur chaque PR
 - **[.github/workflows/deploy.yml](../.github/workflows/deploy.yml)** : déploiement auto à chaque push sur `main` (SSH vers le VPS, `scripts/deploy.sh`)
 - Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) servis par Caddy
-- `/api/v1/health` pour le monitoring externe (réponse `{"status":"UP"}`)
+- `/api/v1/health` pour le monitoring externe (réponse `{"data":{"status":"ok","database":true}}` · mot-clé à surveiller : `ok`)
 
-> **Endpoints pas encore portés** : `/api/v1/uploads/*` et `/api/v1/gifs/*` répondent `501 Not Implemented`
-> via Caddy (ils étaient servis par l'ancien front Next.js, retiré). L'upload S3 (presign) sera porté
-> sur l'API ; aujourd'hui la SPA web n'en dépend pas.
+> **Uploads** : `POST /api/v1/uploads/presign` est servi par l'API ; le fichier part ensuite
+> directement sur `cdn.${DOMAIN}` (MinIO) via une URL signée. Renseigner `S3_ACCESS_KEY` et
+> `S3_SECRET_KEY` suffit. Restent en `501` deux endpoints non portés depuis le retrait de l'ancien
+> front : `/api/v1/uploads/voice` (messages vocaux mobiles) et `/api/v1/gifs/*`.
 
 ## 1. Provisioning VPS
 
@@ -163,7 +164,7 @@ Caddy obtient automatiquement les certificats Let's Encrypt au premier hit HTTPS
 
 ```bash
 curl -s https://dorloter.fr/api/v1/health
-# {"status":"UP"}
+# {"data":{"status":"ok","database":true}}
 ```
 
 Vérifier aussi l'espace pro :

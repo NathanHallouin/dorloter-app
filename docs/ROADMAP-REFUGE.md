@@ -12,7 +12,7 @@ Adoption (animaux, candidatures, contrats d'adoption + conventions de famille d'
 - Web Push + transport SMTP réel de l'email (gabarits déjà portés).
 - Paiements : **HelloAsso** (français, gratuit pour assos, reçus fiscaux).
 
-## Phase 1 · Suivi médical & sanitaire — FAIT (v1)
+## Phase 1 · Suivi médical & sanitaire · FAIT (v1)
 Carnet de santé par animal : vaccins, vermifuges, antiparasitaires, stérilisation, tests FIV/FeLV, visites, traitements, pesées. Échéances/rappels (`next_due_date`). Table `health_events` (migration V19), API `/api/v1/shelter/pets/{id}/health` + `/health/upcoming`, console « Santé » (échéances + carnet par animal). À venir : upload d'ordonnances (Phase 0), lien vers le module Veterinarians, rappels email/push.
 
 ## Phase 2 · Bénévoles & planning

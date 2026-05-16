@@ -2,7 +2,7 @@
 
 Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'animaux domestiques (chats et chiens, extensible aux NAC), complétée d'un **annuaire de pensions professionnelles** agréées. Le produit s'appuie sur une **API NestJS** (`apps/api`, Kysely + PostGIS, routes `/api/v1`), une **SPA publique** React + Vite (`apps/web`, `dorloter.fr`), une **SPA espace pro** (`apps/pro`, `pro.dorloter.fr`) et une **app mobile** Expo (`apps/mobile`). Les deux fronts web partagent leur design system (`packages/ui`) et leur couche d'accès API (`packages/client`). Postgres/PostGIS pour les données, MinIO/Scaleway pour le stockage S3-compatible, Caddy en reverse proxy.
 
-> La **source de vérité** du projet (stack, modèle de données, conventions) est le fichier **[../CLAUDE.md](../CLAUDE.md)** à la racine du dépôt. Les documents `docs/` ci-dessous apportent du détail, du contexte et de l'historique. Plusieurs documents de conception ont été rédigés à l'époque de l'ancien front Next.js (retiré) : ils portent un encart de contexte en tête précisant ce qui reste valable et ce qui est caduc.
+> La **source de vérité** du projet est le fichier **[../CLAUDE.md](../CLAUDE.md)** à la racine, complété par un `CLAUDE.md` par workspace : [apps/api](../apps/api/CLAUDE.md) (qui porte le **modèle de données** complet), [apps/web](../apps/web/CLAUDE.md), [apps/pro](../apps/pro/CLAUDE.md), [apps/mobile](../apps/mobile/CLAUDE.md), [packages/ui](../packages/ui/CLAUDE.md), [packages/client](../packages/client/CLAUDE.md), [packages/api-client](../packages/api-client/CLAUDE.md). Les documents `docs/` ci-dessous apportent du détail, du contexte et de l'historique. Plusieurs documents de conception ont été rédigés à l'époque de l'ancien front Next.js (retiré) : ils portent un encart de contexte en tête précisant ce qui reste valable et ce qui est caduc.
 
 > **Périmètre produit** · deux fonctionnalités ont été **retirées** le 2026-03-07, en même temps que la réécriture du backend en NestJS : l'**annuaire vétérinaire** et la **gestion TNR (chats libres)**. Les documents de vision et de roadmap qui les évoquent encore le font au titre de pistes stratégiques, pas de l'état du code.
 
@@ -16,6 +16,8 @@ Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'
 | [GAMIFICATION.md](./GAMIFICATION.md) | Stratégie d'engagement : crédits de résolution, badges de contribution, garde-fous anti dark-patterns. |
 | [CONTRATS.md](./CONTRATS.md) | Système de contrats du module Adoption : table `contracts` (type adoption / foster), contrats d'adoption et conventions de famille d'accueil. |
 | [EMAIL.md](./EMAIL.md) | Email transactionnel : émetteur `infra/email` (gabarits + déclencheurs en place · transport SMTP réel à brancher, provider Brevo/OVH/Scaleway/Postfix). |
+| [RGPD.md](./RGPD.md) | Conformité RGPD : polices auto-hébergées, documents légaux, droits des personnes (export, effacement), purge de rétention, procédure de violation, et ce qui reste à la charge de l'éditeur. |
+| [RGPD-REGISTRE.md](./RGPD-REGISTRE.md) | Registre des activités de traitement (art. 30) : onze traitements documentés (finalité, base légale, données, destinataires, durée), sous-traitants et mesures de sécurité. |
 
 ## Infrastructure & déploiement
 
