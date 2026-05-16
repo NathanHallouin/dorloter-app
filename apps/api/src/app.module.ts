@@ -4,6 +4,7 @@ import { ConfigModule } from './config.module';
 import { DatabaseModule } from './infra/database/database.module';
 import { EmailModule } from './infra/email/email.service';
 import { SecurityModule } from './infra/security/security.module';
+import { StorageModule } from './infra/storage/storage.module';
 import { HealthController } from './infra/web/health.controller';
 import { OpenApiController } from './infra/web/openapi.controller';
 import { AdoptionModule } from './modules/adoption/adoption.module';
@@ -15,6 +16,7 @@ import { ModerationModule } from './modules/moderation/moderation.controller';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PensionsModule } from './modules/pensions/pensions.module';
 import { SheltersModule } from './modules/shelters/shelters.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { SheltersModule } from './modules/shelters/shelters.module';
     DatabaseModule,
     SecurityModule,
     EmailModule,
+    StorageModule,
     IdentityModule,
+    UploadsModule,
     SheltersModule,
     AdoptionModule,
     LostFoundModule,

@@ -6,6 +6,12 @@
 #   - Coeur d'API : NestJS (`api:8080`) sous /api/v1/*.
 #   - Images : MinIO sur cdn.{$DOMAIN}.
 #
+# Journaux d'acces : ils contiennent l'adresse IP des visiteurs, donc une
+# donnee personnelle. Ils sont ecrits dans un fichier avec purge automatique
+# au bout de 12 mois (roll_keep_for 8760h), duree annoncee dans la politique
+# de confidentialite. Les logs de demarrage et d'erreur restent sur stderr,
+# donc visibles via `docker compose logs caddy`.
+#
 # Domaine public : Let's Encrypt via ACME HTTP-01. Domaine .localhost : CA
 # interne de Caddy. Le comportement depend de la variable d'env DOMAIN.
 #
@@ -21,19 +27,18 @@
 {$DOMAIN} {
 	encode zstd gzip
 
-	# TODO(cutover) : uploads et gifs ne sont pas encore portes sur l'API
-	# (ils etaient servis par l'ancien front Next.js, retire). On repond 501
-	# explicite tant que ces endpoints n'existent pas, plutot qu'un 404 ambigu.
-	# Cote produit : flux d'upload utilise uniquement par l'app mobile (presign
-	# S3) ; la SPA web n'en depend pas.
-	handle /api/v1/uploads/* {
-		respond "Not Implemented: uploads a porter sur l'API" 501
+	# `POST /api/v1/uploads/presign` est servi par l'API (le binaire, lui, va
+	# directement sur cdn.{$DOMAIN}). Restent deux endpoints non portes depuis
+	# le retrait de l'ancien front Next.js : on repond 501 explicite plutot
+	# qu'un 404 ambigu.
+	handle /api/v1/uploads/voice {
+		respond "Not Implemented: upload vocal a porter sur l'API" 501
 	}
 	handle /api/v1/gifs/* {
 		respond "Not Implemented: gifs a porter sur l'API" 501
 	}
 
-	# Coeur du domaine : API.
+	# Coeur du domaine : API NestJS.
 	handle /api/v1/* {
 		reverse_proxy api:8080
 	}
@@ -55,7 +60,11 @@
 	}
 
 	log {
-		output stdout
+		output file /var/log/caddy/access.log {
+			roll_size 20MiB
+			roll_keep 12
+			roll_keep_for 8760h
+		}
 		format console
 	}
 }
@@ -64,7 +73,7 @@
 pro.{$DOMAIN} {
 	encode zstd gzip
 
-	# Meme API, en same-origin pour la SPA pro.
+	# Meme API NestJS, en same-origin pour la SPA pro.
 	handle /api/v1/* {
 		reverse_proxy api:8080
 	}
@@ -84,7 +93,11 @@ pro.{$DOMAIN} {
 	}
 
 	log {
-		output stdout
+		output file /var/log/caddy/access-pro.log {
+			roll_size 20MiB
+			roll_keep 12
+			roll_keep_for 8760h
+		}
 		format console
 	}
 }
