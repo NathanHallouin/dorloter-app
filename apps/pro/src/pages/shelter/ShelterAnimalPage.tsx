@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   shelterApi,
+  uploadsApi,
   healthApi,
   registreApi,
   contractsApi,
@@ -87,6 +88,7 @@ export function ShelterAnimalPage() {
       <div className="grid items-start gap-5 xl:grid-cols-[1.4fr_1fr]">
         <div className="flex flex-col gap-5">
           <FicheSection pet={pet} qc={qc} />
+          <PhotosSection petId={id} petName={pet.name} qc={qc} />
           <HealthSection petId={id} petName={pet.name} events={health} qc={qc} />
         </div>
         <div className="flex flex-col gap-5">
@@ -207,6 +209,88 @@ function Check({ label, checked, onChange }: { label: string; checked: boolean; 
     <label className="flex cursor-pointer items-center gap-2 text-[13.5px] text-foreground">
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} /> {label}
     </label>
+  );
+}
+
+/* --------------------------------- photos ---------------------------------- */
+/**
+ * Galerie de l'annonce. Le fichier part directement au stockage objet via une
+ * URL signée : l'API ne voit passer que l'URL finale, jamais le binaire.
+ *
+ * La photo principale est celle qui illustre la carte du catalogue public, d'où
+ * le fait qu'elle soit désignable explicitement.
+ */
+function PhotosSection({ petId, petName, qc }: {
+  petId: string; petName: string; qc: ReturnType<typeof useQueryClient>;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const photos = useQuery({ queryKey: ["pet-photos", petId], queryFn: () => shelterApi.petPhotos(petId) });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["pet-photos", petId] });
+
+  const add = useMutation({
+    mutationFn: async (file: File) => {
+      const url = await uploadsApi.uploadFile(file, "pet");
+      // Première photo de la galerie : elle devient d'office la principale.
+      await shelterApi.addPetPhoto(petId, url, (photos.data?.length ?? 0) === 0);
+    },
+    onSuccess: () => { setError(null); invalidate(); },
+    onError: (e) => setError(e instanceof Error ? e.message : "Envoi impossible."),
+  });
+  const remove = useMutation({ mutationFn: (id: string) => shelterApi.deletePetPhoto(petId, id), onSuccess: invalidate });
+  const setPrimary = useMutation({ mutationFn: (id: string) => shelterApi.setPrimaryPetPhoto(petId, id), onSuccess: invalidate });
+
+  const list = photos.data ?? [];
+
+  return (
+    <Panel title="Photos" hint="JPEG, PNG ou WebP · 5 Mo maximum par photo">
+      <label className="mb-4 flex cursor-pointer items-center justify-center gap-2 rounded-card border border-dashed border-line px-4 py-6 text-sm text-muted-foreground hover:border-coral-400 hover:text-foreground">
+        <Icon name="download" size={18} />
+        {add.isPending ? "Envoi en cours…" : "Ajouter une photo"}
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          disabled={add.isPending}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) add.mutate(file);
+            e.target.value = "";
+          }}
+        />
+      </label>
+
+      {error && <p className="mb-3 text-sm font-semibold text-brick-600">{error}</p>}
+
+      {photos.isLoading ? (
+        <p className="text-sm text-muted-foreground">Chargement…</p>
+      ) : list.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Aucune photo pour {petName}. Une belle photo est ce qui décide le plus souvent d'une adoption.
+        </p>
+      ) : (
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
+          {list.map((p) => (
+            <li key={p.id} className="overflow-hidden rounded-card border border-line">
+              <img src={p.url} alt="" className="aspect-square w-full object-cover" />
+              <div className="flex items-center justify-between gap-1 px-2 py-1.5">
+                {p.isPrimary ? (
+                  <span className="mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-coral-700">Principale</span>
+                ) : (
+                  <button type="button" onClick={() => setPrimary.mutate(p.id)} disabled={setPrimary.isPending}
+                    className="text-[11.5px] text-muted-foreground hover:underline">
+                    Définir principale
+                  </button>
+                )}
+                <button type="button" onClick={() => remove.mutate(p.id)} disabled={remove.isPending}
+                  className="text-[11.5px] text-brick-600 hover:underline">
+                  Retirer
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   );
 }
 
