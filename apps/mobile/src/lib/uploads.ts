@@ -10,7 +10,7 @@
  *
  * Pas de génération de blurDataUrl côté mobile : c'est le serveur qui
  * pourra le faire au moment où la photo est attachée à un report
- * (extension future). Pour le MVP, on poste sans blur — l'image
+ * (extension future). Pour le MVP, on poste sans blur · l'image
  * s'affiche sans LQIP, c'est acceptable.
  */
 
@@ -26,7 +26,7 @@ type AudioContentType =
 type ContentType = ImageContentType | AudioContentType;
 
 interface UploadInput {
-  /** URI local du fichier — fourni par expo-image-picker ou expo-av. */
+  /** URI local du fichier · fourni par expo-image-picker ou expo-av. */
   fileUri: string;
   contentType: ContentType;
   kind: "report" | "pet" | "shelter" | "pension" | "voice";
@@ -35,11 +35,11 @@ interface UploadInput {
 interface UploadResult {
   /** URL publique de l'asset, à passer dans le payload de création. */
   publicUrl: string;
-  /** Clé S3 — utile pour debug ou DELETE ultérieur. */
+  /** Clé S3 · utile pour debug ou DELETE ultérieur. */
   key: string;
 }
 
-/** Taille max par fichier — doit matcher MAX_BYTES_BY_KIND côté serveur. */
+/** Taille max par fichier · doit matcher MAX_BYTES_BY_KIND côté serveur. */
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /**
@@ -54,7 +54,7 @@ export async function uploadFile({
   contentType,
   kind,
 }: UploadInput): Promise<UploadResult> {
-  // 1. Lire le fichier d'abord — on a besoin de sa taille pour la signer.
+  // 1. Lire le fichier d'abord · on a besoin de sa taille pour la signer.
   const fileBlob = await uriToBlob(fileUri);
   const contentLength = fileBlob.size;
 
@@ -69,7 +69,7 @@ export async function uploadFile({
     );
   }
 
-  // 2. Demander une URL signée — la taille fait partie de la signature.
+  // 2. Demander une URL signée · la taille fait partie de la signature.
   const { data, error } = await api.POST("/uploads/presign", {
     body: { contentType, kind, contentLength },
   });
@@ -101,7 +101,7 @@ export async function uploadFile({
 }
 
 /**
- * Convertit un URI local (file://...) en Blob — supportée par RN/Expo
+ * Convertit un URI local (file://...) en Blob · supportée par RN/Expo
  * via `fetch`.
  */
 async function uriToBlob(uri: string): Promise<Blob> {
@@ -110,7 +110,7 @@ async function uriToBlob(uri: string): Promise<Blob> {
 }
 
 /**
- * Alias historique — ne supporte que les content types image. Conservé
+ * Alias historique · ne supporte que les content types image. Conservé
  * pour ne pas casser les callers existants (signaler.tsx).
  */
 export async function uploadPhoto(input: {
@@ -122,8 +122,8 @@ export async function uploadPhoto(input: {
 }
 
 /**
- * Upload spécifique pour les messages vocaux — ne passe PAS par un
- * presign + PUT S3 direct, mais par un endpoint Next.js qui reçoit le
+ * Upload spécifique pour les messages vocaux · ne passe PAS par un
+ * presign + PUT S3 direct, mais par un endpoint de l'API qui reçoit le
  * fichier en multipart et l'upload côté serveur.
  *
  * Pourquoi : en dev local, le bucket MinIO tourne sur `localhost:9000`,
@@ -131,7 +131,7 @@ export async function uploadPhoto(input: {
  * (déjà accessible via cloudflared/Metro tunnel), on évite la friction.
  *
  * Retourne `url` qui peut être absolue (S3 public en prod) ou relative
- * (route Next.js qui stream l'audio depuis le bucket). Le composant
+ * (route de l'API qui stream l'audio depuis le bucket). Le composant
  * player préfixe les URL relatives avec l'API base URL.
  */
 import Constants from "expo-constants";
@@ -155,7 +155,7 @@ export async function uploadVoice({
   const form = new FormData();
   // RN supporte FormData avec un descripteur { uri, name, type }.
   form.append("file", {
-    // @ts-expect-error — RN FormData accepte ce shape, pas le type DOM File
+    // @ts-expect-error · RN FormData accepte ce shape, pas le type DOM File
     uri: fileUri,
     name: `voice.${contentType.split("/")[1] ?? "m4a"}`,
     type: contentType,
@@ -165,7 +165,7 @@ export async function uploadVoice({
   const res = await fetch(`${apiBaseUrl}/uploads/voice`, {
     method: "POST",
     headers: {
-      // Pas de Content-Type explicite — fetch RN ajoute le boundary
+      // Pas de Content-Type explicite · fetch RN ajoute le boundary
       // multipart tout seul si on le laisse vide.
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       Origin: "dorloter://",
