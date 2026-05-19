@@ -9,6 +9,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -24,6 +25,7 @@ import { DB, type Db } from '../../infra/database/database.module';
 import { EmailService } from '../../infra/email/email.service';
 import { applicationDecision } from '../../infra/email/templates';
 import { Auth, CurrentUser, type CurrentUserInfo } from '../../infra/security/auth.guard';
+import { S3Service } from '../../infra/storage/s3.service';
 import { ok, type ApiResponse } from '../../shared/api-response';
 import { AppError } from '../../shared/app-error';
 import {
@@ -187,6 +189,13 @@ interface ShelterApplicationDto {
   createdAt: string;
 }
 
+interface PetPhotoResponse {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  order: number;
+}
+
 @Controller('api/v1/shelter')
 export class AdoptionBackofficeController {
   constructor(
@@ -194,6 +203,7 @@ export class AdoptionBackofficeController {
     private readonly membership: ShelterMembershipService,
     private readonly users: UserDirectory,
     private readonly email: EmailService,
+    private readonly s3: S3Service,
   ) {}
 
   // --- Animaux du refuge ------------------------------------------------------------
@@ -289,6 +299,27 @@ export class AdoptionBackofficeController {
     return ok(toPetResponse(pet));
   }
 
+  @Get('pets/:id/photos')
+  @Auth()
+  async listPhotos(
+    @CurrentUser() current: CurrentUserInfo,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ApiResponse<PetPhotoResponse[]>> {
+    const shelterId = await this.membership.requireAccess(current.userId, 'pets:read');
+    await this.ensureOwnedPet(shelterId, id);
+    const photos = await this.db
+      .selectFrom('pet_photos')
+      .select(['id', 'url', 'is_primary', 'order'])
+      .where('pet_id', '=', id)
+      .orderBy('is_primary', 'desc')
+      .orderBy('order', 'asc')
+      .orderBy('created_at', 'asc')
+      .execute();
+    return ok(
+      photos.map((p) => ({ id: p.id, url: p.url, isPrimary: p.is_primary, order: p.order })),
+    );
+  }
+
   @Post('pets/:id/photos')
   @Auth()
   @HttpCode(HttpStatus.CREATED)
@@ -299,12 +330,70 @@ export class AdoptionBackofficeController {
   ): Promise<ApiResponse<{ id: string }>> {
     const shelterId = await this.membership.requireAccess(current.userId, 'pets:write');
     await this.ensureOwnedPet(shelterId, id);
-    const photo = await this.db
-      .insertInto('pet_photos')
-      .values({ pet_id: id, url: dto.url, is_primary: dto.isPrimary ?? false })
-      .returning('id')
-      .executeTakeFirstOrThrow();
+    const photo = await this.db.transaction().execute(async (trx) => {
+      // Une seule photo principale par animal : la nouvelle détrône l'ancienne.
+      if (dto.isPrimary) {
+        await trx
+          .updateTable('pet_photos')
+          .set({ is_primary: false })
+          .where('pet_id', '=', id)
+          .execute();
+      }
+      return trx
+        .insertInto('pet_photos')
+        .values({ pet_id: id, url: dto.url, is_primary: dto.isPrimary ?? false })
+        .returning('id')
+        .executeTakeFirstOrThrow();
+    });
     return ok({ id: photo.id });
+  }
+
+  @Delete('pets/:id/photos/:photoId')
+  @Auth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deletePhoto(
+    @CurrentUser() current: CurrentUserInfo,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('photoId', ParseUUIDPipe) photoId: string,
+  ): Promise<void> {
+    const shelterId = await this.membership.requireAccess(current.userId, 'pets:write');
+    await this.ensureOwnedPet(shelterId, id);
+    const photo = await this.db
+      .selectFrom('pet_photos')
+      .select(['id', 'url'])
+      .where('id', '=', photoId)
+      .where('pet_id', '=', id)
+      .executeTakeFirst();
+    if (!photo) throw AppError.notFoundId('Photo', photoId);
+
+    await this.db.deleteFrom('pet_photos').where('id', '=', photoId).execute();
+    // L'objet stocké part aussi : sans quoi il resterait accessible par son URL.
+    const key = this.s3.keyFromPublicUrl(photo.url);
+    if (key) await this.s3.deleteObject(key);
+  }
+
+  /** Désigne la photo principale de la galerie. */
+  @Post('pets/:id/photos/:photoId/primary')
+  @Auth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async setPrimaryPhoto(
+    @CurrentUser() current: CurrentUserInfo,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('photoId', ParseUUIDPipe) photoId: string,
+  ): Promise<void> {
+    const shelterId = await this.membership.requireAccess(current.userId, 'pets:write');
+    await this.ensureOwnedPet(shelterId, id);
+    await this.db.transaction().execute(async (trx) => {
+      const photo = await trx
+        .selectFrom('pet_photos')
+        .select('id')
+        .where('id', '=', photoId)
+        .where('pet_id', '=', id)
+        .executeTakeFirst();
+      if (!photo) throw AppError.notFoundId('Photo', photoId);
+      await trx.updateTable('pet_photos').set({ is_primary: false }).where('pet_id', '=', id).execute();
+      await trx.updateTable('pet_photos').set({ is_primary: true }).where('id', '=', photoId).execute();
+    });
   }
 
   // --- Candidatures reçues ------------------------------------------------------------
