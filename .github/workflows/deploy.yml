@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # permet de relancer à la main depuis l'UI GitHub
 
 concurrency:
-  # Un seul deploy à la fois — évite les races sur le VPS
+  # Un seul deploy à la fois · évite les races sur le VPS
   group: deploy-production
   cancel-in-progress: false
 

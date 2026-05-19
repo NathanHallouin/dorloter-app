@@ -1,9 +1,9 @@
 /**
  * Configuration Expo de l'app mobile Dorloter.
  *
- * - Bundle id `fr.dorloter.app` (à conserver — change l'identité côté
+ * - Bundle id `fr.dorloter.app` (à conserver · change l'identité côté
  *   stores et les push tokens APNs/FCM)
- * - New Architecture activée (Fabric/TurboModules) — par défaut SDK 53+
+ * - New Architecture activée (Fabric/TurboModules) · par défaut SDK 53+
  * - Typed routes Expo Router : génère les types des paths dans .expo/types/
  * - `extra.apiBaseUrl` : URL de l'API consommée par le client REST
  *   (apps/web en dev local, dorloter.fr en prod). Surchargeable via la
@@ -23,7 +23,7 @@ const mapStyleUrl =
   process.env.EXPO_PUBLIC_MAP_STYLE_URL ??
   "https://tiles.openfreemap.org/styles/liberty";
 
-// DSN Sentry — laissé vide = Sentry init no-op (dev local). Valoriser
+// DSN Sentry · laissé vide = Sentry init no-op (dev local). Valoriser
 // par profile EAS via `eas.json.build.<profile>.env.EXPO_PUBLIC_SENTRY_DSN`.
 // Alternative souveraine EU : GlitchTip (Sentry-compatible).
 const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN ?? "";

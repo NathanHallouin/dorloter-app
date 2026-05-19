@@ -7,7 +7,7 @@
 #   - le S3 (MinIO en dev) tourne pour que l'upload presigned passe
 #
 # Ce flow ne pousse PAS de photos (le picker système est piloté par
-# launchImageLibraryAsync — Maestro ne peut pas interagir avec).
+# launchImageLibraryAsync · Maestro ne peut pas interagir avec).
 # Le flow couvre la création SANS photo, ce qui valide la pipeline
 # géoloc + form + POST /reports.
 
@@ -15,7 +15,7 @@ appId: fr.dorloter.app
 ---
 - launchApp
 
-# 1. Onglet Signaler — auth gate déjà passée par le flow 01
+# 1. Onglet Signaler · auth gate déjà passée par le flow 01
 - tapOn: "Signaler"
 - assertVisible: "Signaler un animal"
 
