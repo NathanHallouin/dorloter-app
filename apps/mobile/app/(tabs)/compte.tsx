@@ -1,5 +1,5 @@
 /**
- * Onglet Compte — hub de l'espace personnel.
+ * Onglet Compte · hub de l'espace personnel.
  *
  * Layout : header avec avatar + nom + email, puis liste de rows
  * navigationnels (favoris, signalements, candidatures, notifications,
@@ -23,10 +23,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import {
-  clearAuthToken,
   clearDeviceTokenId,
   getAuthToken,
   getDeviceTokenId,
+  logout as endSession,
 } from "@/lib/auth";
 import { unregisterPushDevice } from "@/lib/notifications";
 
@@ -38,7 +38,9 @@ async function logout() {
     await unregisterPushDevice(deviceTokenId);
     await clearDeviceTokenId();
   }
-  await clearAuthToken();
+  // Révoque le refresh token côté serveur avant d'effacer la session locale :
+  // sans ça, un jeton volé resterait valable un mois.
+  await endSession();
 }
 
 export default function CompteScreen() {

@@ -1,21 +1,22 @@
 /**
- * Écran auth — modal hors des tabs, 3 modes.
+ * Écran auth · modal hors des tabs, deux modes.
  *
- *   - signin    : POST /api/auth/sign-in/email
- *   - signup    : POST /api/auth/sign-up/email   (+ name + password ≥ 8)
- *   - forgot    : POST /api/auth/forget-password (envoie un mail de reset)
+ *   - signin    : POST /api/v1/auth/login
+ *   - signup    : POST /api/v1/auth/register    (+ name + password ≥ 8)
  *
- * Layout : KeyboardAvoidingView → header (toggle ou titre) + body
- * scrollable (champs variables selon le mode) + footer fixe en bas avec
- * le CTA. Le CTA reste à la même position visuelle entre Connexion et
+ * L'API renvoie un access token court et un refresh token : les deux sont
+ * persistés, le renouvellement est ensuite transparent (cf. src/lib/auth.ts).
+ *
+ * Pas de « mot de passe oublié » : aucun endpoint de réinitialisation n'existe
+ * côté API, ni sur le web. Proposer l'écran donnerait une promesse creuse.
+ *
+ * Layout : KeyboardAvoidingView → header (toggle) + body scrollable (champs
+ * variables selon le mode) + footer fixe en bas avec le CTA. Le CTA reste à la même position visuelle entre Connexion et
  * Inscription pour une expérience cohérente (pattern iOS/Android natif).
  *
- * Après un signin OU signup réussi, on stocke le bearer token, on
- * enregistre le device pour les push (non-bloquant), on invalide les
- * queries auth/me, et on referme la modal.
- *
- * La page de reset de password (lien dans le mail) reste sur le web —
- * pas de deep-link mobile en MVP.
+ * Après un signin OU signup réussi, on persiste la session, on enregistre le
+ * device pour les push (non-bloquant), on invalide les queries auth/me, et on
+ * referme la modal.
  */
 
 import { useState } from "react";
@@ -36,16 +37,19 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
-import { setAuthToken, setDeviceTokenId } from "@/lib/auth";
+import { saveSession, setDeviceTokenId } from "@/lib/auth";
 import { registerForPushNotifications } from "@/lib/notifications";
 
-type Mode = "signin" | "signup" | "forgot";
+type Mode = "signin" | "signup";
 
-interface BetterAuthAuthResponse {
-  token?: string;
-  user?: { id: string; email: string };
-  // forget-password ne renvoie pas de token, juste {status:true} ou similaire
-  status?: boolean;
+/** Enveloppe `{ data }` de l'API pour /auth/login et /auth/register. */
+interface AuthResponse {
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+    user: { id: string; email: string };
+  };
 }
 
 const PASSWORD_MIN = 8;
@@ -65,36 +69,29 @@ export default function LoginScreen() {
 
   const apiBaseUrl =
     (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
-    "http://localhost:3000/api/v1";
-  const authBaseUrl = apiBaseUrl.replace(/\/api\/v1\/?$/, "/api/auth");
+    "http://localhost:8080/api/v1";
 
   async function postAuth(
     path: string,
     body: Record<string, string>
-  ): Promise<BetterAuthAuthResponse> {
-    const res = await fetch(`${authBaseUrl}/${path}`, {
+  ): Promise<AuthResponse> {
+    const res = await fetch(`${apiBaseUrl}/auth/${path}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // RN fetch n'envoie pas de header Origin par défaut, ce qui
-        // déclenche "Missing or null Origin" côté Better Auth. On en
-        // fournit un explicite qui matche `trustedOrigins` (le scheme
-        // de l'app, configuré dans app.config.ts).
-        Origin: "dorloter://",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
+      // Enveloppe d'erreur de l'API : { error: { code, message } }.
       const errBody = (await res.json().catch(() => null)) as
-        | { message?: string }
+        | { error?: { message?: string } }
         | null;
-      throw new Error(errBody?.message ?? `HTTP ${res.status}`);
+      throw new Error(errBody?.error?.message ?? `HTTP ${res.status}`);
     }
-    return (await res.json()) as BetterAuthAuthResponse;
+    return (await res.json()) as AuthResponse;
   }
 
-  async function persistSessionAndClose(token: string) {
-    await setAuthToken(token);
+  async function persistSessionAndClose(tokens: AuthResponse["data"]) {
+    await saveSession(tokens);
     try {
       const reg = await registerForPushNotifications();
       if (reg) await setDeviceTokenId(reg.deviceTokenId);
@@ -113,9 +110,8 @@ export default function LoginScreen() {
     }
     setSubmitting(true);
     try {
-      const data = await postAuth("sign-in/email", { email, password });
-      if (!data.token) throw new Error("Token manquant dans la réponse.");
-      await persistSessionAndClose(data.token);
+      const body = await postAuth("login", { email, password });
+      await persistSessionAndClose(body.data);
     } catch (err) {
       Alert.alert(
         "Connexion impossible",
@@ -140,11 +136,8 @@ export default function LoginScreen() {
     }
     setSubmitting(true);
     try {
-      const data = await postAuth("sign-up/email", { email, password, name });
-      if (!data.token) {
-        throw new Error("Token manquant — vérifie ton email pour confirmer.");
-      }
-      await persistSessionAndClose(data.token);
+      const body = await postAuth("register", { email, password, name });
+      await persistSessionAndClose(body.data);
     } catch (err) {
       Alert.alert(
         "Inscription impossible",
@@ -155,45 +148,8 @@ export default function LoginScreen() {
     }
   }
 
-  async function handleForgotPassword() {
-    if (!email) {
-      Alert.alert("Email manquant", "Renseigne l'email de ton compte.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await postAuth("forget-password", {
-        email,
-        redirectTo: `${Constants.expoConfig?.scheme ?? "dorloter"}://reset-password`,
-      });
-      Alert.alert(
-        "Email envoyé",
-        "Si un compte existe avec cet email, un lien de réinitialisation t'a été envoyé. Vérifie ta boîte de réception.",
-        [{ text: "OK", onPress: () => setMode("signin") }]
-      );
-    } catch (err) {
-      Alert.alert(
-        "Envoi impossible",
-        err instanceof Error ? err.message : "Une erreur est survenue."
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const ctaLabel =
-    mode === "signin"
-      ? "Se connecter"
-      : mode === "signup"
-        ? "Créer mon compte"
-        : "Envoyer le lien";
-
-  const ctaHandler =
-    mode === "signin"
-      ? handleSignin
-      : mode === "signup"
-        ? handleSignup
-        : handleForgotPassword;
+  const ctaLabel = mode === "signin" ? "Se connecter" : "Créer mon compte";
+  const ctaHandler = mode === "signin" ? handleSignin : handleSignup;
 
   return (
     <KeyboardAvoidingView
@@ -201,53 +157,30 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
-      {/* ─── Header : toggle (signin/signup) ou titre (forgot) ─────────── */}
+      {/* ─── Header : toggle signin / signup ───────────────────────────── */}
       <View style={styles.header}>
-        {mode !== "forgot" ? (
-          <View style={styles.toggle}>
-            <Pressable
-              style={[
-                styles.toggleBtn,
-                mode === "signin" && styles.toggleBtnActive,
-              ]}
-              onPress={() => setMode("signin")}
+        <View style={styles.toggle}>
+          <Pressable
+            style={[styles.toggleBtn, mode === "signin" && styles.toggleBtnActive]}
+            onPress={() => setMode("signin")}
+          >
+            <Text
+              style={[styles.toggleLabel, mode === "signin" && styles.toggleLabelActive]}
             >
-              <Text
-                style={[
-                  styles.toggleLabel,
-                  mode === "signin" && styles.toggleLabelActive,
-                ]}
-              >
-                Connexion
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.toggleBtn,
-                mode === "signup" && styles.toggleBtnActive,
-              ]}
-              onPress={() => setMode("signup")}
-            >
-              <Text
-                style={[
-                  styles.toggleLabel,
-                  mode === "signup" && styles.toggleLabelActive,
-                ]}
-              >
-                Inscription
-              </Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View style={styles.forgotHeader}>
-            <Text style={styles.title}>Mot de passe oublié</Text>
-            <Text style={styles.subtitle}>
-              On t'envoie un lien pour le réinitialiser. Le reset se fait sur
-              dorloter.fr — tu reviens ici une fois le nouveau mot de passe
-              choisi.
+              Connexion
             </Text>
-          </View>
-        )}
+          </Pressable>
+          <Pressable
+            style={[styles.toggleBtn, mode === "signup" && styles.toggleBtnActive]}
+            onPress={() => setMode("signup")}
+          >
+            <Text
+              style={[styles.toggleLabel, mode === "signup" && styles.toggleLabelActive]}
+            >
+              Inscription
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* ─── Body : champs (scrollable si overflow) ────────────────────── */}
@@ -284,50 +217,48 @@ export default function LoginScreen() {
             editable={!submitting}
           />
         </Field>
-        {mode !== "forgot" ? (
-          <Field
-            label={
-              mode === "signup"
-                ? `Mot de passe (${PASSWORD_MIN} caractères mini)`
-                : "Mot de passe"
-            }
-          >
-            <View style={styles.passwordWrap}>
-              <TextInput
-                testID="auth-password-input"
-                style={[styles.input, styles.passwordInput]}
-                autoCapitalize="none"
-                autoComplete={
-                  mode === "signup" ? "new-password" : "current-password"
-                }
-                secureTextEntry={!showPassword}
-                placeholder="••••••••"
-                value={password}
-                onChangeText={setPassword}
-                editable={!submitting}
+        <Field
+          label={
+            mode === "signup"
+              ? `Mot de passe (${PASSWORD_MIN} caractères mini)`
+              : "Mot de passe"
+          }
+        >
+          <View style={styles.passwordWrap}>
+            <TextInput
+              testID="auth-password-input"
+              style={[styles.input, styles.passwordInput]}
+              autoCapitalize="none"
+              autoComplete={
+                mode === "signup" ? "new-password" : "current-password"
+              }
+              secureTextEntry={!showPassword}
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              editable={!submitting}
+            />
+            <Pressable
+              style={styles.passwordToggle}
+              onPress={() => setShowPassword((v) => !v)}
+              hitSlop={10}
+              accessibilityLabel={
+                showPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+            >
+              <MaterialCommunityIcons
+                name={showPassword ? "eye-off" : "eye"}
+                size={22}
+                color="#7a5f5f"
               />
-              <Pressable
-                style={styles.passwordToggle}
-                onPress={() => setShowPassword((v) => !v)}
-                hitSlop={10}
-                accessibilityLabel={
-                  showPassword
-                    ? "Masquer le mot de passe"
-                    : "Afficher le mot de passe"
-                }
-              >
-                <MaterialCommunityIcons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={22}
-                  color="#7a5f5f"
-                />
-              </Pressable>
-            </View>
-          </Field>
-        ) : null}
+            </Pressable>
+          </View>
+        </Field>
       </ScrollView>
 
-      {/* ─── Footer : CTA + lien secondaire (toujours en bas) ──────────── */}
+      {/* ─── Footer : CTA (toujours en bas) ────────────────────────────── */}
       <View style={[styles.footer, { paddingBottom: bottomInset }]}>
         <Pressable
           testID="auth-submit"
@@ -341,16 +272,6 @@ export default function LoginScreen() {
             <Text style={styles.ctaLabel}>{ctaLabel}</Text>
           )}
         </Pressable>
-        {mode === "signin" ? (
-          <Pressable onPress={() => setMode("forgot")} disabled={submitting}>
-            <Text style={styles.linkLabel}>Mot de passe oublié ?</Text>
-          </Pressable>
-        ) : null}
-        {mode === "forgot" ? (
-          <Pressable onPress={() => setMode("signin")} disabled={submitting}>
-            <Text style={styles.linkLabel}>Retour à la connexion</Text>
-          </Pressable>
-        ) : null}
       </View>
     </KeyboardAvoidingView>
   );
@@ -392,9 +313,6 @@ const styles = StyleSheet.create({
   toggleLabel: { fontSize: 14, fontWeight: "600", color: "#7a5f5f" },
   toggleLabelActive: { color: "#1f1414" },
 
-  forgotHeader: { gap: 8, paddingVertical: 4 },
-  title: { fontSize: 22, fontWeight: "700", color: "#1f1414" },
-  subtitle: { fontSize: 14, color: "#7a5f5f", lineHeight: 20 },
 
   body: { flex: 1 },
   bodyContent: {
@@ -441,12 +359,4 @@ const styles = StyleSheet.create({
   },
   ctaDisabled: { opacity: 0.6 },
   ctaLabel: { color: "white", fontWeight: "600", fontSize: 16 },
-
-  linkLabel: {
-    color: "#e8634d",
-    fontSize: 14,
-    fontWeight: "500",
-    textAlign: "center",
-    paddingVertical: 10,
-  },
 });
