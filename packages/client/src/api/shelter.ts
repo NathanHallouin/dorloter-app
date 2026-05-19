@@ -2,6 +2,7 @@ import { api } from "./client";
 import type {
   ApiResponse,
   Message,
+  PetPhoto,
   ShelterApplication,
   ShelterConversation,
   ShelterDetail,
@@ -61,6 +62,27 @@ export const shelterApi = {
 
   updatePet: (id: string, input: ShelterPetInput) =>
     api.patch<ApiResponse<ShelterPet>>(`/api/v1/shelter/pets/${id}`, input).then((r) => r.data),
+
+  // --- Galerie photo d'un animal ---------------------------------------------
+
+  petPhotos: (petId: string) =>
+    api
+      .get<ApiResponse<PetPhoto[]>>(`/api/v1/shelter/pets/${petId}/photos`)
+      .then((r) => r.data),
+
+  addPetPhoto: (petId: string, url: string, isPrimary?: boolean) =>
+    api
+      .post<ApiResponse<{ id: string }>>(`/api/v1/shelter/pets/${petId}/photos`, {
+        url,
+        isPrimary,
+      })
+      .then((r) => r.data),
+
+  deletePetPhoto: (petId: string, photoId: string) =>
+    api.del<void>(`/api/v1/shelter/pets/${petId}/photos/${photoId}`),
+
+  setPrimaryPetPhoto: (petId: string, photoId: string) =>
+    api.post<void>(`/api/v1/shelter/pets/${petId}/photos/${photoId}/primary`),
 
   applications: () =>
     api

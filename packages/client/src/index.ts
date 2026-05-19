@@ -32,6 +32,7 @@ export * from "./api/communications";
 export * from "./api/templates";
 export * from "./api/followups";
 export * from "./api/digest";
+export * from "./api/uploads";
 
 // Auth & data layer
 export * from "./auth/AuthContext";
