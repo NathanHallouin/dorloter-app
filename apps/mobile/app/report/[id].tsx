@@ -1,5 +1,5 @@
 /**
- * Fiche détaillée d'un signalement perdu / trouvé — `/report/[id]`.
+ * Fiche détaillée d'un signalement perdu / trouvé · `/report/[id]`.
  *
  * Stack screen (back button natif). Affiche :
  *   - galerie photos paginée
@@ -12,7 +12,7 @@
  *   - bouton "Voir le contact" qui appelle POST /reports/{id}/reveal-contact
  *     (rate-limité serveur 30/h/IP, on log côté serveur)
  *
- * Pas de modification depuis le mobile en MVP — juste lecture +
+ * Pas de modification depuis le mobile en MVP · juste lecture +
  * révélation contact. L'édition / résolution / partage reste sur le web.
  */
 

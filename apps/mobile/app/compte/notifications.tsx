@@ -1,5 +1,5 @@
 /**
- * Notifications inbox — `/compte/notifications`.
+ * Notifications inbox · `/compte/notifications`.
  *
  * Affiche les notifications persistées en base pour l'utilisateur (alerts
  * push aussi loggées ici). Tap → route mappée via `notificationDataToRoute`.

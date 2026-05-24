@@ -1,5 +1,5 @@
 /**
- * Onglet Pensions — annuaire des pensions professionnelles agréées.
+ * Onglet Pensions · annuaire des pensions professionnelles agréées.
  *
  * MVP mobile : liste paginée (cursor-based), recherche texte, filtres
  * chat/chien. Pas de map ni de filtres par services en mobile en MVP

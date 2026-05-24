@@ -1,5 +1,5 @@
 /**
- * Formulaire de candidature pour adopter un animal — `/pet/[id]/apply`.
+ * Formulaire de candidature pour adopter un animal · `/pet/[id]/apply`.
  *
  * Présenté en stack au-dessus de la fiche détail (back button).
  *
@@ -86,7 +86,7 @@ export default function ApplyScreen() {
       return data.data;
     },
     onSuccess: () => {
-      // Pas de query "applications" côté mobile pour l'instant — l'invalidate
+      // Pas de query "applications" côté mobile pour l'instant · l'invalidate
       // est défensif au cas où on l'ajoute plus tard.
       queryClient.invalidateQueries({ queryKey: ["applications"] });
       Alert.alert(
@@ -122,7 +122,7 @@ export default function ApplyScreen() {
 
       <Text style={styles.heading}>Présente-toi au refuge</Text>
       <Text style={styles.intro}>
-        Quelques infos suffisent — le refuge te contactera pour un échange.
+        Quelques infos suffisent · le refuge te contactera pour un échange.
       </Text>
 
       <Field label="Logement" optional>

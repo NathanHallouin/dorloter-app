@@ -1,11 +1,11 @@
 /**
- * Écran "Contacter ce refuge" — `/shelter/[slug]/contact`.
+ * Écran "Contacter ce refuge" · `/shelter/[slug]/contact`.
  *
  * Formulaire minimal pour démarrer une conversation avec un refuge sans
  * passer par un animal précis (question générale : visite, processus
  * d'adoption, partenariat famille d'accueil, etc.).
  *
- * Le payload `POST /conversations` envoie `shelterId` sans `petId` — le
+ * Le payload `POST /conversations` envoie `shelterId` sans `petId` · le
  * service côté serveur upsert la conversation par (user, shelter, null)
  * et y attache le premier message.
  *
@@ -123,7 +123,7 @@ export default function ContactShelterScreen() {
           <Text style={styles.heading}>Tu écris à {shelter.name}</Text>
           <Text style={styles.subheading}>
             Un bénévole te répondra dès que possible. Évite les questions sur
-            un animal en particulier ici — passe par la fiche de l'animal
+            un animal en particulier ici · passe par la fiche de l'animal
             pour ça (un fil dédié sera créé).
           </Text>
         </View>

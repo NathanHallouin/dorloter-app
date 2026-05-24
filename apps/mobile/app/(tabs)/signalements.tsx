@@ -1,5 +1,5 @@
 /**
- * Onglet Signalements — perdus / trouvés.
+ * Onglet Signalements · perdus / trouvés.
  *
  * Deux modes :
  *   - liste : FlatList classique avec photo (cf. session 3a)
@@ -231,7 +231,7 @@ function MapView() {
   const [centerReady, setCenterReady] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Géoloc au mount — fallback Paris si refus / erreur, et on continue.
+  // Géoloc au mount · fallback Paris si refus / erreur, et on continue.
   useEffect(() => {
     let cancelled = false;
     (async () => {

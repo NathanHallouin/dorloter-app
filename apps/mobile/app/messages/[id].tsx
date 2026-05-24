@@ -1,5 +1,5 @@
 /**
- * Conversation thread — `/messages/[id]`.
+ * Conversation thread · `/messages/[id]`.
  *
  * Stack screen au-dessus des tabs (back natif). Affiche :
  *   - header : nom du peer, pet associé éventuel
@@ -509,7 +509,7 @@ export default function ConversationThreadScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyBody}>
-              Aucun message pour l'instant — écris le premier ci-dessous.
+              Aucun message pour l'instant · écris le premier ci-dessous.
             </Text>
           </View>
         }

@@ -1,5 +1,5 @@
 /**
- * Fiche détaillée d'un animal à adopter — `/pet/[id]`.
+ * Fiche détaillée d'un animal à adopter · `/pet/[id]`.
  *
  * Stack screen au-dessus des tabs (back button natif). Affiche :
  *   - galerie horizontale des photos (FlatList paginée)

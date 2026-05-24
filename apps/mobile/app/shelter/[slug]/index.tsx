@@ -1,5 +1,5 @@
 /**
- * Fiche détaillée d'un refuge — `/shelter/[slug]`.
+ * Fiche détaillée d'un refuge · `/shelter/[slug]`.
  *
  * Stack screen au-dessus des tabs (back natif). Affiche :
  *   - cover + logo overlay + nom + badge "Vérifié"

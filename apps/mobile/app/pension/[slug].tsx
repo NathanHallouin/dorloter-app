@@ -1,5 +1,5 @@
 /**
- * Fiche détaillée d'une pension agréée — `/pension/[slug]`.
+ * Fiche détaillée d'une pension agréée · `/pension/[slug]`.
  *
  * Stack screen au-dessus des tabs (back natif). Affiche :
  *   - galerie photos horizontale paginée
@@ -8,7 +8,7 @@
  *   - description
  *   - services proposés (badges)
  *   - horaires d'ouverture
- *   - contact (téléphone, email, site web — Linking natif)
+ *   - contact (téléphone, email, site web · Linking natif)
  *
  * Pas de booking intégré en MVP : Dorloter est un annuaire, le contact
  * reste direct entre l'adoptant et la pension.

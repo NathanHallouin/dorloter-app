@@ -1,5 +1,5 @@
 /**
- * Layout racine de l'app — un seul Stack qui :
+ * Layout racine de l'app · un seul Stack qui :
  *   - monte le QueryClient TanStack pour tout l'arbre
  *   - rend SafeAreaProvider pour que les écrans respectent les notches
  *   - délègue à Expo Router pour le routing fichier-based
@@ -22,7 +22,7 @@ import { registerForPushNotifications } from "@/lib/notifications";
 import { notificationDataToRoute } from "@/lib/deep-link";
 import { initObservability } from "@/lib/observability";
 
-// Init Sentry au tout premier import du module — avant que React monte
+// Init Sentry au tout premier import du module · avant que React monte
 // quoi que ce soit, pour capturer aussi les crashes de bootstrap.
 initObservability();
 

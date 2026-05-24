@@ -1,9 +1,9 @@
 /**
- * Édition du profil — `/compte/profil`.
+ * Édition du profil · `/compte/profil`.
  *
  * Form : nom (obligatoire), téléphone (optionnel), rayon de notification
  * (slider 1-50 km). La position GPS est captée via expo-location au tap
- * sur "Utiliser ma position courante" — on n'expose pas de map picker en
+ * sur "Utiliser ma position courante" · on n'expose pas de map picker en
  * MVP.
  *
  * Submit → PATCH /me → invalide la query `me` → toast OK → back.

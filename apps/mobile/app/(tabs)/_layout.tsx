@@ -1,11 +1,11 @@
 /**
  * Bottom tabs : 5 onglets alignés sur les 3 features métier + transversal.
  *
- *   1. Adopter        — feature 1 : catalogue d'animaux à adopter
- *   2. Signalements   — feature 2 : perdus/trouvés (FAB "Signaler" intégré)
- *   3. Pensions       — feature 3 : annuaire des pensions agréées
- *   4. Messages       — transversal : conversations user ↔ refuge/pension
- *   5. Compte         — profil, login/logout, paramètres
+ *   1. Adopter        · feature 1 : catalogue d'animaux à adopter
+ *   2. Signalements   · feature 2 : perdus/trouvés (FAB "Signaler" intégré)
+ *   3. Pensions       · feature 3 : annuaire des pensions agréées
+ *   4. Messages       · transversal : conversations user ↔ refuge/pension
+ *   5. Compte         · profil, login/logout, paramètres
  *
  * "Signaler" est sorti des tabs (le bouton de création reste accessible
  * via le FAB de l'onglet Signalements). Cohérent avec Vinted, Le Bon Coin :

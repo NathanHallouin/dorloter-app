@@ -1,5 +1,5 @@
 /**
- * Onglet Adopter — catalogue d'animaux à adopter ET annuaire des refuges.
+ * Onglet Adopter · catalogue d'animaux à adopter ET annuaire des refuges.
  *
  * Toggle "Animaux | Refuges" en haut (même pattern que Signalements).
  * Le mode "animaux" est l'expérience principale ; le mode "refuges" est

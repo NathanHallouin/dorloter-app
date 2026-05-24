@@ -1,5 +1,5 @@
 /**
- * Mes signalements — `/compte/signalements`.
+ * Mes signalements · `/compte/signalements`.
  *
  * Liste paginée des signalements créés par l'utilisateur (tous statuts).
  * Badges colorés par statut (actif/résolu/expiré) et type (perdu/trouvé).

@@ -1,5 +1,5 @@
 /**
- * Swipe adoption — `/adopter/swipe`.
+ * Swipe adoption · `/adopter/swipe`.
  *
  * Pattern Tinder : pile de cards, swipe gauche = passer, swipe droite =
  * ajouter aux favoris. Implémentation native avec `react-native-gesture-handler`
@@ -8,7 +8,7 @@
  * - Stack visible : top + 1 card de prefetch en dessous (effet de pile)
  * - Threshold : 25% de la largeur de l'écran (équivalent ~120px sur la
  *   plupart des phones), comme la version web
- * - "Skip" est purement local — aucune persistance serveur des passes.
+ * - "Skip" est purement local · aucune persistance serveur des passes.
  *   "Like" persiste via POST /favorites (le serveur dédoublonne).
  * - Undo : ramène la dernière card et toggle le favori si nécessaire.
  *

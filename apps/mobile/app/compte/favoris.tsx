@@ -1,5 +1,5 @@
 /**
- * Mes favoris — `/compte/favoris`.
+ * Mes favoris · `/compte/favoris`.
  *
  * Liste des animaux favorisés (incluant ceux passés en `reserve` /
  * `adopte` pour suivre leur sort). Tap → fiche pet.

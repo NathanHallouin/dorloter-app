@@ -1,5 +1,5 @@
 /**
- * Écran "Contacter le refuge" — `/pet/[id]/contact`.
+ * Écran "Contacter le refuge" · `/pet/[id]/contact`.
  *
  * Formulaire minimal : header (pet + refuge), textarea pré-remplie avec
  * un message générique modifiable, bouton "Envoyer". Au submit, POST

@@ -1,5 +1,5 @@
 /**
- * Onglet Messages — inbox conversations de l'utilisateur courant.
+ * Onglet Messages · inbox conversations de l'utilisateur courant.
  *
  * Refetch automatique toutes les 15s pour faire vivre la liste (preview
  * du dernier message + compteur unread).

@@ -1,16 +1,16 @@
 /**
- * Onglet Signaler — création d'un signalement perdu / trouvé.
+ * Onglet Signaler · création d'un signalement perdu / trouvé.
  *
  * Form minimum pour le MVP mobile :
  *   - type (perdu / trouvé)
  *   - espèce (chat / chien)
  *   - description (>= 10 caractères)
  *   - photos (jusqu'à 4, expo-image-picker → presign S3 → PUT)
- *   - location : géoloc courante (pas de carte picker en MVP — prochaine itération)
+ *   - location : géoloc courante (pas de carte picker en MVP · prochaine itération)
  *   - dateEvent : aujourd'hui (le flow d'édition permettra de corriger)
  *
  * Le détail (race, couleur, signes distinctifs, contact, dates passées,
- * pin sur la carte) revient à l'édition côté web pour l'instant — la
+ * pin sur la carte) revient à l'édition côté web pour l'instant · la
  * cible principale ici est de pouvoir signaler depuis la rue en 30 s.
  */
 
@@ -75,7 +75,7 @@ export default function SignalerScreen() {
   >("loading");
   const [submitting, setSubmitting] = useState(false);
 
-  // Géoloc au mount — non-blocking. Si refus, on bloque la submission
+  // Géoloc au mount · non-blocking. Si refus, on bloque la submission
   // (un signalement sans lieu n'a pas de sens pour le matching).
   useEffect(() => {
     let cancelled = false;
@@ -179,7 +179,7 @@ export default function SignalerScreen() {
         body: {
           type,
           species,
-          // Le form mobile MVP ne demande pas le sexe ni la puce —
+          // Le form mobile MVP ne demande pas le sexe ni la puce :
           // valeurs par défaut côté Zod serveur. On les envoie
           // explicitement parce que le contrat OpenAPI les marque
           // requis (les champs `default` ne deviennent pas optionnels
@@ -205,7 +205,7 @@ export default function SignalerScreen() {
       Alert.alert(
         "Signalement publié",
         data.data.matchCount > 0
-          ? `${data.data.matchCount} correspondance(s) trouvée(s) — on va te notifier.`
+          ? `${data.data.matchCount} correspondance(s) trouvée(s) · on va te notifier.`
           : "Tu seras notifié dès qu'un signalement potentiellement compatible apparaît.",
         [{ text: "OK", onPress: () => router.push("/signalements") }]
       );

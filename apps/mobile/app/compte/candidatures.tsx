@@ -1,5 +1,5 @@
 /**
- * Mes candidatures — `/compte/candidatures`.
+ * Mes candidatures · `/compte/candidatures`.
  *
  * Liste des candidatures d'adoption avec le résumé de l'animal concerné
  * et le statut de la candidature (envoyée / en cours / acceptée / refusée

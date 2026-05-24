@@ -1,8 +1,8 @@
 /**
- * Quiz adoption — `/adopter/quiz`.
+ * Quiz adoption · `/adopter/quiz`.
  *
  * 7 questions step-by-step pour aider l'utilisateur à profiler son
- * adoption idéale. Aucune réponse n'est persistée serveur — tout reste
+ * adoption idéale. Aucune réponse n'est persistée serveur · tout reste
  * en local. À la fin, on construit des filtres `/pets` et on redirige
  * vers l'onglet Adopter avec ces filtres pré-appliqués.
  *
@@ -95,9 +95,9 @@ const QUESTIONS: Question[] = [
     key: "time",
     title: "Combien de temps pouvez-vous lui consacrer chaque jour ?",
     options: [
-      { value: "low", label: "Peu — je travaille à l'extérieur" },
+      { value: "low", label: "Peu · je travaille à l'extérieur" },
       { value: "medium", label: "Le matin et le soir" },
-      { value: "high", label: "Beaucoup — je télétravaille ou je suis dispo" },
+      { value: "high", label: "Beaucoup · je télétravaille ou je suis dispo" },
     ],
   },
 ];
@@ -117,7 +117,7 @@ function computeRecommendation(answers: Answers): Recommendation {
       answers.species === "chat" ? "Tu cherches un chat" : "Tu cherches un chien"
     );
   } else {
-    highlights.push("Chats et chiens — tu es ouvert·e");
+    highlights.push("Chats et chiens · tu es ouvert·e");
   }
 
   if (answers.children === "young" || answers.children === "older") {
@@ -136,21 +136,21 @@ function computeRecommendation(answers: Answers): Recommendation {
 
   if (answers.housing === "appartement" && answers.outdoor === "non") {
     highlights.push(
-      "Vie en appartement sans extérieur — privilégie un chat plutôt qu'un chien actif"
+      "Vie en appartement sans extérieur · privilégie un chat plutôt qu'un chien actif"
     );
   }
 
   if (answers.experience === "first") {
     highlights.push(
-      "Premier animal — un adulte calme et sociable sera plus facile à accueillir"
+      "Premier animal · un adulte calme et sociable sera plus facile à accueillir"
     );
   }
 
   if (answers.time === "low") {
-    highlights.push("Peu de temps dispo — privilégie un animal indépendant");
+    highlights.push("Peu de temps dispo · privilégie un animal indépendant");
   } else if (answers.time === "high") {
     highlights.push(
-      "Beaucoup de temps — un animal social ou actif appréciera ta présence"
+      "Beaucoup de temps · un animal social ou actif appréciera ta présence"
     );
   }
 
