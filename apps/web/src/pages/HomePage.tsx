@@ -8,7 +8,7 @@ import { Icon } from "@dorloter/ui";
 import { Btn, Eyebrow, Marquee, Rule, Stamp } from "@dorloter/ui";
 
 const HERO_IMG = "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&q=80&auto=format&fit=crop";
-// Chiffres vitrine (indicatifs) — à brancher sur un endpoint /stats ultérieurement.
+// Chiffres vitrine (indicatifs) · à brancher sur un endpoint /stats ultérieurement.
 const STATS: [string, string][] = [["248", "à adopter"], ["19", "recherches"], ["143", "retrouvailles"], ["8", "pensions"]];
 
 const STEPS: [string, string, string, string][] = [
@@ -35,7 +35,7 @@ export function HomePage() {
             </h1>
             <p className="lead-drop mt-[22px] max-w-[500px] text-[17.5px] leading-[1.6] text-foreground">
               Adopter, retrouver un animal perdu, ou confier le sien à une pension de confiance : la plateforme qui réunit
-              refuges, familles et bénévoles autour d'une idée simple — prendre soin, ensemble.
+              refuges, familles et bénévoles autour d'une idée simple · prendre soin, ensemble.
             </p>
             <div className="mt-[26px] flex flex-wrap gap-3">
               <Btn size="lg" icon="sparkles" onClick={() => navigate("/adopter")}>Trouver mon compagnon</Btn>
@@ -59,7 +59,7 @@ export function HomePage() {
               <img src={HERO_IMG} alt="Animal à la une" className="h-full w-full object-cover" />
             </div>
             <div className="mt-2 flex items-baseline justify-between gap-3">
-              <span className="mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">Cliché — à la une</span>
+              <span className="mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">Cliché · à la une</span>
               <span className="mono text-[10.5px] text-muted-foreground">Refuges partenaires</span>
             </div>
           </div>

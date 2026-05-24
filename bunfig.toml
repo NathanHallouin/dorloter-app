@@ -1,6 +1,6 @@
 # Mode hoisted : crée des symlinks plats dans node_modules au lieu du store
 # isolé .bun/. Indispensable pour React Native / Metro qui ne sait pas
 # résoudre les modules à travers le store bun (résolution Node standard
-# remonte les `node_modules` parents — pas `.bun/...`).
+# remonte les `node_modules` parents · pas `.bun/...`).
 [install]
 linker = "hoisted"
