@@ -73,7 +73,7 @@ export function ShelterTemplatesPage() {
             <Select name="category" defaultValue="acceptation" options={CATS.map((c) => ({ value: c, label: CAT[c] }))} />
             <input name="name" required placeholder="Nom (ex. Acceptation standard)" className={cn(input, "md:col-span-2")} />
           </div>
-          <input name="subject" placeholder="Objet de l'email (optionnel) — ex. Votre candidature pour {{nomAnimal}}" className={input} />
+          <input name="subject" placeholder="Objet de l'email (optionnel) · ex. Votre candidature pour {{nomAnimal}}" className={input} />
           <textarea name="body" required rows={4} placeholder="Bonjour {{prenomCandidat}}, …" className={cn(input, "resize-y")} />
           <div><MiniBtn label="Créer le modèle" icon="check" tone="green" /></div>
         </form>

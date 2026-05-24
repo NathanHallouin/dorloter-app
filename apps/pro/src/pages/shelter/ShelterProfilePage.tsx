@@ -147,7 +147,7 @@ export function ShelterProfilePage() {
             <div className="sm:col-span-2">
               <Field label="Horaires d'ouverture / visite" hint="Une ligne par jour, ou une plage globale. Affiché tel quel sur la fiche.">
                 <Textarea value={form.visitHours} onChange={(e) => set({ visitHours: e.target.value })} disabled={ro} rows={4}
-                  placeholder={"Lundi au vendredi : 9h–12h et 14h–18h\nSamedi : 10h–17h\nDimanche et jours fériés : fermé"} />
+                  placeholder={"Lundi au vendredi : 9h-12h et 14h-18h\nSamedi : 10h-17h\nDimanche et jours fériés : fermé"} />
               </Field>
             </div>
           </div>

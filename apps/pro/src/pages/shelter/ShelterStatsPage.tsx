@@ -28,7 +28,7 @@ export function ShelterStatsPage() {
             <Link to="/refuge/candidatures" className="mb-[22px] flex items-center gap-3 rounded-card border border-brick-300 bg-brick-50 p-3.5 hover:border-brick-400">
               <span className="mono text-[11px] font-bold uppercase tracking-wide text-brick-600">Action</span>
               <span className="text-sm text-foreground">
-                {s.applications.pending} candidature{s.applications.pending > 1 ? "s" : ""} sans réponse — étudiez-les pour ne pas perdre d'adoptants.
+                {s.applications.pending} candidature{s.applications.pending > 1 ? "s" : ""} sans réponse · étudiez-les pour ne pas perdre d'adoptants.
               </span>
               <MiniBtn label="Traiter" icon="arrow" />
             </Link>
@@ -62,7 +62,7 @@ export function ShelterStatsPage() {
           <div className="mt-[18px]">
             <Panel
               title="Animaux en difficulté de placement"
-              hint="Disponibles depuis plus de 90 jours, avec peu de candidatures — à mettre en avant"
+              hint="Disponibles depuis plus de 90 jours, avec peu de candidatures · à mettre en avant"
               pad={false}
             >
               <div className="px-1 pt-1">
