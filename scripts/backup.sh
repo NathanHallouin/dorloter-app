@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Dorloter — backup quotidien Postgres + MinIO vers un bucket S3-compatible
+# Dorloter · backup quotidien Postgres + MinIO vers un bucket S3-compatible
 #
 # Destinataire par défaut : OVH Object Storage (standard) ou Cold Archive.
 # Fonctionne aussi avec Scaleway, Backblaze B2, R2 ou tout autre endpoint S3.

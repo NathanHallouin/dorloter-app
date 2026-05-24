@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Dorloter — création/rotation des rôles Postgres en prod.
+# Dorloter · création/rotation des rôles Postgres en prod.
 #
 # À exécuter :
 #   - une fois après le premier `prod:up`

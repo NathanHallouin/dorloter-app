@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Dorloter — script de déploiement exécuté sur le VPS (par GitHub Actions via SSH
+# Dorloter · script de déploiement exécuté sur le VPS (par GitHub Actions via SSH
 # ou manuellement).
 #
 # Préconditions (à satisfaire une seule fois au setup initial) :
@@ -20,7 +20,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$ROOT_DIR"
 
 if [[ ! -f .env.production ]]; then
-  echo "❌ .env.production introuvable — setup initial pas terminé" >&2
+  echo "❌ .env.production introuvable · setup initial pas terminé" >&2
   exit 1
 fi
 
@@ -59,5 +59,5 @@ $COMPOSE up -d --force-recreate --no-deps web pro api caddy
 echo "🧹 Nettoyage des images Docker orphelines…"
 docker image prune -f --filter "until=168h" > /dev/null || true
 
-echo "✅ Déploiement terminé — $(date -Iseconds)"
+echo "✅ Déploiement terminé · $(date -Iseconds)"
 echo "   Healthcheck : $(curl -s -o /dev/null -w "%{http_code}" https://${DOMAIN}/api/v1/health || echo unreachable)"

@@ -13,7 +13,7 @@
 #
 # Pré-requis (UNE fois) :
 #   1. bun add -g eas-cli
-#   2. eas login  (compte Expo gratuit — 30 builds/mois suffit)
+#   2. eas login  (compte Expo gratuit · 30 builds/mois suffit)
 #   3. cd apps/mobile && eas init  (renseigne le projectId dans app.config.ts)
 #
 # À la fin du build, EAS te donne :
