@@ -41,7 +41,7 @@ describe("notificationDataToRoute", () => {
   });
 
   test("reportId prioritaire sur petId si les deux sont présents", () => {
-    // Cas peu probable en pratique mais défensif — un payload futur
+    // Cas peu probable en pratique mais défensif · un payload futur
     // pourrait inclure les deux et on veut un comportement déterministe.
     expect(
       notificationDataToRoute({

@@ -51,7 +51,7 @@ export function ReportsMap({
     (Constants.expoConfig?.extra?.mapStyleUrl as string | undefined) ??
     DEFAULT_STYLE_URL;
 
-  // Centre initial via `defaultSettings` (non-controlled — pour suivre
+  // Centre initial via `defaultSettings` (non-controlled · pour suivre
   // l'user qui bouge, utiliser un ref + setCamera).
   const defaultCenter: [number, number] = useMemo(
     () => [center.longitude, center.latitude],

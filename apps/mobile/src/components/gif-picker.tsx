@@ -1,5 +1,5 @@
 /**
- * Picker GIF — modal plein écran avec recherche et grille de résultats.
+ * Picker GIF · modal plein écran avec recherche et grille de résultats.
  *
  * Utilise le proxy serveur `/api/v1/gifs/search` (clé Tenor cachée côté
  * serveur). La grille affiche les `previewUrl` (~tinygif, légers). Au tap,

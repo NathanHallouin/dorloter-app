@@ -1,5 +1,5 @@
 /**
- * Observabilité production — Sentry RN.
+ * Observabilité production · Sentry RN.
  *
  * Init idempotent appelé une seule fois en root layout. Si pas de DSN
  * configuré (ex. dev local), Sentry init no-op et l'app continue sans
@@ -9,7 +9,7 @@
  * moment du build EAS (cf. eas.json par profile). Pas commité en repo.
  *
  * Alternative souveraine EU (mentionnée dans HEBERGEMENT-ET-API.md) :
- * GlitchTip est Sentry-compatible — pour migrer, juste remplacer le
+ * GlitchTip est Sentry-compatible · pour migrer, juste remplacer le
  * DSN par celui d'une instance GlitchTip self-hosted.
  */
 
@@ -26,7 +26,7 @@ export function initObservability(): void {
   if (!dsn) {
     // eslint-disable-next-line no-console
     console.info(
-      "[observability] EXPO_PUBLIC_SENTRY_DSN absent — Sentry init skipped (dev local)."
+      "[observability] EXPO_PUBLIC_SENTRY_DSN absent · Sentry init skipped (dev local)."
     );
     return;
   }

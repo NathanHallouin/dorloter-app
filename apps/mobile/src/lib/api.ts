@@ -1,5 +1,5 @@
 /**
- * Client API singleton — wrap @dorloter/api-client avec :
+ * Client API singleton · wrap @dorloter/api-client avec :
  *   - URL de base depuis app.config.ts (`extra.apiBaseUrl`)
  *   - bearer token lu depuis expo-secure-store à chaque requête
  *

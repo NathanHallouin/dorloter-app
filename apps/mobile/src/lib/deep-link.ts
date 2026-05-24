@@ -12,10 +12,10 @@
  *
  * On choisit la route en fonction du premier id non-null trouvé
  * (priorité reportId > petId). Pour les types sans id mappable
- * (`new_message` aujourd'hui), retourne `null` — l'appelant fallback
+ * (`new_message` aujourd'hui), retourne `null` · l'appelant fallback
  * sur un no-op.
  *
- * Pure function — aucune dépendance native, donc unit-testable.
+ * Pure function · aucune dépendance native, donc unit-testable.
  */
 
 export type DeepLinkRoute =

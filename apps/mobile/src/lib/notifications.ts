@@ -1,5 +1,5 @@
 /**
- * Notifications push — wiring Expo + backend Dorloter.
+ * Notifications push · wiring Expo + backend Dorloter.
  *
  * Flow :
  *   1. (au login) demande la permission au système
@@ -13,7 +13,7 @@
  *   - Sur Android, on doit créer un channel pour que les notifs ne soient
  *     pas silencieuses sur 8.0+. On en crée un par type (cf. emit côté
  *     serveur qui envoie `channelId`).
- *   - Le token Expo peut changer (réinstall, restore device) — on
+ *   - Le token Expo peut changer (réinstall, restore device) · on
  *     ré-enregistre à chaque démarrage authentifié, le serveur dédoublonne.
  */
 
@@ -90,9 +90,9 @@ async function ensureAndroidChannels(): Promise<void> {
 }
 
 interface RegistrationResult {
-  /** ID du device en base — utile pour le DELETE au logout. */
+  /** ID du device en base · utile pour le DELETE au logout. */
   deviceTokenId: string;
-  /** Token Expo Push lui-même — exposé pour debug. */
+  /** Token Expo Push lui-même · exposé pour debug. */
   expoPushToken: string;
 }
 
@@ -141,7 +141,7 @@ export async function registerForPushNotifications(): Promise<RegistrationResult
 
   if (!projectId || projectId === "REPLACE_WITH_EAS_PROJECT_ID") {
     console.warn(
-      "[notifications] EAS projectId non configuré — push impossible. Lance `eas init` puis update app.config.ts."
+      "[notifications] EAS projectId non configuré · push impossible. Lance `eas init` puis update app.config.ts."
     );
     return null;
   }

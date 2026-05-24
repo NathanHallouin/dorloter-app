@@ -8,7 +8,7 @@
  *   - on ne stocke rien : à chaque ouverture de la carte, on ré-interroge
  *
  * Si l'utilisateur refuse, l'appelant doit fallback (centrer Paris ou
- * la ville d'inscription du user — info qu'on ne connaît pas encore en
+ * la ville d'inscription du user · info qu'on ne connaît pas encore en
  * MVP, donc fallback Paris).
  */
 
@@ -21,7 +21,7 @@ export interface UserCoords {
 
 /**
  * Centre par défaut quand on n'a pas la position de l'user (refus, hors
- * device, erreur). Paris République — neutre, central, lisible.
+ * device, erreur). Paris République · neutre, central, lisible.
  */
 export const DEFAULT_CENTER: UserCoords = {
   latitude: 48.8676,
@@ -35,7 +35,7 @@ export type LocationStatus =
 
 /**
  * Demande la permission (si pas encore accordée) et récupère la
- * position courante. Ne throw jamais — toute erreur revient en
+ * position courante. Ne throw jamais · toute erreur revient en
  * `LocationStatus`.
  */
 export async function getCurrentLocation(): Promise<LocationStatus> {

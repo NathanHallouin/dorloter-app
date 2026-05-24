@@ -6,14 +6,14 @@
  * mode (allowsRecordingIOS) et les options par défaut. Les composants
  * appellent juste start/stop/cancel et reçoivent { uri, durationMs }.
  *
- * Format produit : m4a (audio/mp4) — natif iOS et Android, lisible par
+ * Format produit : m4a (audio/mp4) · natif iOS et Android, lisible par
  * les navigateurs modernes (web peut aussi le jouer).
  *
  * Note : `expo-av` est un module natif qui doit être présent dans le
  * binaire de l'app (dev-client EAS build). On le charge en `require()`
  * lazy + try/catch : si l'utilisateur ouvre un thread avec un dev-client
  * pas encore rebuild, le module n'est pas dispo mais l'écran ne crash
- * pas — seule la fonction record renvoie une erreur explicite.
+ * pas · seule la fonction record renvoie une erreur explicite.
  */
 
 import { NativeModules } from "react-native";
@@ -36,7 +36,7 @@ let cachedAudio: typeof AudioType | null | undefined = undefined;
 /**
  * Détecte si le pont natif `expo-av` est linké dans le binaire courant.
  *
- * Important : un simple `require("expo-av")` ne suffit pas — le JS du
+ * Important : un simple `require("expo-av")` ne suffit pas · le JS du
  * module est dans le bundle Metro même sans natif, et les méthodes
  * comme `requestPermissionsAsync()` retournent alors des Promises qui
  * ne résolvent JAMAIS (ni reject ni resolve). On sonde directement
@@ -79,7 +79,7 @@ export async function startRecording(): Promise<RecorderHandle> {
   const Audio = getAudio();
   if (!Audio) {
     throw new Error(
-      "Module audio indisponible — rebuild le dev-client (bun mobile:build) pour activer les messages vocaux."
+      "Module audio indisponible · rebuild le dev-client (bun mobile:build) pour activer les messages vocaux."
     );
   }
 
