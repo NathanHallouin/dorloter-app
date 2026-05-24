@@ -102,8 +102,8 @@ Si tu veux du tRPC plus tard (parce que ton mobile est aussi Expo donc full TS),
 ## 3. Auth : Better Auth supporte déjà web + mobile
 
 Better Auth a deux modes qui cohabitent sans conflit :
-- **Cookie session** (par défaut) — utilisé par le web, déjà en place
-- **Bearer token** — utilisé par la mobile, à activer via le plugin `bearer`
+- **Cookie session** (par défaut) · utilisé par le web, déjà en place
+- **Bearer token** · utilisé par la mobile, à activer via le plugin `bearer`
 
 Côté serveur :
 
@@ -130,11 +130,11 @@ Côté mobile (Expo) :
 
 ---
 
-## 4. Structure de code proposée — monorepo léger
+## 4. Structure de code proposée · monorepo léger
 
 Aujourd'hui : un seul repo Next.js. À l'arrivée du mobile, deux options :
 
-### Option A — Monorepo Turborepo (recommandé)
+### Option A · Monorepo Turborepo (recommandé)
 
 ```
 dorloter/
@@ -153,7 +153,7 @@ dorloter/
 │   │   └── src/                    # adoption.ts, report.ts, application.ts
 │   │
 │   └── ui-kit/                     # (optionnel) tokens design partagés
-│       └── src/tokens.ts           # couleurs, espaces — utilisables par RN aussi
+│       └── src/tokens.ts           # couleurs, espaces · utilisables par RN aussi
 │
 ├── turbo.json
 └── package.json
@@ -163,7 +163,7 @@ dorloter/
 
 **Coût** : 1 jour de migration. Pas de réécriture, juste déplacer `src/` dans `apps/web/src/` et créer des packages.
 
-### Option B — Repo séparé pour le mobile
+### Option B · Repo séparé pour le mobile
 
 Si la migration monorepo te paraît trop lourde, garde Next.js tel quel et crée un repo `dorloter-mobile` à côté. Le contrat partagé (types, validators) est publié comme package npm privé (GitHub Packages, gratuit) et consommé par les deux.
 
@@ -208,13 +208,13 @@ VPS OVH VLE-4 / Hetzner CX22 + Docker Compose (Postgres, MinIO, Caddy, app). Sai
 | CDN images | aucun | **BunnyCDN** (EU, 0,01€/Go) ou Scaleway Edge Services | idem |
 | Email transactionnel | Resend | Brevo (FR) ou Resend EU region | idem + double provider failover |
 | Push web | Web Push VAPID self | inchangé (gratuit, infini) | inchangé |
-| Push mobile | — | **APNs (Apple) + FCM (Google)** via `web-push` ou `node-pushnotifications` | idem |
+| Push mobile | · | **APNs (Apple) + FCM (Google)** via `web-push` ou `node-pushnotifications` | idem |
 | Monitoring erreurs | logs Docker | **GlitchTip** self-hosted (Sentry-compat, EU) ou Sentry EU | idem + alerting Slack |
 | Uptime | UptimeRobot | UptimeRobot + statuspage publique | idem |
 | Analytics | aucun | **Plausible** self-hosted (RGPD-friendly, FR) | idem |
 | Logs centralisés | `docker logs` | **Grafana Loki** self-hosted sur le même VPS | Loki + Grafana managé (Scaleway) |
 
-### Souveraineté européenne — checklist
+### Souveraineté européenne · checklist
 
 Le projet vise la souveraineté EU (cf. CLAUDE.md). Voici les choix conformes :
 
@@ -231,9 +231,9 @@ Le projet vise la souveraineté EU (cf. CLAUDE.md). Voici les choix conformes :
 ### Option « zéro maintenance » : PaaS européen
 
 Si tu veux te débarrasser de la gestion VPS un jour :
-- **Clever Cloud** (FR) — push git, app + DB managées, ~25-40€/mois pour Dorloter
-- **Scaleway Serverless** — autoscale à 0, pay-per-request
-- **Coolify** ou **Dokploy** self-hosted — PaaS open-source sur ton propre VPS, joli compromis
+- **Clever Cloud** (FR) · push git, app + DB managées, ~25-40€/mois pour Dorloter
+- **Scaleway Serverless** · autoscale à 0, pay-per-request
+- **Coolify** ou **Dokploy** self-hosted · PaaS open-source sur ton propre VPS, joli compromis
 
 Tant que tu es solo et que les heures de maintenance Docker restent < 2h/mois (ce qui est le cas vu ton setup), reste sur le VPS.
 
@@ -241,17 +241,17 @@ Tant que tu es solo et que les heures de maintenance Docker restent < 2h/mois (c
 
 ## 7. Plan de migration progressif
 
-### Étape 0 — État des lieux (actuel)
+### Étape 0 · État des lieux (actuel)
 - Next.js monolithe, Server Actions partout, mobile = 0
 - Quelques routes API (`/api/upload`, `/api/notifications/subscribe`, `/api/messages`)
 
-### Étape 1 — Préparer le terrain (faisable maintenant, sans mobile)
+### Étape 1 · Préparer le terrain (faisable maintenant, sans mobile)
 1. **Factoriser les services** : pour chaque domaine, créer `domains/X/services/` qui contient la logique métier pure (pas d'accès Next.js, pas de `revalidatePath`, retourne des `Result<T>`).
 2. **Server Actions deviennent des coquilles** : valident, appellent le service, gèrent `revalidatePath`.
-3. **Bearer plugin Better Auth** activé dès maintenant — coût quasi nul, prêt pour la mobile.
+3. **Bearer plugin Better Auth** activé dès maintenant · coût quasi nul, prêt pour la mobile.
 4. **OpenAPI partiel** : décrire les endpoints existants (`/api/upload`, `/api/messages`) avec `zod-openapi`. Documente, ne casse rien.
 
-### Étape 2 — Première API publique v1
+### Étape 2 · Première API publique v1
 1. Créer `app/api/v1/` avec les endpoints lecture seule pour le mobile :
    - `GET /api/v1/pets` (catalogue adoption, paginé)
    - `GET /api/v1/pets/:id` (fiche détaillée)
@@ -261,13 +261,13 @@ Tant que tu es solo et que les heures de maintenance Docker restent < 2h/mois (c
 2. Générer l'OpenAPI à `/api/v1/openapi.json`.
 3. Tests d'intégration sur ces routes (Vitest + msw).
 
-### Étape 3 — Mobile MVP en lecture seule
+### Étape 3 · Mobile MVP en lecture seule
 1. Migration monorepo Turborepo (1 jour).
 2. App Expo qui consomme l'API v1 : navigation par onglets (Adopter / Signalements / Mon compte), connexion, vitrine.
-3. Pas de signalement ni candidature côté mobile pour le V1 — uniquement consultation. Renvoi vers le web pour les actions.
+3. Pas de signalement ni candidature côté mobile pour le V1 · uniquement consultation. Renvoi vers le web pour les actions.
 4. Distribution interne via EAS Update + TestFlight / Play Console internal track.
 
-### Étape 4 — Mobile complète
+### Étape 4 · Mobile complète
 1. Ajout des endpoints d'écriture v1 :
    - `POST /api/v1/reports` (créer signalement)
    - `POST /api/v1/applications` (candidater)
@@ -277,7 +277,7 @@ Tant que tu es solo et que les heures de maintenance Docker restent < 2h/mois (c
 3. Géoloc native, carte native MapLibre, push natifs.
 4. Sortie publique App Store + Play Store.
 
-### Étape 5 — Optimisations
+### Étape 5 · Optimisations
 - CDN devant les images
 - DB managée
 - GlitchTip pour le monitoring
@@ -305,7 +305,7 @@ Pour ne pas avoir à les changer plus tard :
 - **Pagination** : cursor-based (déjà la convention CLAUDE.md). Pas d'offset.
 - **Localisation** : header `Accept-Language: fr-FR` → réponses traduites côté serveur. Anglais en seconde langue.
 - **Rate limiting** : par IP + par user, valeurs strictes sur les endpoints écriture. `429` avec `Retry-After`.
-- **Idempotency** : header `Idempotency-Key` accepté sur les POST critiques (création signalement, candidature) — évite les doublons en cas de timeout réseau mobile.
+- **Idempotency** : header `Idempotency-Key` accepté sur les POST critiques (création signalement, candidature) · évite les doublons en cas de timeout réseau mobile.
 - **Tracing** : header `X-Request-Id` propagé partout, log structuré avec ce champ.
 - **CORS** : web même origine (pas de CORS), mobile pas de CORS (requêtes natives). Pas d'`Access-Control-Allow-Origin: *`.
 - **Auth** : `Authorization: Bearer <token>` pour mobile, cookie `__Secure-better-auth.session_token` pour web. Le serveur accepte les deux automatiquement avec Better Auth.

@@ -25,7 +25,7 @@ Messagerie 1-to-1 entre particuliers et refuges, avec réactions aux messages, i
 Non-objectifs (MVP) :
 - Pas de chat user ↔ user (les signalements exposent déjà téléphone/email pour cas urgents)
 - Pas de chat refuge ↔ refuge
-- Pas d'attachements (photos, fichiers) — v2
+- Pas d'attachements (photos, fichiers) · v2
 - Pas de messages vocaux
 - Pas de chiffrement bout-en-bout (chiffrement TLS en transit uniquement)
 - Pas de threads dans un message (les réponses ciblées feraient une UX plus lourde sans vraie valeur sur des fils courts)
@@ -51,7 +51,7 @@ SSE est un protocole HTTP standard (text/event-stream). Une connexion HTTP persi
 | Ressource serveur par client | 1 requête ouverte | 1 socket TCP |
 | Librairies | zéro dépendance (Node + Response ReadableStream) | `ws`, `socket.io`, etc. |
 
-Pour une messagerie 1-to-1 asymétrique (l'utilisateur envoie via POST, le serveur broadcast les nouveaux messages via SSE), le caractère unidirectionnel de SSE n'est pas une limitation — c'est même une simplification. Le client envoie ses messages par `fetch POST` comme d'habitude, le serveur les pousse au destinataire via le stream SSE déjà ouvert.
+Pour une messagerie 1-to-1 asymétrique (l'utilisateur envoie via POST, le serveur broadcast les nouveaux messages via SSE), le caractère unidirectionnel de SSE n'est pas une limitation · c'est même une simplification. Le client envoie ses messages par `fetch POST` comme d'habitude, le serveur les pousse au destinataire via le stream SSE déjà ouvert.
 
 **Pourquoi pas un service managé** (Pusher, Ably, Supabase Realtime) : règle de souveraineté du projet (pas d'AWS, Google, services hors EU), coûts qui montent avec l'usage.
 
@@ -65,13 +65,13 @@ Un `EventEmitter` Node mémorise les listeners par `conversationId`. Quand une m
 
 ### Fallback
 
-`EventSource` reconnecte automatiquement avec `retry:` spécifié dans le stream. Si la connexion refuse d'ouvrir (firewall restrictif, ad-blocker agressif), le client bascule sur du polling `/api/messages/[conversationId]?since=...` toutes les 5 secondes — UX dégradée mais fonctionnelle.
+`EventSource` reconnecte automatiquement avec `retry:` spécifié dans le stream. Si la connexion refuse d'ouvrir (firewall restrictif, ad-blocker agressif), le client bascule sur du polling `/api/messages/[conversationId]?since=...` toutes les 5 secondes · UX dégradée mais fonctionnelle.
 
 ---
 
 ## User flows
 
-### A — Question sur un chat avant candidature
+### A · Question sur un chat avant candidature
 
 1. Alice regarde `/adopter/abc123` (Princesse)
 2. Bouton « Poser une question au refuge »
@@ -82,20 +82,20 @@ Un `EventEmitter` Node mémorise les listeners par `conversationId`. Quand une m
 7. **Le refuge commence à taper → Alice voit « Chats Libres de Paris est en train d'écrire… »**
 8. Message reçu → apparaît instantanément dans le fil Alice
 
-### B — Réactions
+### B · Réactions
 
 1. Le refuge écrit « Princesse peut aller sur un balcon sécurisé, oui »
 2. Alice survole le message → bouton « + » apparaît, ouvre le picker emoji
 3. Elle clique 🙏 → la réaction apparaît sous le message chez elle ET chez le refuge en temps réel
 4. Le refuge clique à son tour 🐾 pour confirmer → compteur des réactions mis à jour en live
 
-### C — Accusé de lecture
+### C · Accusé de lecture
 
 1. Bob envoie un message à 14:30, status « envoyé » (une coche grise)
 2. Le refuge ouvre la conversation à 15:12 → status passe à « lu » (deux coches bleues) avec timestamp
 3. Le changement est visible en live chez Bob sans qu'il rafraîchisse
 
-### D — Offline & push fallback
+### D · Offline & push fallback
 
 1. Claire a envoyé un message à Bob, qui est hors-ligne
 2. Le serveur détecte qu'aucun stream SSE n'est actif pour Bob sur cette conversation
@@ -158,9 +158,9 @@ CREATE INDEX message_reactions_message_idx ON message_reactions (message_id);
 
 ### Contraintes et design rationale
 
-- **`sender_id UUID`** : l'id du user (même pour un refuge admin — c'est lui personnellement qui a envoyé). `sender_type` donne le camp (affichage UI, permissions).
+- **`sender_id UUID`** : l'id du user (même pour un refuge admin · c'est lui personnellement qui a envoyé). `sender_type` donne le camp (affichage UI, permissions).
 - **`edited_at`** : pour un éventuel édit de message. Affiché « modifié » dans l'UI si non-null.
-- **`message_reactions` avec emoji Unicode direct** : évite une table de lookup pour les emojis — plus simple, utf8mb4 géré nativement par Postgres 18.
+- **`message_reactions` avec emoji Unicode direct** : évite une table de lookup pour les emojis · plus simple, utf8mb4 géré nativement par Postgres 18.
 - **Contrainte unique sur (message, user, emoji)** : un user clique 2× sur 🙏 → la 2e fois ça **toggle** (suppression) côté server action. C'est la sémantique Telegram/Slack.
 - **Limitation emoji** : on whitelistera côté server action à ~10 emojis (voir « liste ci-dessous »). Pas de clavier emoji complet pour éviter le bruit (et les emojis random type 🍆).
 
@@ -209,7 +209,7 @@ Toutes : auth requise, vérif appartenance à la conversation, rate-limit.
 
 - Vérifie emoji dans la whitelist (cf. ci-dessous)
 - Vérifie appartenance à la conversation du message
-- Insert with `ON CONFLICT (message, user, emoji) DO DELETE` — toggle natif Postgres
+- Insert with `ON CONFLICT (message, user, emoji) DO DELETE` · toggle natif Postgres
 - Publie `reaction.toggled` sur le bus avec la nouvelle agrégation
 - Pas de push notification pour les réactions (bruit trop élevé)
 
@@ -223,7 +223,7 @@ Toutes : auth requise, vérif appartenance à la conversation, rate-limit.
 
 - Pas de persistence DB
 - Publie `typing.changed` sur le bus, TTL géré côté receveur (3s)
-- Rate-limit généreux (10/min) — debounce côté client (poste max 1×/3s même si on tape vite)
+- Rate-limit généreux (10/min) · debounce côté client (poste max 1×/3s même si on tape vite)
 
 #### `archiveConversation(conversationId)`
 
@@ -357,7 +357,7 @@ Affichage agrégé sous chaque message :
 
 #### `OnlineIndicator` (optionnel)
 - Point vert à côté du nom de l'autre camp si au moins un stream SSE actif pour lui sur cette conversation
-- Pas affiché si tout le monde est offline (pas de « vu il y a X » — privacy)
+- Pas affiché si tout le monde est offline (pas de « vu il y a X » · privacy)
 
 #### `MessagesBadge` (navbar)
 - Compteur unread
@@ -378,13 +378,13 @@ Affichage agrégé sous chaque message :
 | Événement | In-app | Push | Email |
 |---|---|---|---|
 | 1er contact initial | ✓ | ✓ | ✓ |
-| Nouveau message, destinataire offline (pas de SSE actif) | ✓ | ✓ | — |
-| Nouveau message, destinataire online sur cette convo | — | — | — (il le voit en live) |
-| Nouveau message, destinataire online ailleurs dans l'app | ✓ (toast) | — | — |
+| Nouveau message, destinataire offline (pas de SSE actif) | ✓ | ✓ | · |
+| Nouveau message, destinataire online sur cette convo | · | · | · (il le voit en live) |
+| Nouveau message, destinataire online ailleurs dans l'app | ✓ (toast) | · | · |
 | Fil silencieux > 24h, nouveau message | ✓ | ✓ | ✓ (reprise) |
-| Réaction reçue | — | — | — (bruit trop élevé) |
-| Accusé de lecture | — | — | — |
-| Typing | — | — | — |
+| Réaction reçue | · | · | · (bruit trop élevé) |
+| Accusé de lecture | · | · | · |
+| Typing | · | · | · |
 
 Nouveau `notificationTypeEnum.new_message` (migration).
 
@@ -415,7 +415,7 @@ class MessagingBus extends EventEmitter {
   }
 }
 
-// Un singleton par process — on passe par `globalThis` pour survivre aux
+// Un singleton par process · on passe par `globalThis` pour survivre aux
 // rechargements Turbopack en dev.
 const globalAny = globalThis as unknown as { __messagingBus?: MessagingBus };
 export const messagingBus = globalAny.__messagingBus ??= new MessagingBus();
@@ -468,7 +468,7 @@ export async function GET(req: Request) {
 
 ### Caddy config
 
-Déjà OK pour SSE — `reverse_proxy` de Caddy stream par défaut. Seul ajustement : on désactivera le compresseur sur cet endpoint spécifique (gzip casse le flush des events). Dans le `Caddyfile` :
+Déjà OK pour SSE · `reverse_proxy` de Caddy stream par défaut. Seul ajustement : on désactivera le compresseur sur cet endpoint spécifique (gzip casse le flush des events). Dans le `Caddyfile` :
 
 ```
 @sse path /api/messages/stream
@@ -490,7 +490,7 @@ handle @sse {
 - Longueur : 1-2000 caractères pour `content`
 - Honeypot `_hp` sur le composer
 - Signalement des fils via `content_reports` (type `conversation`) : auto-hide à 5 signalements
-- Shelter admin peut **bloquer** un user ayant abusé (flag à ajouter en phase 2) : nouvelle table `conversation_blocks` (shelter_id, user_id) — l'user ne peut plus ouvrir de conversations avec ce refuge
+- Shelter admin peut **bloquer** un user ayant abusé (flag à ajouter en phase 2) : nouvelle table `conversation_blocks` (shelter_id, user_id) · l'user ne peut plus ouvrir de conversations avec ce refuge
 
 ---
 
@@ -499,7 +499,7 @@ handle @sse {
 - **Isolement** : `assertCanAccessConversation(userId, conversationId)` vérifie que le user courant est soit le user_id du fil, soit un shelter_admin du shelter_id
 - **Privacy admin plateforme** : les platform_admin **ne voient pas** les messages, sauf sur un fil explicitement signalé. Accès via `/admin/moderation` avec log `admin.conversation_viewed`
 - **Export RGPD** : `/api/profile/export` inclut les conversations et messages de l'user + ses réactions
-- **Suppression compte** : cascade delete via les FK. Les messages envoyés par un user supprimé restent visibles dans la conversation côté refuge (légitime — ils ont été échangés dans un contrat de service), avec `sender_id = NULL` après `ON DELETE SET NULL`. Le `content` est conservé mais `sender` devient « Utilisateur supprimé »
+- **Suppression compte** : cascade delete via les FK. Les messages envoyés par un user supprimé restent visibles dans la conversation côté refuge (légitime · ils ont été échangés dans un contrat de service), avec `sender_id = NULL` après `ON DELETE SET NULL`. Le `content` est conservé mais `sender` devient « Utilisateur supprimé »
 - **Politique de rétention** : conversations archivées depuis > 12 mois → purgées automatiquement (cron, à ajouter). Justification RGPD : durée strictement nécessaire à la finalité (suivi adoption + litiges éventuels)
 
 ---
@@ -518,45 +518,45 @@ MVP cible un VPS OVH VLE-4 (2 vCPU, 4 Go RAM). Un process Node gère aisément *
 2. Scale Next.js horizontalement : 2+ containers derrière Caddy load-balancer
 3. Sticky sessions pas nécessaires (chaque stream SSE peut viser n'importe quel process, Redis route les events)
 
-À ce stade on a probablement plusieurs milliers d'utilisateurs actifs — problème appréciable d'avoir.
+À ce stade on a probablement plusieurs milliers d'utilisateurs actifs · problème appréciable d'avoir.
 
 ---
 
 ## Plan d'implémentation (~5-6 jours dev)
 
-### Jour 1 — fondations DB + bus
+### Jour 1 · fondations DB + bus
 - Migrations `conversations`, `messages`, `message_reactions`
 - Enum `new_message` ajouté à `notificationTypeEnum`
 - Mise à jour `init-db-roles.sql` (grants sur nouvelles tables)
 - `src/server/messaging/bus.ts` (event bus singleton)
 - `src/lib/messaging/emojis.ts` (whitelist)
 
-### Jour 2 — server actions & API
+### Jour 2 · server actions & API
 - Server actions : `openConversation`, `sendMessage`, `editMessage`, `toggleReaction`, `markConversationRead`, `setTyping`, `archiveConversation`
 - API route SSE : `/api/messages/stream`
 - API route polling fallback : `/api/messages/poll`
 - API route unread count : `/api/messages/unread-count`
 - Tests unitaires critiques (bus pub/sub, assertCanAccessConversation)
 
-### Jour 3 — UI thread + composer
+### Jour 3 · UI thread + composer
 - `/messages/[id]` avec thread view
 - `useMessagingStream` hook
 - `MessageBubble`, `MessageComposer`, `TypingIndicator`
 - Auto-scroll intelligent (garde la position si l'user a scrollé vers le haut)
 
-### Jour 4 — réactions + read receipts
+### Jour 4 · réactions + read receipts
 - `ReactionPicker`, `ReactionBar`
 - Ticks d'accusé de lecture
 - Optimistic updates sur réactions
 - UI online indicator (optionnel)
 
-### Jour 5 — inbox + refuge side + entry points
+### Jour 5 · inbox + refuge side + entry points
 - `/messages` inbox
 - `/shelter-messages` + thread refuge
 - Boutons « Poser une question », « Contacter le refuge », « Contacter le candidat »
 - Navbar badge + bottom-nav mobile
 
-### Jour 6 — notifications + modération + polish
+### Jour 6 · notifications + modération + polish
 - Template email `newMessageEmailTemplate`
 - Push fanout conditionné à l'absence de SSE actif
 - Signalement d'une conversation dans `/admin/moderation`
@@ -589,7 +589,7 @@ Parking :
 - **Export PDF** d'une conversation (utile pour litige)
 - **Block user** côté refuge (table `conversation_blocks`)
 - **Redis pub/sub** si scaling horizontal nécessaire
-- **Présence "vu il y a X minutes"** (décision privacy — probablement on laisse tomber)
+- **Présence "vu il y a X minutes"** (décision privacy · probablement on laisse tomber)
 
 ---
 

@@ -1,8 +1,8 @@
-# Gamification — stratégie d'engagement
+# Gamification · stratégie d'engagement
 
 ## Philosophie
 
-Dorloter opère sur un terrain émotionnel : on perd son chat, on adopte, on sauve. La gamification classique (XP, levels, streaks, collections) **cheapifie la mission** et fait fuir les utilisateurs sérieux — concierges, bénévoles, refuges. L'objectif n'est pas de créer une dopamine loop, c'est de **reconnaître publiquement les contributions réelles** pour alimenter la fierté, la réputation et l'auto-modération communautaire.
+Dorloter opère sur un terrain émotionnel : on perd son chat, on adopte, on sauve. La gamification classique (XP, levels, streaks, collections) **cheapifie la mission** et fait fuir les utilisateurs sérieux · concierges, bénévoles, refuges. L'objectif n'est pas de créer une dopamine loop, c'est de **reconnaître publiquement les contributions réelles** pour alimenter la fierté, la réputation et l'auto-modération communautaire.
 
 Règle directrice : **on récompense les résultats, pas l'activité**. Poster 50 signalements douteux ne doit rien rapporter. Aider à retrouver 3 chats, oui.
 
@@ -22,7 +22,7 @@ Débloqués automatiquement à partir de seuils :
 |---|---|---|
 | 1 retrouvaille | **Bonne âme** | 1 signalement résolu dont vous étiez l'auteur ou un confirmateur |
 | 3 retrouvailles | **Héros du quartier** | 3 signalements résolus cumulés |
-| 10 retrouvailles | **Sentinelle** | 10 signalements résolus — titre rare, visible en commentaire/profil |
+| 10 retrouvailles | **Sentinelle** | 10 signalements résolus · titre rare, visible en commentaire/profil |
 
 Affichés sous forme de petites pastilles discrètes, pas en bannière agressive. Un clic ouvre une explication de l'obtention.
 
@@ -34,7 +34,7 @@ Quand le matching algo propose une suggestion (perdu × trouvé), l'utilisateur 
 
 ### 📈 Leaderboard refuges (pas individus)
 
-Sur `/refuges` : un bandeau "Les plus actifs ce mois-ci" listant 3–5 refuges selon un score composite :
+Sur `/refuges` : un bandeau "Les plus actifs ce mois-ci" listant 3-5 refuges selon un score composite :
 
 - Taux de réponse aux candidatures (<48h)
 - Nombre d'adoptions réussies (status `adopte`) sur la période
@@ -44,20 +44,20 @@ Sur `/refuges` : un bandeau "Les plus actifs ce mois-ci" listant 3–5 refuges s
 
 ### 🤝 Badge "Famille d'accueil" (user)
 
-Marqueur de profil pour les utilisateurs qui ont déclaré (et qu'un refuge admin a confirmé) accueillir des chats en famille d'accueil. C'est plus un flag de statut qu'une récompense — utile pour les refuges qui cherchent des FA.
+Marqueur de profil pour les utilisateurs qui ont déclaré (et qu'un refuge admin a confirmé) accueillir des chats en famille d'accueil. C'est plus un flag de statut qu'une récompense · utile pour les refuges qui cherchent des FA.
 
 ## Ce qu'on ne fait PAS
 
 Liste explicite de ce qu'on **refuse** d'implémenter, pour résister à la tentation plus tard :
 
-- ❌ **XP / niveaux** ("Niveau 12 adoptant") — infantilisant sur une plateforme sérieuse
-- ❌ **Streaks de visite** ("Vous avez visité 7 jours de suite !") — mécanique d'addiction, aucun rapport avec la mission
-- ❌ **Points pour poster** un signalement ou créer une annonce — incite au spam et aux faux signalements
-- ❌ **Récompenses pour partager** — incite au spam sur réseaux sociaux, pollue l'écosystème
-- ❌ **Collection de chats favoris** ("Vous avez collectionné 50 chats !") — faux collection, pas d'adoption réelle
-- ❌ **Leaderboards individuels des adoptants** — l'adoption n'est pas une compétition, c'est un engagement à vie
-- ❌ **Badges "Premier" ou "Early adopter"** — récompense l'ancienneté, pas la contribution
-- ❌ **Notifications de relance "Revenez, vous avez un badge à réclamer"** — manipulation, pas engagement sincère
+- ❌ **XP / niveaux** ("Niveau 12 adoptant") · infantilisant sur une plateforme sérieuse
+- ❌ **Streaks de visite** ("Vous avez visité 7 jours de suite !") · mécanique d'addiction, aucun rapport avec la mission
+- ❌ **Points pour poster** un signalement ou créer une annonce · incite au spam et aux faux signalements
+- ❌ **Récompenses pour partager** · incite au spam sur réseaux sociaux, pollue l'écosystème
+- ❌ **Collection de chats favoris** ("Vous avez collectionné 50 chats !") · faux collection, pas d'adoption réelle
+- ❌ **Leaderboards individuels des adoptants** · l'adoption n'est pas une compétition, c'est un engagement à vie
+- ❌ **Badges "Premier" ou "Early adopter"** · récompense l'ancienneté, pas la contribution
+- ❌ **Notifications de relance "Revenez, vous avez un badge à réclamer"** · manipulation, pas engagement sincère
 
 ## Proposition MVP (première itération)
 
@@ -84,7 +84,7 @@ ALTER TABLE reports ADD COLUMN resolved_at TIMESTAMP;
 ALTER TABLE reports ADD COLUMN resolved_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL;
 
 -- Table de journal pour garder la trace des contributeurs qui touchent un compteur
--- (utile si plusieurs users ont aidé — ex. un confirmateur d'un match de quelqu'un d'autre)
+-- (utile si plusieurs users ont aidé · ex. un confirmateur d'un match de quelqu'un d'autre)
 CREATE TABLE resolution_credits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
@@ -101,10 +101,10 @@ La résolution d'un signalement déclenche l'insertion de lignes dans `resolutio
 
 Indicateurs à suivre en base (dashboard admin) :
 
-- **% des signalements résolus** avec confirmation explicite (vs expirés ou abandonnés) — doit monter
-- **Nombre de users avec au moins 1 retrouvaille** — trajectoire engagement
-- **Taux de retour** (users qui postent >1 signalement ou confirment >1 match) — mesure de l'engagement répété
-- **Temps moyen signalement → résolution confirmée** — si ça baisse, la gamification a contribué à pousser à l'action
+- **% des signalements résolus** avec confirmation explicite (vs expirés ou abandonnés) · doit monter
+- **Nombre de users avec au moins 1 retrouvaille** · trajectoire engagement
+- **Taux de retour** (users qui postent >1 signalement ou confirment >1 match) · mesure de l'engagement répété
+- **Temps moyen signalement → résolution confirmée** · si ça baisse, la gamification a contribué à pousser à l'action
 
 À revoir à 3 mois post-lancement : si les badges ne sont pas réclamés / ne corrèlent pas avec de l'engagement réel, pivoter. Si ça marche, étape 2 : leaderboard refuges et badge FA.
 
@@ -114,4 +114,4 @@ Indicateurs à suivre en base (dashboard admin) :
 
 - **Système de recommandation peer-to-peer** : les FA peuvent endosser un adoptant ("déjà adopté chez nous en 2024")
 - **Badge "vérifié par un refuge"** : un refuge admin peut attester qu'un user est FA ou bénévole fiable
-- **Score de confiance pour les refuges** agrégé de tous les indicateurs (vérification SIRET + adoptions réussies + temps de réponse + ancienneté) — utile si beaucoup de faux refuges essaient de s'inscrire
+- **Score de confiance pour les refuges** agrégé de tous les indicateurs (vérification SIRET + adoptions réussies + temps de réponse + ancienneté) · utile si beaucoup de faux refuges essaient de s'inscrire

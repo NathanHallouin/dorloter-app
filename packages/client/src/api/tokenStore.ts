@@ -2,7 +2,7 @@
  * Stockage des jetons JWT.
  *
  * Choix assumé (app grand public, simplicité) : access + refresh en
- * localStorage pour survivre au rechargement. Caveat XSS connu — pour un
+ * localStorage pour survivre au rechargement. Caveat XSS connu · pour un
  * durcissement, passer le refresh token en cookie httpOnly côté API.
  */
 

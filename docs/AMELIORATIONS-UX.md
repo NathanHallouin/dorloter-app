@@ -2,7 +2,7 @@
 
 Document de propositions pour faire passer Dorloter d'un MVP fonctionnel à un produit dont **on a envie de parler à ses proches**. Centré sur l'expérience utilisateur, mais inclut aussi les améliorations de qualité technique qui ont un impact direct sur le ressenti (vitesse, fiabilité, accessibilité).
 
-Les propositions sont classées par **impact perçu × effort** — celles du haut sont à attaquer en priorité.
+Les propositions sont classées par **impact perçu × effort** · celles du haut sont à attaquer en priorité.
 
 ---
 
@@ -52,7 +52,7 @@ Le swipe est ludique mais pas pour tout le monde. Toggle visible « Liste / Swip
 - Carrousel **swipeable** plein écran, pinch-to-zoom
 - Première photo en hero, les suivantes en grille en dessous
 - Tap sur une miniature → lightbox plein écran
-- Si une seule photo, ne pas afficher le carrousel — pas d'UI inutile
+- Si une seule photo, ne pas afficher le carrousel · pas d'UI inutile
 
 ### 2.3. Fiche animal scannable en 3 secondes
 
@@ -67,7 +67,7 @@ En bas de fiche : 3-4 animaux similaires (même espèce, même tranche d'âge, m
 ### 2.5. Suivi post-favori intelligent
 
 Quand l'utilisateur met un animal en favori :
-- Notification immédiate : « Le refuge X a reçu 3 nouvelles candidatures pour Mistigri cette semaine — n'attendez pas pour candidater si c'est lui »
+- Notification immédiate : « Le refuge X a reçu 3 nouvelles candidatures pour Mistigri cette semaine · n'attendez pas pour candidater si c'est lui »
 - Si le statut change (réservé, adopté), notification + animal grisé en favoris avec message touchant : « Mistigri a trouvé sa famille 💛 Découvrez d'autres chats au même refuge ».
 - Quand le user n'a pas ouvert l'app depuis 7 jours : digest hebdo des nouveaux animaux dans ses favoris/préférences.
 
@@ -111,9 +111,9 @@ Aujourd'hui : rayon en km. À ajouter :
 ### 3.4. Matching présenté comme une recommandation, pas un fait
 
 Sur la page d'un signalement perdu, afficher les matches potentiels avec **un score honnête** :
-- « 92 % de similarité — distance 800 m, même couleur, taille proche » (vert)
-- « 64 % de similarité — distance 4 km, race différente mais même âge » (jaune)
-- Jamais « MATCH TROUVÉ ! » triomphal — l'utilisateur est en détresse, le faux espoir fait mal.
+- « 92 % de similarité · distance 800 m, même couleur, taille proche » (vert)
+- « 64 % de similarité · distance 4 km, race différente mais même âge » (jaune)
+- Jamais « MATCH TROUVÉ ! » triomphal · l'utilisateur est en détresse, le faux espoir fait mal.
 
 Boutons d'action clairs : « Contacter » (révèle le téléphone), « Pas mon animal » (rejette la suggestion, améliore l'algo).
 
@@ -183,7 +183,7 @@ Chaque user contrôle. Pas d'opt-in caché. Bouton "tout désactiver sauf urgent
 ### 5.3. Microcopy chaleureuse
 
 Mauvais : « Vous avez 1 nouvelle correspondance ».
-Bon : « 🐾 Mistigri pourrait être votre Felix perdu — il est à 800 m. Voulez-vous le contacter ? »
+Bon : « 🐾 Mistigri pourrait être votre Felix perdu · il est à 800 m. Voulez-vous le contacter ? »
 
 Toutes les notifs sont rédigées comme un voisin bienveillant, pas comme un système.
 
@@ -201,7 +201,7 @@ Lien dans le footer de chaque fiche : signaler une fiche douteuse, une pension n
 
 ### 6.3. RGPD irréprochable
 
-- Bandeau cookies minimaliste (juste "OK", pas de dark pattern), si vraiment nécessaire — ou mieux, **pas de tracker du tout** au lancement (Plausible self-hosted = pas de cookie nominatif).
+- Bandeau cookies minimaliste (juste "OK", pas de dark pattern), si vraiment nécessaire · ou mieux, **pas de tracker du tout** au lancement (Plausible self-hosted = pas de cookie nominatif).
 - Page « Exporter mes données » et « Supprimer mon compte » accessibles en 2 clics depuis le profil.
 - Politique de confidentialité courte, en français normal (pas du juridique).
 
@@ -218,7 +218,7 @@ Sur les signalements, ne pas afficher le téléphone en clair → bouton « Cont
 - `<img srcset>` avec tailles précises sur chaque card → économise des Mo
 - Format AVIF ou WebP servi automatiquement
 - Placeholder `blur` (LQIP) généré au build
-- Photos dans S3 stockées en plusieurs tailles (thumbnail 320px, medium 800px, full 1920px) — génération à l'upload, pas à la volée
+- Photos dans S3 stockées en plusieurs tailles (thumbnail 320px, medium 800px, full 1920px) · génération à l'upload, pas à la volée
 
 ### 7.2. Skeleton loaders, jamais de spinner plein écran
 
@@ -247,7 +247,7 @@ Lighthouse CI dans GitHub Actions avec seuils. Un PR qui dégrade un score ne me
 
 ### 8.1. Contrastes AA (WCAG 2.2)
 
-Tous les textes doivent passer le ratio 4.5:1 en clair et en sombre. Tester avec `axe-core` en e2e. Couleurs chaleureuses ne signifient pas faibles contrastes — l'ambre sur crème peut être insuffisant.
+Tous les textes doivent passer le ratio 4.5:1 en clair et en sombre. Tester avec `axe-core` en e2e. Couleurs chaleureuses ne signifient pas faibles contrastes · l'ambre sur crème peut être insuffisant.
 
 ### 8.2. Navigation clavier complète
 
@@ -316,7 +316,7 @@ Bouton « Suivre ce refuge » sur chaque page refuge. Le user reçoit :
 - **Dark mode soigné** : pas juste invertir, vraies couleurs nocturnes (terre cuite → terre brûlée, crème → graphite)
 - **404 émouvante** : un chat perdu sur fond de carte avec « Cette page s'est perdue. Vous avez essayé Adopter ? »
 - **Loading messages variés** : « On caresse le chat... », « On prépare la croquette... » au lieu de "Chargement..."
-- **Empty states illustrés** : pas de "Aucun résultat", mais une illustration et une suggestion (« Aucun chat dans ce rayon — élargissez à 50 km ? »)
+- **Empty states illustrés** : pas de "Aucun résultat", mais une illustration et une suggestion (« Aucun chat dans ce rayon · élargissez à 50 km ? »)
 
 ---
 
@@ -363,8 +363,8 @@ Bouton « Suivre ce refuge » sur chaque page refuge. Le user reçoit :
 
 Le MVP est solide techniquement. Les 3 axes qui transformeront l'expérience :
 
-1. **Émotion** — chaque écran doit donner envie d'agir, pas juste d'informer. Microcopy chaleureuse, illustrations, témoignages, empty states soignés.
-2. **Vitesse perçue** — skeleton loaders, images optimisées, PWA offline, Lighthouse > 90. L'utilisateur doit sentir que l'app est vivante.
-3. **Confiance** — vérifications visibles, RGPD irréprochable, modération réactive, anti-arnaque. Le sujet (animaux perdus, adoption) est émotionnellement chargé : l'app doit inspirer un sérieux absolu.
+1. **Émotion** · chaque écran doit donner envie d'agir, pas juste d'informer. Microcopy chaleureuse, illustrations, témoignages, empty states soignés.
+2. **Vitesse perçue** · skeleton loaders, images optimisées, PWA offline, Lighthouse > 90. L'utilisateur doit sentir que l'app est vivante.
+3. **Confiance** · vérifications visibles, RGPD irréprochable, modération réactive, anti-arnaque. Le sujet (animaux perdus, adoption) est émotionnellement chargé : l'app doit inspirer un sérieux absolu.
 
 Le différenciateur produit reste le **matching perdu/trouvé**. Tout investissement qui le rend plus précis, plus rapide, plus émouvant (stories de retrouvailles, QR médaillons, notifications granulaires) creuse l'écart avec la concurrence.

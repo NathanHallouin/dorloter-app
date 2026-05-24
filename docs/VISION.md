@@ -1,4 +1,4 @@
-# Vision 2030 — Dorloter comme plateforme cardinale du bien-être félin en France
+# Vision 2030 · Dorloter comme plateforme cardinale du bien-être félin en France
 
 Document de réflexion stratégique : idées qui transformeraient Dorloter d'une plateforme d'adoption + lost/found en **l'infrastructure de référence** pour l'ensemble de l'écosystème félin français (adoptants, refuges, associations TNR, vétérinaires, pouvoirs publics).
 
@@ -19,10 +19,10 @@ Document de réflexion stratégique : idées qui transformeraient Dorloter d'une
 
 ---
 
-## 1. Matching adoptif prédictif — au-delà des cases à cocher
+## 1. Matching adoptif prédictif · au-delà des cases à cocher
 
 ### Problème
-Le matching actuel repose sur des flags binaires : « OK avec chats », « OK avec enfants ». Résultat : ~30% des adoptions se terminent par un retour au refuge dans les 6 mois (chiffre SPA). La cause n°1 n'est jamais « incompatibilité espèces » — c'est le **décalage entre attentes et réalité comportementale**.
+Le matching actuel repose sur des flags binaires : « OK avec chats », « OK avec enfants ». Résultat : ~30% des adoptions se terminent par un retour au refuge dans les 6 mois (chiffre SPA). La cause n°1 n'est jamais « incompatibilité espèces » · c'est le **décalage entre attentes et réalité comportementale**.
 
 ### Proposition
 Questionnaire psychométrique adoptant + profil comportemental chat (tags enrichis par le refuge : niveau d'activité, sociabilité, besoin de câlins, bruyant, type de jeu, tolérance à la solitude, etc.). Score de compatibilité **multi-dimensionnel** calculé comme une distance euclidienne pondérée entre les deux vecteurs.
@@ -52,7 +52,7 @@ Le contrat papier se perd. Les refuges n'ont aucun moyen de vérifier que le cha
 Contrat signé électroniquement au moment de l'adoption (eIDAS compliant). Check-ins obligatoires à **J+7, J+30, J+90, J+180, J+365** : mini-questionnaire (1 min) + photo récente du chat.
 
 ### Mécanique
-- Signature électronique via DocuSign ou équivalent européen (Yousign FR, Universign FR — souverain)
+- Signature électronique via DocuSign ou équivalent européen (Yousign FR, Universign FR · souverain)
 - Push + email automatique à chaque échéance
 - Escalade si pas de réponse à J+7 après rappel : notification au refuge d'origine
 - Tableau de bord côté refuge : cohortes d'adoptions avec leur statut de check-in
@@ -63,7 +63,7 @@ Contrat signé électroniquement au moment de l'adoption (eIDAS compliant). Chec
 - **Mesure impact** : % check-ins complétés, taux de rehoming détecté, temps médian de détection d'un abandon.
 
 ### Pourquoi ça change la donne
-Crée un **standard** qui n'existe pas aujourd'hui. Les refuges qui l'adoptent peuvent le mettre en avant. Les adoptants sérieux adhèrent naturellement — les autres s'auto-sélectionnent out.
+Crée un **standard** qui n'existe pas aujourd'hui. Les refuges qui l'adoptent peuvent le mettre en avant. Les adoptants sérieux adhèrent naturellement · les autres s'auto-sélectionnent out.
 
 ---
 
@@ -73,7 +73,7 @@ Crée un **standard** qui n'existe pas aujourd'hui. Les refuges qui l'adoptent p
 Les hoarders (personnes qui accumulent des dizaines d'animaux en mauvaises conditions) et les trafiquants (revente déguisée via adoptions multiples) sont invisibles pour les refuges individuels. Un refuge refuse un adoptant suspect → il va au suivant → personne n'est prévenu.
 
 ### Proposition
-Système de **flags partagés entre refuges** (avec consentement explicite de l'adoptant au signup — base légale RGPD : intérêt légitime + protection des animaux).
+Système de **flags partagés entre refuges** (avec consentement explicite de l'adoptant au signup · base légale RGPD : intérêt légitime + protection des animaux).
 
 ### Mécanique
 - Chaque refuge peut lever un flag sur un user après refus documenté (motif obligatoire, 500 caractères min)
@@ -84,7 +84,7 @@ Système de **flags partagés entre refuges** (avec consentement explicite de l'
 
 ### Faisabilité & effort
 - **Effort** : 3 semaines. Schema flags + UI + algo détection + admin review.
-- **Risques** : juridique (diffamation si flag injustifié — mitigation : motif obligatoire + droit de réponse), RGPD (DPA à faire). Partenariat I-CAD complexe.
+- **Risques** : juridique (diffamation si flag injustifié · mitigation : motif obligatoire + droit de réponse), RGPD (DPA à faire). Partenariat I-CAD complexe.
 - **Mesure impact** : nombre d'alertes, % confirmées après review, nombre d'hoarders/trafiquants identifiés.
 
 ### Pourquoi ça change la donne
@@ -92,7 +92,7 @@ Zéro plateforme ne fait ça en France. Potentiel médiatique énorme (« Dorlot
 
 ---
 
-## 4. Module TNR intégré — outil terrain pour associations
+## 4. Module TNR intégré · outil terrain pour associations
 
 ### Contexte
 La France compte ~11M de chats errants (source ECAIE). Le TNR (Trap-Neuter-Return) est la méthode validée scientifiquement pour stabiliser les colonies. Mais les associations qui le pratiquent gèrent tout sur papier / Excel / groupes WhatsApp. Perte d'info massive, duplication de travail, rapports préfectoraux laborieux.
@@ -187,7 +187,7 @@ Les fiches chats en refuge ont des descriptions de qualité très variable. Cert
 4. Auto-suggère des tags comportementaux à partir de la description libre
 
 ### Mécanique
-- Modèle IA local (Llama 3.1 7B sur GPU partagé ou via Mistral API FR — souverain)
+- Modèle IA local (Llama 3.1 7B sur GPU partagé ou via Mistral API FR · souverain)
 - Inférence à la sauvegarde de la fiche (latence acceptable 2-5s)
 - Feedback non-bloquant : suggestions affichées, refuge libre de les appliquer
 - Apprentissage continu sur les adoptions réussies vs retours
@@ -247,7 +247,7 @@ Au moment de l'adoption, l'adoptant place un **dépôt de 200-500€** (selon le
 - **Mesure impact** : taux d'abandon avant J+180 vs sans dépôt (A/B test sur refuges volontaires).
 
 ### Pourquoi ça change la donne
-Transforme la **décision d'adoption en décision réfléchie**. Les adoptants impulsifs s'auto-excluent. C'est controversé — certains y verront de l'élitisme — mais c'est scientifiquement étayé (le « skin in the game » réduit l'abandon de 40% selon les études US avec adoption fees).
+Transforme la **décision d'adoption en décision réfléchie**. Les adoptants impulsifs s'auto-excluent. C'est controversé · certains y verront de l'élitisme · mais c'est scientifiquement étayé (le « skin in the game » réduit l'abandon de 40% selon les études US avec adoption fees).
 
 ---
 
@@ -314,11 +314,11 @@ Onglet « Signaler une maltraitance » distinct du signalement perdu/trouvé. L'
 - **Mesure impact** : nombre de signalements, % ayant donné lieu à une action, visibilité médiatique.
 
 ### Pourquoi ça change la donne
-Rend **visible** ce qui aujourd'hui est noyé. Crée de la pression institutionnelle documentée. Certains politiques vont faire de la comm' sur ces données — tant mieux.
+Rend **visible** ce qui aujourd'hui est noyé. Crée de la pression institutionnelle documentée. Certains politiques vont faire de la comm' sur ces données · tant mieux.
 
 ---
 
-## 13. Registre des bonnes pratiques — certification refuges
+## 13. Registre des bonnes pratiques · certification refuges
 
 ### Problème
 Il existe des refuges excellents et des refuges discutables. Rien ne permet à l'adoptant de distinguer les deux au-delà du badge « vérifié » actuel (qui vérifie juste l'existence juridique).
@@ -374,13 +374,13 @@ Comble le trou entre « j'ai adopté » et « je sais gérer ». Augmente la ré
 ## 15. Application mobile terrain (refuges + TNR)
 
 ### Problème
-Les bénévoles en action (tractage TNR, visite à domicile, sauvetage) ont besoin d'outils terrain — appareil photo géolocalisé, accès offline, check-list. Aujourd'hui ils utilisent des apps multiples non intégrées.
+Les bénévoles en action (tractage TNR, visite à domicile, sauvetage) ont besoin d'outils terrain · appareil photo géolocalisé, accès offline, check-list. Aujourd'hui ils utilisent des apps multiples non intégrées.
 
 ### Proposition
 **App mobile dédiée** (PWA → iOS/Android via Capacitor) avec :
 - Mode **Terrain** : photo + géoloc + notes synchrones quand connecté, sinon queue locale
 - **Check-lists** de visite (pre-adoption, post-adoption)
-- **Scanner de puce** (via lecteur BLE interopérable — il existe déjà sur le marché)
+- **Scanner de puce** (via lecteur BLE interopérable · il existe déjà sur le marché)
 - **Mode hors ligne complet** : carte, fiches chats, contacts vet
 - **Notifications terrain** : alerte quand un bénévole arrive près d'une colonie à surveiller
 
@@ -417,10 +417,10 @@ Voici une matrice impact × effort, vue à 24 mois :
 | 12. Observatoire maltraitance | Moyen | Moyen | Institutionnel | **P3** |
 
 **Les 4 à lancer en priorité absolue** si je devais parier :
-1. **Matching prédictif** (§1) — le différenciateur technique
-2. **Module TNR** (§4) — le monopole fonctionnel
-3. **Rehoming encadré** (§10) — ferme le trou noir
-4. **Check-ins contractuels** (§2) — crée le standard
+1. **Matching prédictif** (§1) · le différenciateur technique
+2. **Module TNR** (§4) · le monopole fonctionnel
+3. **Rehoming encadré** (§10) · ferme le trou noir
+4. **Check-ins contractuels** (§2) · crée le standard
 
 Ces 4 combinés font de Dorloter **l'outil évident** pour l'écosystème. Le reste se construit par capillarité.
 
@@ -432,7 +432,7 @@ Dorloter doit rester **gratuit pour adoptants, refuges et associations** (c'est 
 
 1. **Parrainage** (§8) : 1-3% de revenu via frais Stripe
 2. **Réseau vet** (§5) : % sur les consultations prises via Dorloter (les vets acceptent)
-3. **Subventions publiques** : CNAF, conseils régionaux, DGAL — viennent après §6 (open data) et §11 (I-CAD)
+3. **Subventions publiques** : CNAF, conseils régionaux, DGAL · viennent après §6 (open data) et §11 (I-CAD)
 4. **Mécénat entreprises** : fondations animales (Royal Canin, Purina), assurances animaux (SantéVet, Assur O'Poil) qui veulent associer leur marque
 5. **Dons volontaires** : page « soutenir Dorloter » discrète
 
@@ -442,7 +442,7 @@ Dorloter doit rester **gratuit pour adoptants, refuges et associations** (c'est 
 
 ## L'étape d'après
 
-Ce doc ne propose pas de roadmap temporelle précise — c'est une **vision**. Chaque idée vaut une réflexion approfondie individuelle (mini-doc dédié, comme `GAMIFICATION.md` ou `MESSAGING.md`), un sondage auprès de l'audience cible, et éventuellement un prototype.
+Ce doc ne propose pas de roadmap temporelle précise · c'est une **vision**. Chaque idée vaut une réflexion approfondie individuelle (mini-doc dédié, comme `GAMIFICATION.md` ou `MESSAGING.md`), un sondage auprès de l'audience cible, et éventuellement un prototype.
 
 **Proposition concrète** : choisir **1 idée P0** pour le prochain cycle de 6 mois, aller en profondeur, et mesurer. Si ça marche → on enchaîne. Si ça ne marche pas → on apprend. Pas de fuite en avant sur 15 features à la fois.
 

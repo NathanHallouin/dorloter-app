@@ -23,17 +23,17 @@ Document de référence rédigé pour l'ancien stack **Next.js / TypeScript**
 
 Aujourd'hui, la logique métier est répartie entre :
 
-- `domains/X/queries/` — accès lecture (SQL, pas de logique métier)
-- `domains/X/actions/` — Server Actions Next.js (validation FormData,
+- `domains/X/queries/` · accès lecture (SQL, pas de logique métier)
+- `domains/X/actions/` · Server Actions Next.js (validation FormData,
   `revalidatePath`, retour `ActionResponse`)
 
 Quand on ajoutera l'API mobile (`/api/v1/*`), elle aura besoin de la
 **même** logique métier. Si on la duplique, on a deux endroits à mettre
-à jour à chaque règle métier — typiquement un endroit qui dérive et le
+à jour à chaque règle métier · typiquement un endroit qui dérive et le
 client mobile commence à différer du web.
 
-**Solution** : extraire la logique métier dans un troisième niveau —
-`domains/X/services/` — qui est :
+**Solution** : extraire la logique métier dans un troisième niveau,
+`domains/X/services/` · qui est :
 
 - **pur** : pas de `revalidatePath`, pas de FormData, pas de `NextResponse`
 - **typé** : entrées et sorties typées, pas de `unknown`
@@ -100,12 +100,12 @@ Trois règles d'or :
 2. **Throw, ne pas return un Result.** Le code reste linéaire. Le wrapper
    API et la Server Action catch et formatent.
 3. **Pas de Next.js dans un service.** Si tu importes `next/cache`,
-   `next/headers`, `revalidatePath` — c'est le signal que tu es dans une
+   `next/headers`, `revalidatePath` · c'est le signal que tu es dans une
    coquille (Server Action), pas dans un service.
 
 ---
 
-## 3. Erreurs de domaine — `DomainError`
+## 3. Erreurs de domaine · `DomainError`
 
 Toute erreur "métier" est une `DomainError` avec un code stable parmi
 `@infra/api/errors`. Les codes sont **publics** : ils sont exposés au
@@ -132,11 +132,11 @@ throw rateLimited(retryAfterSec);                // 429
 ```
 
 Tout autre `Error` qui remonte au handler API est converti en
-`INTERNAL_ERROR` (500) — message générique, log structuré côté serveur.
+`INTERNAL_ERROR` (500) · message générique, log structuré côté serveur.
 
 ---
 
-## 4. Server Actions — coquille fine
+## 4. Server Actions · coquille fine
 
 ```ts
 // src/domains/adoption/actions/pets.ts
@@ -171,7 +171,7 @@ return { success: true, data: result };
 
 ---
 
-## 5. Routes API REST — coquille fine
+## 5. Routes API REST · coquille fine
 
 ```ts
 // src/app/api/v1/pets/[id]/route.ts
@@ -219,7 +219,7 @@ Options du wrapper :
 
 ---
 
-## 6. DTOs — la stabilité du contrat
+## 6. DTOs · la stabilité du contrat
 
 Ne jamais retourner directement une entité Drizzle dans une réponse API.
 Toujours passer par un **DTO** (`src/app/api/v1/_dtos/`) :
@@ -331,7 +331,7 @@ Type-safety complète, suggestions d'autocomplétion, validation au build.
 
 ## 10. Tester
 
-Une route API ressemble à n'importe quelle handler Next.js — on peut la
+Une route API ressemble à n'importe quelle handler Next.js · on peut la
 tester :
 
 - **End-to-end** : Playwright qui hit `/api/v1/pets/...` et asserte le

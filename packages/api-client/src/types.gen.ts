@@ -1,5 +1,5 @@
 /**
- * Types TypeScript du client API Dorloter — GÉNÉRÉS AUTOMATIQUEMENT.
+ * Types TypeScript du client API Dorloter · GÉNÉRÉS AUTOMATIQUEMENT.
  * Ne pas éditer à la main. Régénérer via : `bun api:types`.
  *
  * Source : apps/web/src/infrastructure/api/openapi.ts → buildOpenApiDocument()
@@ -117,7 +117,7 @@ export interface paths {
         };
         /**
          * Animaux similaires à un pet de référence
-         * @description Heuristique : même espèce, priorité même refuge puis même catégorie d'âge. Pas de pagination — retourne `limit` items max (défaut 4).
+         * @description Heuristique : même espèce, priorité même refuge puis même catégorie d'âge. Pas de pagination · retourne `limit` items max (défaut 4).
          */
         get: {
             parameters: {
@@ -307,7 +307,7 @@ export interface paths {
         put?: never;
         /**
          * Créer un signalement perdu / trouvé
-         * @description Auth requise. Rate-limité (5/h/IP). Lance le matching à la création — le retour contient `matchCount` (correspondances candidates).
+         * @description Auth requise. Rate-limité (5/h/IP). Lance le matching à la création · le retour contient `matchCount` (correspondances candidates).
          *
          *     **Anti-doublon** : refus 409 si l'user a déjà un signalement actif très similaire (description proche, < 30j). Inviter à éditer plutôt qu'à recréer.
          */
@@ -469,7 +469,7 @@ export interface paths {
         };
         /**
          * Profil de l'utilisateur courant
-         * @description Retourne le profil complet de l'utilisateur connecté. Ne contient **jamais** la `pushSubscription` ni les `notificationPreferences` — endpoints dédiés.
+         * @description Retourne le profil complet de l'utilisateur connecté. Ne contient **jamais** la `pushSubscription` ni les `notificationPreferences` · endpoints dédiés.
          */
         get: {
             parameters: {
@@ -542,7 +542,7 @@ export interface paths {
         };
         /**
          * Mes signalements perdus / trouvés
-         * @description Liste paginée des signalements créés par l'utilisateur courant. Tous statuts confondus par défaut (actif + résolu + expiré) — passer `status` pour restreindre.
+         * @description Liste paginée des signalements créés par l'utilisateur courant. Tous statuts confondus par défaut (actif + résolu + expiré) · passer `status` pour restreindre.
          */
         get: {
             parameters: {
@@ -673,7 +673,7 @@ export interface paths {
         };
         /**
          * Liste des favoris (petId) de l'utilisateur courant
-         * @description Réponse compacte : juste les UUIDs. Le client en fait un Set pour piloter le rendu des cœurs côté mobile. Pas de pagination — un user typique en a < 100, et le client veut la liste complète.
+         * @description Réponse compacte : juste les UUIDs. Le client en fait un Set pour piloter le rendu des cœurs côté mobile. Pas de pagination · un user typique en a < 100, et le client veut la liste complète.
          */
         get: {
             parameters: {
@@ -888,7 +888,7 @@ export interface paths {
         put?: never;
         /**
          * Enregistre un Expo push token
-         * @description Idempotent — ré-appel avec le même `(userId, expoPushToken)` rafraîchit `lastSeenAt`. À appeler après login mobile et à chaque démarrage si le token a changé (Expo en redonne parfois un nouveau).
+         * @description Idempotent · ré-appel avec le même `(userId, expoPushToken)` rafraîchit `lastSeenAt`. À appeler après login mobile et à chaque démarrage si le token a changé (Expo en redonne parfois un nouveau).
          */
         post: {
             parameters: {
@@ -980,7 +980,7 @@ export interface paths {
          * Génère une URL S3 signée pour un upload direct
          * @description Le client (mobile) envoie ensuite le body du fichier via `PUT uploadUrl`, puis utilise `publicUrl` dans le payload de la ressource (POST /reports, /pets, …).
          *
-         *     L'URL signée expire après 5 minutes — assez pour uploader, court pour limiter le risque d'interception.
+         *     L'URL signée expire après 5 minutes · assez pour uploader, court pour limiter le risque d'interception.
          */
         post: {
             parameters: {
@@ -1286,7 +1286,7 @@ export interface paths {
         put?: never;
         /**
          * Ouvre une conversation avec un refuge
-         * @description Crée ou récupère une conversation entre l'utilisateur courant et le refuge cible (optionnellement attachée à un animal). Idempotent sur (user, shelter, pet) — un appel sur une conversation existante ajoute juste le `firstMessage` au fil.
+         * @description Crée ou récupère une conversation entre l'utilisateur courant et le refuge cible (optionnellement attachée à un animal). Idempotent sur (user, shelter, pet) · un appel sur une conversation existante ajoute juste le `firstMessage` au fil.
          */
         post: {
             parameters: {
@@ -1449,7 +1449,7 @@ export interface paths {
         };
         /**
          * Recherche de GIFs (proxy Tenor)
-         * @description Renvoie des GIFs depuis Tenor — soit par mot-clef via `?q=`, soit les tendances si `q` est omis. Filtre `contentfilter=high` appliqué côté Tenor (pas de NSFW). Rate-limité 60/min/user.
+         * @description Renvoie des GIFs depuis Tenor · soit par mot-clef via `?q=`, soit les tendances si `q` est omis. Filtre `contentfilter=high` appliqué côté Tenor (pas de NSFW). Rate-limité 60/min/user.
          */
         get: {
             parameters: {
@@ -1537,7 +1537,7 @@ export interface paths {
         put?: never;
         /**
          * Déclare que l'appelant tape (ou s'arrête)
-         * @description À envoyer en debounce ~3s tant que l'utilisateur tape, et avec `isTyping=false` quand il s'arrête. L'entrée expire à 5s côté serveur — si le client est déconnecté/crashe, l'indicateur disparaît tout seul.
+         * @description À envoyer en debounce ~3s tant que l'utilisateur tape, et avec `isTyping=false` quand il s'arrête. L'entrée expire à 5s côté serveur · si le client est déconnecté/crashe, l'indicateur disparaît tout seul.
          */
         post: {
             parameters: {
@@ -1701,7 +1701,7 @@ export interface paths {
         };
         /**
          * Messages d'une conversation
-         * @description Renvoie les messages chronologiquement (max 200). Avec `?since=ISO`, renvoie uniquement les messages strictement postérieurs — pour le polling 5s du mobile.
+         * @description Renvoie les messages chronologiquement (max 200). Avec `?since=ISO`, renvoie uniquement les messages strictement postérieurs · pour le polling 5s du mobile.
          */
         get: {
             parameters: {
@@ -1832,7 +1832,7 @@ export interface components {
                  */
                 code: "VALIDATION_FAILED" | "BAD_REQUEST" | "INVALID_PARAM" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "DUPLICATE" | "GONE" | "UNPROCESSABLE" | "RATE_LIMITED" | "INTERNAL_ERROR" | "SERVICE_UNAVAILABLE";
                 message: string;
-                /** @description Contexte additionnel — structure dépend du code. */
+                /** @description Contexte additionnel · structure dépend du code. */
                 details?: {
                     [key: string]: unknown;
                 };
@@ -1887,7 +1887,7 @@ export interface components {
             id: string;
             /** Format: uri */
             url: string;
-            /** @description LQIP base64 (~500 octets) — utilisable comme placeholder. */
+            /** @description LQIP base64 (~500 octets) · utilisable comme placeholder. */
             blurDataUrl?: string | null;
             isPrimary: boolean;
             order: number;
@@ -1900,7 +1900,7 @@ export interface components {
             address?: string | null;
             isVerified: boolean;
         };
-        /** @description Refuge ou association — version annuaire (sans coordonnées détaillées). */
+        /** @description Refuge ou association · version annuaire (sans coordonnées détaillées). */
         ShelterSummary: {
             /** Format: uuid */
             id: string;
@@ -1922,7 +1922,7 @@ export interface components {
         };
         Shelter: components["schemas"]["ShelterSummary"] & {
             missionLong?: string | null;
-            /** @description Numéro SIRET — public légalement. */
+            /** @description Numéro SIRET · public légalement. */
             siret?: string | null;
             phone?: string | null;
             /** Format: email */
@@ -1943,7 +1943,7 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        /** @description Signalement perdu / trouvé — version liste (sans description longue, sans coordonnées de contact). */
+        /** @description Signalement perdu / trouvé · version liste (sans description longue, sans coordonnées de contact). */
         ReportSummary: {
             /** Format: uuid */
             id: string;
@@ -1980,7 +1980,7 @@ export interface components {
             distinctiveSigns?: string | null;
             notes?: string | null;
             photos: components["schemas"]["ReportPhoto"][];
-            /** @description Vrai si le signalement a un téléphone ou email associé. **Les valeurs ne sont jamais retournées en clair** — utilisez l'endpoint de révélation (rate-limité). */
+            /** @description Vrai si le signalement a un téléphone ou email associé. **Les valeurs ne sont jamais retournées en clair** · utilisez l'endpoint de révélation (rate-limité). */
             hasContact: boolean;
             /** Format: date-time */
             resolvedAt?: string | null;
@@ -2041,7 +2041,7 @@ export interface components {
             isPrimary: boolean;
             order: number;
         };
-        /** @description Pension agréée — version annuaire (sans coordonnées détaillées, sans services). */
+        /** @description Pension agréée · version annuaire (sans coordonnées détaillées, sans services). */
         PensionSummary: {
             /** Format: uuid */
             id: string;
@@ -2075,7 +2075,7 @@ export interface components {
             role: "user" | "shelter_admin" | "pension_admin" | "platform_admin";
             /**
              * Format: uuid
-             * @description Si l'user est admin d'un refuge — utilisé pour afficher les onglets backoffice.
+             * @description Si l'user est admin d'un refuge · utilisé pour afficher les onglets backoffice.
              */
             shelterId?: string | null;
             /** Format: uuid */
@@ -2138,7 +2138,7 @@ export interface components {
             type: components["schemas"]["NotificationType"];
             title: string;
             body?: string | null;
-            /** @description Payload contextuel — structure dépend du `type` (ex. `reportId`, `petId`, `applicationId`). */
+            /** @description Payload contextuel · structure dépend du `type` (ex. `reportId`, `petId`, `applicationId`). */
             data?: {
                 [key: string]: unknown;
             } | null;
@@ -2212,7 +2212,7 @@ export interface components {
              * @description ID utilisateur de l'émetteur. `null` si le compte a été supprimé entre-temps.
              */
             senderId: string | null;
-            /** @description Texte du message — `null` si le message est purement GIF ou vocal. */
+            /** @description Texte du message · `null` si le message est purement GIF ou vocal. */
             content: string | null;
             attachment: (components["schemas"]["MessageAttachment"] | null) | null;
             /** Format: date-time */
@@ -2265,7 +2265,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             /**
-             * @description Côté représenté par l'appelant courant — détermine quel `peer*` est rendu.
+             * @description Côté représenté par l'appelant courant · détermine quel `peer*` est rendu.
              * @enum {string}
              */
             asSide: "user" | "shelter";
@@ -2278,7 +2278,7 @@ export interface components {
             peerName: string;
             /** Format: uri */
             peerImageUrl: string | null;
-            /** @description Slug du refuge si l'appelant est côté user. `null` côté shelter (le peer est un particulier — pas de page publique). */
+            /** @description Slug du refuge si l'appelant est côté user. `null` côté shelter (le peer est un particulier · pas de page publique). */
             peerSlug: string | null;
             unreadCount: number;
         };
@@ -2287,7 +2287,7 @@ export interface components {
             shelterId: string;
             /**
              * Format: uuid
-             * @description Optionnel — attache la conversation à un animal précis (question avant adoption).
+             * @description Optionnel · attache la conversation à un animal précis (question avant adoption).
              */
             petId?: string;
             firstMessage: string;
@@ -2295,7 +2295,7 @@ export interface components {
         OpenConversationResult: {
             /** Format: uuid */
             conversationId: string;
-            /** @description `false` si une conversation existait déjà pour (user, shelter, pet) — le 1er message a été appendu à l'existante. */
+            /** @description `false` si une conversation existait déjà pour (user, shelter, pet) · le 1er message a été appendu à l'existante. */
             isNew: boolean;
         };
         /** @description Au moins l'un de `content` ou `attachment` doit être fourni. Un message peut combiner les deux (légende sur un GIF par exemple). */
@@ -2343,13 +2343,13 @@ export interface components {
              * @enum {string}
              */
             kind: "report" | "pet" | "shelter" | "pension" | "voice";
-            /** @description Taille en octets. Max 5 Mo par fichier. Inclus dans la signature S3 — le PUT est refusé si le client envoie un fichier d'une autre taille. */
+            /** @description Taille en octets. Max 5 Mo par fichier. Inclus dans la signature S3 · le PUT est refusé si le client envoie un fichier d'une autre taille. */
             contentLength: number;
         };
         UploadPresignResponse: {
             /**
              * Format: uri
-             * @description URL signée — PUT le body fichier dessus avec les mêmes `Content-Type` et `Content-Length` que ceux demandés.
+             * @description URL signée · PUT le body fichier dessus avec les mêmes `Content-Type` et `Content-Length` que ceux demandés.
              */
             uploadUrl: string;
             /**
@@ -2357,10 +2357,10 @@ export interface components {
              * @description URL finale de l'asset une fois uploadé. À inclure dans le payload de création (POST /reports, etc.).
              */
             publicUrl: string;
-            /** @description Clé S3 — utile pour DELETE ultérieur ou pour debug. Pas requise dans les payloads de création. */
+            /** @description Clé S3 · utile pour DELETE ultérieur ou pour debug. Pas requise dans les payloads de création. */
             key: string;
             expiresInSec: number;
-            /** @description Taille max autorisée par le serveur pour ce kind d'upload. Informative — le client doit déjà respecter cette limite. */
+            /** @description Taille max autorisée par le serveur pour ce kind d'upload. Informative · le client doit déjà respecter cette limite. */
             maxBytes: number;
         };
         ApplicationCreate: {
@@ -2375,7 +2375,7 @@ export interface components {
             hasChildren: boolean;
             childrenAges?: string;
             experience?: string;
-            /** @description Pourquoi cet animal — au moins 20 caractères. */
+            /** @description Pourquoi cet animal · au moins 20 caractères. */
             motivation: string;
             availability?: string;
         };
@@ -2387,7 +2387,7 @@ export interface components {
             /** @description Nouvelle vérité après toggle. */
             isFavorite: boolean;
             petName: string | null;
-            /** @description Candidatures actives sur ce pet — null si on vient de retirer le favori. */
+            /** @description Candidatures actives sur ce pet · null si on vient de retirer le favori. */
             applicationsCount: number | null;
         };
         ReportPhotoInput: {
@@ -2438,7 +2438,7 @@ export interface components {
             matchCount: number;
         };
         Pension: components["schemas"]["PensionSummary"] & {
-            /** @description Numéro SIRET — public légalement (registre INSEE). Permet d'afficher la mention 'agrément vérifié'. */
+            /** @description Numéro SIRET · public légalement (registre INSEE). Permet d'afficher la mention 'agrément vérifié'. */
             siret: string;
             /** @description Certificat de capacité ou ICPE (si renseigné). */
             agrementNumber?: string | null;
@@ -2453,7 +2453,7 @@ export interface components {
             } | null;
             capacityCats?: number | null;
             capacityDogs?: number | null;
-            /** @description Services offerts — toutes les clés sont retournées avec un booléen explicite (pas d'omission). */
+            /** @description Services offerts · toutes les clés sont retournées avec un booléen explicite (pas d'omission). */
             services: {
                 medication: boolean;
                 grooming: boolean;
@@ -2498,7 +2498,7 @@ export interface components {
                 "application/json": components["schemas"]["ApiError"];
             };
         };
-        /** @description Données invalides — voir `error.details.issues`. */
+        /** @description Données invalides · voir `error.details.issues`. */
         ValidationError: {
             headers: {
                 [name: string]: unknown;
