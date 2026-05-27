@@ -103,9 +103,9 @@ permissions fines (`pets:write`, `applications:read`…).
 
 **Un contrat d'API stable.** Enveloppes `{data}`, `{data, pagination}` et
 `{error: {code, message}}`, codes d'erreur figés, pagination par curseur keyset.
-Le backend a d'ailleurs été réécrit deux fois (le service API, puis Rust, puis
-NestJS) sans changer ce contrat ni le format des hashes de mots de passe, donc
-sans rien casser côté clients.
+Ce contrat et le format des hashes de mots de passe n'ont pas bougé depuis
+l'origine, donc les trois clients (web, pro, mobile) restent alignés sans
+régénération.
 
 ## Démarrage rapide
 

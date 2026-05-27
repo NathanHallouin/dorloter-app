@@ -18,8 +18,6 @@
 
 ## Identité du projet
 
-## Identité du projet
-
 Dorloter est une plateforme web française d'adoption et de retrouvailles d'animaux domestiques. MVP centré sur **chat et chien** ; extensible aux NAC (lapin, rongeur, reptile…) sans refonte. Trois fonctions :
 
 1. **Adoption** · vitrine des refuges et associations, profils d'animaux à adopter (photos, caractère, besoins médicaux, compatibilités). Matching adoptant/animal en swipe ou en liste filtrée, formulaire de candidature en ligne, suivi du processus.
@@ -46,7 +44,7 @@ Monorepo bun workspaces. L'API est un service séparé ; les trois clients la co
 
 **Commun** : PostgreSQL 18 + PostGIS (schéma `dorloter_api`) · MapLibre GL JS · stockage S3-compatible (MinIO en dev, OVH/Scaleway en prod) · Docker Compose en dev, VPS France + Caddy en prod · CI GitHub Actions (rédigée pour rester portable en Forgejo Actions, au cas où le dépôt migrerait sur Codeberg).
 
-> **Historique du backend.** L'API a été portée NestJS, puis Rust, puis NestJS, en préservant le contrat à l'identique à chaque fois : même schéma, mêmes migrations, mêmes hashes scrypt, même enveloppe et mêmes codes d'erreur. Deux features ont été retirées du produit : l'**annuaire vétérinaire** et le **TNR (chats libres)**.
+> **Contrat d'API stable.** Schéma `dorloter_api`, migrations, hashes scrypt, enveloppe de réponse et codes d'erreur n'ont pas bougé depuis l'origine : les clients typés restent valides sans régénération. Deux features ont été retirées du produit : l'**annuaire vétérinaire** et le **TNR (chats libres)**.
 
 ## Architecture
 
