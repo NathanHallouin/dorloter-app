@@ -19,7 +19,7 @@ Ce document liste tout ce qu'il faut construire pour que Dorloter tourne de mani
 | 1.1 Perdus / Trouvés | 8/8 ✅ |
 | 1.2 Candidatures | 5/5 ✅ |
 | 1.3 Profil utilisateur | 3/4 (email & avatar non éditables) |
-| 1.4 Espace refuge | 4/5 (vues par chat & graphe mensuel — nécessite tracking views) |
+| 1.4 Espace refuge | 4/5 (vues par chat & graphe mensuel · nécessite tracking views) |
 | 2.1 Web Push | 5/5 ✅ |
 | 2.2 Emails transactionnels | 5/5 ✅ |
 | 2.3 Centre notifications in-app | 3/3 ✅ |
@@ -42,7 +42,7 @@ Ce document liste tout ce qu'il faut construire pour que Dorloter tourne de mani
 | 9.2 CGU | 2/2 ✅ |
 | 10. Messagerie temps réel | ✅ (SSE + réactions + typing + read receipts) |
 
-**Total : 58/104 items cochés (56%)** — les P0/P1 socle fonctionnel sont complets, reste surtout infra (déploiement, CI/CD, monitoring, backups), légal (RGPD/CGU), monétisation, et quelques polissages long-tail.
+**Total : 58/104 items cochés (56%)** · les P0/P1 socle fonctionnel sont complets, reste surtout infra (déploiement, CI/CD, monitoring, backups), légal (RGPD/CGU), monétisation, et quelques polissages long-tail.
 
 **Infra livrée au-delà de la roadmap** :
 - Schéma PostGIS avec extension activée, index GIST spatiaux, FK ownership sur toutes les tables métier
@@ -70,7 +70,7 @@ Ce qui existe déjà en squelette mais n'est pas encore câblé aux données.
 - [x] Algo de matching : exécution auto à chaque nouveau signalement, scoring distance + couleur + race + sexe + fenêtre temporelle
 - [x] Page correspondances : affichage des matches triés par score avec distance, bouton "C'est mon chat" / "Ce n'est pas lui"
 - [x] Page "Mes signalements" : liste, statuts, bouton résoudre
-- [x] Expiration auto des signalements après 60 jours via **endpoint `/api/cron/expire-reports`** (protégé par `CRON_SECRET`) — à brancher sur Vercel Cron ou équivalent
+- [x] Expiration auto des signalements après 60 jours via **endpoint `/api/cron/expire-reports`** (protégé par `CRON_SECRET`) · à brancher sur Vercel Cron ou équivalent
 
 ### 1.2 Candidatures d'adoption
 - [x] Formulaire de candidature complet (logement, animaux, enfants, motivation)
@@ -80,7 +80,7 @@ Ce qui existe déjà en squelette mais n'est pas encore câblé aux données.
 - [x] Un adoptant ne peut pas candidater deux fois pour le même chat
 
 ### 1.3 Profil utilisateur
-- [x] Formulaire de modification profil (nom, téléphone) — email & avatar à ajouter
+- [x] Formulaire de modification profil (nom, téléphone) · email & avatar à ajouter
 - [x] Sélection de localisation sur carte pour les alertes proximité
 - [x] Réglage du rayon de notification (1-50 km) via slider
 - [x] Suppression de compte (RGPD) avec purge cascade
@@ -88,7 +88,7 @@ Ce qui existe déjà en squelette mais n'est pas encore câblé aux données.
 ### 1.4 Espace refuge complet
 - [x] Upload de photos dans le formulaire d'ajout/édition de chat (intégré au form)
 - [x] **Réorganisation des photos par drag & drop** via `@dnd-kit/sortable`, la première devient auto la photo principale (action `reorderCatPhotos`)
-- [x] Dashboard stats : candidatures reçues, taux d'adoption, répartition statuts — vues par chat & graphe mensuel à ajouter (nécessite table `cat_views` + tracking)
+- [x] Dashboard stats : candidatures reçues, taux d'adoption, répartition statuts · vues par chat & graphe mensuel à ajouter (nécessite table `cat_views` + tracking)
 - [x] Page de profil refuge modifiable (nom, description, coordonnées, localisation, **logo + bannière** via `ImageUploadField`)
 - [x] **Gestion multi-admin par refuge** : table `shelter_invitations`, action `inviteShelterAdmin` avec email Resend (template dédié), révocation, page d'acceptation `/invitation/[token]` (garde email + expiration 7j + statut)
 
@@ -102,13 +102,13 @@ Sans notifications, les utilisateurs ne reviennent pas. C'est ce qui rend l'app 
 - [x] Inscription au push depuis le profil (VAPID + service worker + toggle UI)
 - [x] Nouveau match perdu/trouvé push au propriétaire du signalement concerné
 - [x] Mise à jour de statut d'une candidature (acceptée, refusée, en cours)
-- [x] **Nouveau chat dans un refuge suivi** — table `shelterFollows` + `FollowButton` sur `/refuges/[id]` + fanout `new_cat_nearby` dans `createCat` via `notifyShelterFollowers` (broadcast push + email aux followers)
-- [x] **Rappel à 7 jours** pour un signalement actif — cron [/api/cron/remind-stale-reports](src/app/api/cron/remind-stale-reports/route.ts) : sélectionne les reports `actif` dans la fenêtre [7j; 8j[ (fenêtre d'1 jour = idempotent si cron quotidien), envoie email + push avec conseils (ajouter photos, partager, clôturer)
+- [x] **Nouveau chat dans un refuge suivi** · table `shelterFollows` + `FollowButton` sur `/refuges/[id]` + fanout `new_cat_nearby` dans `createCat` via `notifyShelterFollowers` (broadcast push + email aux followers)
+- [x] **Rappel à 7 jours** pour un signalement actif · cron [/api/cron/remind-stale-reports](src/app/api/cron/remind-stale-reports/route.ts) : sélectionne les reports `actif` dans la fenêtre [7j; 8j[ (fenêtre d'1 jour = idempotent si cron quotidien), envoie email + push avec conseils (ajouter photos, partager, clôturer)
 
 ### 2.2 Emails transactionnels (fallback push + emails obligatoires)
-- [x] Confirmation d'inscription (vérification email) — Better Auth + Resend
-- [x] Réinitialisation de mot de passe — Better Auth + Resend
-- [x] **Récapitulatif hebdomadaire** — cron [/api/cron/weekly-digest](src/app/api/cron/weekly-digest/route.ts) : requête PostGIS `ST_DWithin` agrégée (une passe SQL pour tous les users) qui collecte les chats créés dans les 7 derniers jours dans le rayon de notification de chaque user, seuil min 3 chats pour déclencher le digest, email HTML avec cartes chats + mini push "3 nouveaux chats près de chez vous", tri par distance. Template [weeklyDigestEmailTemplate](src/lib/email.ts).
+- [x] Confirmation d'inscription (vérification email) · Better Auth + Resend
+- [x] Réinitialisation de mot de passe · Better Auth + Resend
+- [x] **Récapitulatif hebdomadaire** · cron [/api/cron/weekly-digest](src/app/api/cron/weekly-digest/route.ts) : requête PostGIS `ST_DWithin` agrégée (une passe SQL pour tous les users) qui collecte les chats créés dans les 7 derniers jours dans le rayon de notification de chaque user, seuil min 3 chats pour déclencher le digest, email HTML avec cartes chats + mini push "3 nouveaux chats près de chez vous", tri par distance. Template [weeklyDigestEmailTemplate](src/lib/email.ts).
 - [x] Notification de correspondance perdu/trouvé par email
 - [x] Notification de candidature acceptée/refusée par email
 
@@ -125,9 +125,9 @@ Une plateforme autosuffisante doit pouvoir se réguler sans admin permanent.
 
 ### 3.1 Modération des contenus
 - [x] Bouton "Signaler" sur les fiches chat, signalement, refuge (dialog avec motifs contextuels + commentaire libre, `ReportContentDialog`)
-- [x] File de modération `/admin/moderation` (layout `(admin)` avec garde `requirePlatformAdmin`) — regroupe par contenu, affiche détails pliables, actions "Masquer / Rejeter"
+- [x] File de modération `/admin/moderation` (layout `(admin)` avec garde `requirePlatformAdmin`) · regroupe par contenu, affiche détails pliables, actions "Masquer / Rejeter"
 - [x] Blocage automatique après **5 signalements distincts** : cat → status `retire`, report → status `expire`, shelters/users restent en file humaine
-- [x] **Vérification NSFW à l'upload** via [nsfwjs](src/lib/nsfw.ts) (MobileNetV2 local, aucune API tierce, souverain). Modèle ~5 Mo téléchargé au premier hit et mis en cache mémoire, inférence ~1-2s par image. Bloque uniquement si `Porn` ou `Hentai` dépasse `NSFW_BLOCK_THRESHOLD` (défaut 0.75). Dégradation propre : si tfjs-node crash (CI / arch non supportée), l'upload passe avec un warning log — la modération communautaire (auto-hide à 5 signalements) reste le second filet. Désactivable via `NSFW_CHECK_ENABLED=false`.
+- [x] **Vérification NSFW à l'upload** via [nsfwjs](src/lib/nsfw.ts) (MobileNetV2 local, aucune API tierce, souverain). Modèle ~5 Mo téléchargé au premier hit et mis en cache mémoire, inférence ~1-2s par image. Bloque uniquement si `Porn` ou `Hentai` dépasse `NSFW_BLOCK_THRESHOLD` (défaut 0.75). Dégradation propre : si tfjs-node crash (CI / arch non supportée), l'upload passe avec un warning log · la modération communautaire (auto-hide à 5 signalements) reste le second filet. Désactivable via `NSFW_CHECK_ENABLED=false`.
 
 ### 3.2 Vérification des refuges
 - [x] Inscription refuge avec SIRET + champ validation (`isVerified`, défaut false)
@@ -154,13 +154,13 @@ L'acquisition doit être organique pour être autosuffisante. Pas de budget pub.
 - [x] ISR sur les 3 pages détail : `/adopter/[id]` (SSG + revalidate 1h, `generateStaticParams` sur chats disponibles, FavoriteButton refactoré pour hydrater son état via `/api/favorites/[catId]`), `/refuges/[id]` (SSG + revalidate 1h, `generateStaticParams` sur tous les refuges), `/perdus-trouves/[id]` (dynamic + `unstable_cache` 5 min sur `getReportWithPhotos` avec tag invalidé par les actions)
 
 ### 4.2 Pages d'atterrissage géolocalisées
-- [x] Pages `/adopter/ville/[slug]` pour 25 villes (Paris, Lyon, Marseille, Toulouse, Nice, Nantes, Strasbourg, Montpellier, Bordeaux, Lille, Rennes, Reims, Le Havre, Saint-Étienne, Toulon, Grenoble, Dijon, Angers, Nîmes, Villeurbanne, Clermont-Ferrand, Le Mans, Aix-en-Provence, Brest, Tours) — `generateStaticParams` + SSG
+- [x] Pages `/adopter/ville/[slug]` pour 25 villes (Paris, Lyon, Marseille, Toulouse, Nice, Nantes, Strasbourg, Montpellier, Bordeaux, Lille, Rennes, Reims, Le Havre, Saint-Étienne, Toulon, Grenoble, Dijon, Angers, Nîmes, Villeurbanne, Clermont-Ferrand, Le Mans, Aix-en-Provence, Brest, Tours) · `generateStaticParams` + SSG
 - [x] Contenu adapté : H1 "Chats à adopter {prep} {ville}", comptage des chats + refuges dans un rayon de 30 km via PostGIS `ST_DWithin`, liste des refuges triée par distance, grille de chats, nav vers autres villes
 - [x] Index `/adopter/villes` avec compteur live par ville (revalidate 1h), Schema.org/CollectionPage + JSON-LD Place sur chaque fiche ville, canonical URL, sitemap.xml enrichi
 
 ### 4.3 Partage social
 - [x] Bouton "Partager" sur les fiches signalement (`ReportShare`) et sur les fiches chat (`CatShare`) : Web Share API + fallback copie lien, 3 canaux sociaux (Facebook, WhatsApp, X) avec icônes de marque, + texte pré-formaté prêt à coller (groupes Facebook, SMS, WhatsApp…) avec lien de retour vers Dorloter pour créer un effet viral entrant
-- [x] Image OpenGraph utilisant la photo principale (fiches chats, signalements, refuges) — déjà en place
+- [x] Image OpenGraph utilisant la photo principale (fiches chats, signalements, refuges) · déjà en place
 - [x] Story-like : témoignage post-adoption via [TestimonialForm](src/components/cats/testimonial-form.tsx) (nouvelle table `testimonials`, form collapsible avec texte + photo optionnelle, accessible uniquement aux users dont la candidature est `acceptee`), affichage via [TestimonialDisplay](src/components/cats/testimonial-display.tsx) (bloc quote lavande sur la fiche chat, prénom + mois/année, photo "après adoption" si fournie). Rate-limit 10/h, upsert (l'adoptant peut éditer), modération via `unpublishTestimonial` accessible aux shelter_admin du refuge concerné et au platform_admin.
 
 ---
@@ -176,10 +176,10 @@ L'usage principal est mobile (signalements sur le terrain, consultation de fiche
 - [x] **Mode offline** : `<TrackVisit>` sur les 3 fiches détail persiste les visites en localStorage (20 max) et envoie `postMessage({type:"cache-urls"})` au SW qui les fetch+cache → accès offline. `OfflineIndicator` sticky en haut quand `navigator.onLine === false`. Composant `<RecentVisits>` réutilisable pour afficher l'historique.
 
 ### 5.2 UX mobile
-- [x] Swipe sur les fiches chats (style Tinder) — deck motion/react avec drag, stamps, cartes empilées, défaut sur `/adopter`
+- [x] Swipe sur les fiches chats (style Tinder) · deck motion/react avec drag, stamps, cartes empilées, défaut sur `/adopter`
 - [x] **Bottom navigation bar mobile** ([BottomNav](src/components/layout/bottom-nav.tsx)) 5 tabs adaptés selon auth (Adopter / Signaler / Favoris / Alertes / Profil ou version anon), active state coral, safe-area iOS, masqué sur pages d'auth
 - [x] **Appareil photo natif** sur le formulaire de signalement : deux tuiles distinctes "Prendre" (`capture="environment"`) + "Galerie" (file picker classique multiple)
-- [x] Géolocalisation one-tap pour le formulaire de signalement — bouton "Utiliser ma position" dans le location-picker
+- [x] Géolocalisation one-tap pour le formulaire de signalement · bouton "Utiliser ma position" dans le location-picker
 
 ---
 
@@ -189,16 +189,16 @@ Ce qui permet à l'app de tourner sans intervention quotidienne.
 
 ### 6.1 Jobs planifiés
 Tous les endpoints protégés par `CRON_SECRET` (token via `?token=xxx` ou header `Authorization: Bearer xxx`). Helper partagé [lib/cron-auth.ts](src/lib/cron-auth.ts).
-- [x] Expiration des signalements inactifs (> 60 jours) — `/api/cron/expire-reports`
-- [x] Nettoyage des photos orphelines sur S3 — `/api/cron/cleanup-orphan-photos` (liste paginée S3 vs URLs référencées en base, garde-fou si < 10 clés en base)
-- [x] Recalcul périodique des matchs perdu/trouvé — `/api/cron/refresh-matches` (itère sur tous les reports actifs)
-- [x] Email de rappel aux refuges avec candidatures non traitées depuis 7 jours — `/api/cron/remind-pending-applications` (agrégation par refuge, email aux admins)
-- [x] Purge des sessions Better Auth expirées en base — `/api/cron/purge-expired-sessions`
+- [x] Expiration des signalements inactifs (> 60 jours) · `/api/cron/expire-reports`
+- [x] Nettoyage des photos orphelines sur S3 · `/api/cron/cleanup-orphan-photos` (liste paginée S3 vs URLs référencées en base, garde-fou si < 10 clés en base)
+- [x] Recalcul périodique des matchs perdu/trouvé · `/api/cron/refresh-matches` (itère sur tous les reports actifs)
+- [x] Email de rappel aux refuges avec candidatures non traitées depuis 7 jours · `/api/cron/remind-pending-applications` (agrégation par refuge, email aux admins)
+- [x] Purge des sessions Better Auth expirées en base · `/api/cron/purge-expired-sessions`
 
 ### 6.2 Monitoring
 - [x] Health check endpoint `/api/health` : Postgres (SELECT 1) + S3 (HeadBucket) + latences, retourne 503 si KO
-- [ ] Alertes email/webhook si le health check échoue — configuration externe : [UptimeRobot](https://uptimerobot.com) gratuit (50 monitors), pointer sur `https://dorloter.fr/api/health`, alerte si status ≠ 200
-- [x] Logs structurés JSON via [lib/logger.ts](src/lib/logger.ts) — branché sur : `report.created`, `report.resolved`, `report.resolved_via_match`, `moderation.content_reported`, `moderation.resolved`, `shelter.created`, `shelter.verified`. Log level configurable via `LOG_LEVEL` env var.
+- [ ] Alertes email/webhook si le health check échoue · configuration externe : [UptimeRobot](https://uptimerobot.com) gratuit (50 monitors), pointer sur `https://dorloter.fr/api/health`, alerte si status ≠ 200
+- [x] Logs structurés JSON via [lib/logger.ts](src/lib/logger.ts) · branché sur : `report.created`, `report.resolved`, `report.resolved_via_match`, `moderation.content_reported`, `moderation.resolved`, `shelter.created`, `shelter.verified`. Log level configurable via `LOG_LEVEL` env var.
 
 ### 6.3 Backups
 - [x] Backup quotidien Postgres + volume MinIO via [scripts/backup.sh](scripts/backup.sh) : `pg_dump | gzip` + `tar` du volume, upload vers bucket S3 compatible (OVH Object Storage par défaut)
@@ -229,43 +229,43 @@ L'objectif n'est pas le profit mais l'autosuffisance. Coûts estimés : VPS 10-2
 ## 8. Infra et déploiement
 
 ### 8.1 CI/CD
-- [x] GitHub Actions : lint + typecheck + audit + docker build sur chaque PR — [.github/workflows/ci.yml](.github/workflows/ci.yml)
-- [x] Build Docker de l'app Next.js — [Dockerfile](Dockerfile) multi-stage Bun + Next standalone
-- [x] Déploiement auto sur le VPS à chaque push sur `main` via SSH — [.github/workflows/deploy.yml](.github/workflows/deploy.yml) + [scripts/deploy.sh](scripts/deploy.sh)
-- [x] Migration de base auto au déploiement — `docker compose run --rm app bun x drizzle-kit migrate` dans deploy.sh, avec re-application des grants PG
+- [x] GitHub Actions : lint + typecheck + audit + docker build sur chaque PR · [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- [x] Build Docker de l'app Next.js · [Dockerfile](Dockerfile) multi-stage Bun + Next standalone
+- [x] Déploiement auto sur le VPS à chaque push sur `main` via SSH · [.github/workflows/deploy.yml](.github/workflows/deploy.yml) + [scripts/deploy.sh](scripts/deploy.sh)
+- [x] Migration de base auto au déploiement · `docker compose run --rm app bun x drizzle-kit migrate` dans deploy.sh, avec re-application des grants PG
 
 ### 8.2 Production
 Stack et runbook livrés dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Le provisioning du VPS et l'achat du domaine sont des étapes manuelles (non-code).
-- [x] VPS Hetzner ou OVH (souveraineté EU) — choix et guide dans le runbook
-- [x] PostgreSQL self-hosted avec PostGIS — `postgis/postgis:18-3.6` dans [docker-compose.prod.yml](docker-compose.prod.yml)
-- [x] Object Storage self-hosted (MinIO) avec backup vers OVH Object Storage via [scripts/backup.sh](scripts/backup.sh) — la migration vers Scaleway/OVH direct se fait en changeant 5 env vars
-- [x] Reverse proxy Caddy avec HTTPS Let's Encrypt auto — [Caddyfile](Caddyfile)
+- [x] VPS Hetzner ou OVH (souveraineté EU) · choix et guide dans le runbook
+- [x] PostgreSQL self-hosted avec PostGIS · `postgis/postgis:18-3.6` dans [docker-compose.prod.yml](docker-compose.prod.yml)
+- [x] Object Storage self-hosted (MinIO) avec backup vers OVH Object Storage via [scripts/backup.sh](scripts/backup.sh) · la migration vers Scaleway/OVH direct se fait en changeant 5 env vars
+- [x] Reverse proxy Caddy avec HTTPS Let's Encrypt auto · [Caddyfile](Caddyfile)
 - [x] Nom de domaine configuré (DNS A records `dorloter.fr` + `cdn.dorloter.fr` documentés)
 
 ### 8.3 Sécurité
 - [x] Headers de sécurité via [next.config.ts](next.config.ts) : CSP stricte (scripts/styles/img/connect séparés par domaine), HSTS max-age 1 an, X-Content-Type-Options, X-Frame-Options SAMEORIGIN, Referrer-Policy strict-origin, Permissions-Policy (camera/geo autorisés pour l'app)
-- [x] Rate limiting par IP sur les routes sensibles (`createReport` 5/h, `createApplication` 10/h, `reportContent` 20/h, `importReportFromUrl` 10/h) — [lib/rate-limit.ts](src/lib/rate-limit.ts)
-- [x] Audit des dépendances (`bun audit --prod`) dans la CI — étape non-bloquante pour signaler sans bloquer les merges
+- [x] Rate limiting par IP sur les routes sensibles (`createReport` 5/h, `createApplication` 10/h, `reportContent` 20/h, `importReportFromUrl` 10/h) · [lib/rate-limit.ts](src/lib/rate-limit.ts)
+- [x] Audit des dépendances (`bun audit --prod`) dans la CI · étape non-bloquante pour signaler sans bloquer les merges
 - [x] Variables d'environnement en secrets : `.env.production` jamais commit (dans `.gitignore`), secrets GitHub Actions pour SSH/VPS, `CRON_SECRET` pour les endpoints cron, rotation documentée dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 **Bonus défense-en-profondeur livré au-delà de la roadmap** :
-- 3 rôles PG distincts (`dorloter_app` / `dorloter_admin` / superuser migrations) avec grants column-level sur `users.role`, `shelters.is_verified` etc. — voir [scripts/init-db-roles.sql](scripts/init-db-roles.sql). Une Server Action compromise ne peut pas escalader un rôle au niveau driver Postgres.
+- 3 rôles PG distincts (`dorloter_app` / `dorloter_admin` / superuser migrations) avec grants column-level sur `users.role`, `shelters.is_verified` etc. · voir [scripts/init-db-roles.sql](scripts/init-db-roles.sql). Une Server Action compromise ne peut pas escalader un rôle au niveau driver Postgres.
 
 ---
 
 ## 9. Légal et conformité
 
 ### 9.1 RGPD
-- [x] Page mentions légales — [/mentions-legales](src/app/(public)/mentions-legales/page.tsx) (LCEN art. 6-III : éditeur, hébergeur OVH, contenus utilisateurs)
-- [x] Page politique de confidentialité — [/confidentialite](src/app/(public)/confidentialite/page.tsx) (RGPD art. 13/14 : tableau finalités/bases légales/durées, destinataires, droits, sécurité)
+- [x] Page mentions légales · [/mentions-legales](src/app/(public)/mentions-legales/page.tsx) (LCEN art. 6-III : éditeur, hébergeur OVH, contenus utilisateurs)
+- [x] Page politique de confidentialité · [/confidentialite](src/app/(public)/confidentialite/page.tsx) (RGPD art. 13/14 : tableau finalités/bases légales/durées, destinataires, droits, sécurité)
 - [x] Pas de cookies tiers : mention visible en footer, pas de bandeau nécessaire (la jurisprudence CNIL dispense les cookies techniques strictement nécessaires de consentement préalable)
 - [x] Export des données personnelles (art. 15/20 RGPD) : `/api/profile/export` renvoie un JSON attaché avec toutes les données user (profil, reports+photos, applications, favorites, follows, notifications, sessions, content reports, resolution credits, shelter si admin). Bouton "Télécharger mes données" dans [/profil](src/components/profile/data-export.tsx).
 - [x] Suppression de compte avec purge cascade (déjà livré)
-- [x] Base de données hébergée en UE — couvert par §8.2 (OVH Roubaix dans le stack Docker prod)
+- [x] Base de données hébergée en UE · couvert par §8.2 (OVH Roubaix dans le stack Docker prod)
 
 ### 9.2 CGU
-- [x] Conditions générales d'utilisation — [/cgu](src/app/(public)/cgu/page.tsx) (10 sections : objet, acceptation, gratuité, inscription, règles de publication, modération, responsabilité intermédiaire technique LCEN, disponibilité, résiliation, droit applicable)
-- [x] Charte des refuges partenaires — [/charte-refuges](src/app/(public)/charte-refuges/page.tsx) (8 engagements : légitimité juridique, soins vétérinaires, honnêteté des annonces, processus d'adoption, frais proportionnés, non-discrimination, suivi post-adoption, sanctions)
+- [x] Conditions générales d'utilisation · [/cgu](src/app/(public)/cgu/page.tsx) (10 sections : objet, acceptation, gratuité, inscription, règles de publication, modération, responsabilité intermédiaire technique LCEN, disponibilité, résiliation, droit applicable)
+- [x] Charte des refuges partenaires · [/charte-refuges](src/app/(public)/charte-refuges/page.tsx) (8 engagements : légitimité juridique, soins vétérinaires, honnêteté des annonces, processus d'adoption, frais proportionnés, non-discrimination, suivi post-adoption, sanctions)
 
 > ⚠️ **À faire avant lancement public** : relecture par un conseil juridique pour adapter au statut précis (entreprise individuelle / association / société), compléter les crochets `[...]` (nom, adresse, SIRET), et ajuster les délais/montants selon les pratiques réelles.
 
@@ -284,7 +284,7 @@ Design complet : [docs/MESSAGING.md](docs/MESSAGING.md).
 - [x] **Typing indicator** : 3 dots animés, debounce client (max 1×/3s), TTL 3s
 - [x] **Presence** : bordure verte "En ligne" quand le pair a au moins un stream SSE actif
 - [x] **UI thread** : bulles, composer auto-resize, Ctrl+Entrée pour envoyer, picker emoji au survol, honeypot anti-bot
-- [x] **Pages** : `/messages` + `/messages/[id]` (user), `/shelter-messages` + `/shelter-messages/[id]` (refuge) — layouts existants étendus
+- [x] **Pages** : `/messages` + `/messages/[id]` (user), `/shelter-messages` + `/shelter-messages/[id]` (refuge) · layouts existants étendus
 - [x] **Entry points** : `ContactShelterButton` sur fiches chat + refuges, préfill contextuel si on part d'un chat précis
 - [x] **Badge unread** dans la navbar ([MessagesNavLink](src/components/messaging/messages-nav-link.tsx)), refresh 60s via `/api/messages/unread-count`
 - [x] **Fanout notifications** intelligent : push + in-app à chaque message, email uniquement sur le 1er contact ou reprise après silence >24h, skip push si destinataire a un SSE actif
@@ -293,7 +293,7 @@ Design complet : [docs/MESSAGING.md](docs/MESSAGING.md).
 - [x] **Bottom-nav mobile** : tab Messages avec badge unread (remplace Favoris qui reste accessible via /profil)
 - [x] **Purge RGPD** : cron `/api/cron/purge-stale-conversations` supprime les conversations sans activité depuis 18 mois (cascade DELETE sur messages + reactions via FK)
 
-**Scalabilité** : single-process Node tient 5-10k connexions SSE concurrentes. Pour scaler horizontalement, remplacer l'event bus par Redis pub/sub (même API — migration reportée en phase 2).
+**Scalabilité** : single-process Node tient 5-10k connexions SSE concurrentes. Pour scaler horizontalement, remplacer l'event bus par Redis pub/sub (même API · migration reportée en phase 2).
 
 ---
 
@@ -312,3 +312,52 @@ Design complet : [docs/MESSAGING.md](docs/MESSAGING.md).
 | **P3** | 6 Automatisation | Maintenance long terme |
 | **P3** | 7 Monétisation | Quand il y a du trafic |
 | **P3** | 9 Légal | Avant le lancement public officiel |
+
+---
+
+## Annexe · plan MVP d'origine
+
+> Déplacé depuis `CLAUDE.md` lors du découpage du contexte par workspace. Plan
+> initial, conservé pour mémoire : le périmètre MVP est aujourd'hui **livré**
+> sur la stack actuelle (API NestJS, deux SPA React, mobile Expo). Les mentions
+> Next.js / Drizzle / Better Auth-front datent de ce plan et ne reflètent plus
+> l'implémentation. Gaps restants : voir la note « Gaps restants » du
+> [CLAUDE.md racine](../CLAUDE.md).
+
+> **Statut** : la roadmap ci-dessous est le plan d'origine (historique). Le périmètre MVP est aujourd'hui **livré** sur la stack actuelle (API NestJS `apps/api`, deux SPA React `apps/web` + `apps/pro`, mobile Expo). Les mentions Next.js / Drizzle / Better Auth-front datent du plan initial et ne reflètent plus l'implémentation. Gaps restants : voir la note « Gaps restants » plus haut.
+
+#### Phase 1 · Fondations + adoption
+- [x] Setup projet (Docker Compose, CI)
+- [x] Auth (inscription, connexion, rôles ; JWT + scrypt Better Auth)
+- [x] Protection des routes (garde `RequirePro`, permissions par module côté API)
+- [ ] CRUD refuges + page publique refuge
+- [ ] CRUD animaux à adopter (formulaire multi-photos, tous les champs)
+- [ ] Catalogue public : grille de cards, filtres (race, âge, sexe, compatibilité), pagination
+- [ ] Fiche détaillée animal avec galerie photos
+- [ ] Système de favoris (coeur sur les cards)
+- [ ] Upload images vers S3 + optimisation (sharp ou next/image)
+
+#### Phase 2 · Perdus/trouvés + matching (5-6 semaines)
+- [ ] Formulaire signalement perdu/trouvé (localisation carte, photos, description)
+- [ ] Carte interactive des signalements (MapLibre)
+- [ ] Algo de matching automatique (score basé distance + description)
+- [ ] Page correspondances pour un signalement
+- [ ] Composant location-picker réutilisable
+- [ ] Gestion des statuts (actif → résolu)
+- [ ] Page "mes signalements"
+
+#### Phase 3 · Candidatures + notifications (4-5 semaines)
+- [ ] Formulaire de candidature adoption
+- [ ] Espace refuge : réception et gestion des candidatures
+- [ ] Notifications Web Push (nouveau match, mise à jour candidature)
+- [ ] Notifications email (fallback)
+- [ ] Centre de notifications in-app
+- [ ] Dashboard stats refuge (nombre de vues, candidatures, adoptions)
+
+#### Phase 4 · Polish + lancement (3-4 semaines)
+- [ ] Landing page publique attractive
+- [ ] SEO (metadata, sitemap, structured data pour les animaux)
+- [ ] PWA (manifest, service worker, install prompt)
+- [ ] Responsive final pass sur tous les écrans
+- [ ] Seed script avec données réalistes pour démo
+- [ ] Déploiement prod (Hetzner/Scaleway)

@@ -165,7 +165,7 @@ Détail métier : voir **[CONTRATS.md](./CONTRATS.md)**.
 - Auth : JWT (access 15 min + refresh 30 j opaque en base, table `auth_refresh_tokens`, rotation). Le hash `accounts.password` est au format scrypt de Better Auth, lu et écrit à l'identique par l'API (reproduit au bit près).
 - Tables `sessions` / `verifications` : héritage de l'ancien front Better Auth (front Next.js retiré depuis), non utilisées par l'API.
 
-Modèle de données détaillé : **[../CLAUDE.md](../CLAUDE.md)**.
+Modèle de données détaillé : **[../apps/api/CLAUDE.md](../apps/api/CLAUDE.md)**.
 
 ---
 
