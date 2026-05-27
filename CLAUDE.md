@@ -78,12 +78,26 @@ packages/
 - Un composant par fichier
 
 ### Typographie (règle absolue)
-
-### Typographie (règle absolue)
 - **Jamais de cadratin `—` (U+2014) ni de demi-cadratin `–` (U+2013)** dans ce projet, ni dans le code, ni dans le texte visible utilisateur (UI, metadata, OG, emails, manifest, toasts, messages d'erreur exposés), ni dans la documentation interne (CLAUDE.md, README, ROADMAP, JSDoc, commentaires).
 - Remplacement par défaut : point médian `·` (U+00B7), qui est déjà la convention du template de titre `%s · Dorloter`.
 - Selon le contexte, préférer `:` (définition), `,` (incise courte), `.` (deux phrases) plutôt que `·` si la lisibilité y gagne.
 - Exception unique : placeholders typographiques "donnée absente" dans des tableaux/listes. Préférer chaîne vide ou `—` standalone uniquement si aucun autre signe ne convient (et demander à l'utilisateur avant d'introduire un cadratin).
+
+### Git
+
+Commits conventionnels, **en français**, au format `type(scope): sujet`.
+
+- **Types** : `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `merge`.
+- **Scopes** usuels : `api`, `web`, `pro`, `mobile`, `ui`, `client` (le workspace touché) ou `refuge`, `adoption`, `lost-found`, `produit`, `infra`, `db` (le domaine métier). Sans scope si le changement est transverse.
+- **Sujet** à l'impératif ou au substantif, minuscule, sans point final, sous 72 caractères.
+- **Corps** facultatif mais précieux : il dit **pourquoi**, pas quoi. Le diff dit déjà quoi. Les meilleurs commits de ce dépôt expliquent le problème constaté avant le correctif.
+- La règle typographique s'applique aussi aux messages de commit.
+
+Un commit = un changement cohérent. Éviter le commit fourre-tout : c'est ce qui a coûté un mois d'historique lors du passage de `dorloter` à `dorloter-app`, écrasé en un seul commit.
+
+**Branches** : `feat/<sujet>`, `fix/<sujet>`, `chore/<sujet>` pour tout chantier de plus de deux ou trois commits, fusionnées en `--no-ff` pour que le regroupement reste lisible dans le graphe. Les changements isolés vont directement sur `main`.
+
+**Réécriture d'historique** : jamais sur ce qui est déjà poussé, sauf décision explicite. `main` est la branche de référence.
 
 ## Commandes racine
 
