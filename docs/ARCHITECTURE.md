@@ -40,7 +40,7 @@ dorloter/
 
 ## 2. L'API · `apps/api`
 
-Le backend principal : un service **NestJS (Kysely + PostGIS)** organisé en **monolithe modulaire à bounded contexts**. C'est le cœur du système : tous les fronts le consomment via `/api/v1`. Il a remplacé une implémentation Rust (supprimée), elle-même issue d'un portage le service API, à contrat identique.
+Le backend principal : un service **NestJS (Kysely + PostGIS)** organisé en **monolithe modulaire à bounded contexts**. C'est le cœur du système : tous les fronts le consomment via `/api/v1`.
 
 ### 2.1 Modules (bounded contexts)
 

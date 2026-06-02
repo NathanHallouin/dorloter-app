@@ -319,7 +319,7 @@ automatisé dépend du transport SMTP réel (gap infra).
 
 ### 2.8 · Gestion TNR / chats libres ⭐⭐⭐ · RETIRÉ
 
-**État** : retiré du produit lors de la réécriture de l'API en NestJS. Le module
+**État** : retiré du produit. Le module
 API `tnr`, la migration V28 (tables `colonies` / `free_cats` /
 `tnr_interventions`, colonne `shelters.participates_tnr`) et les pages pro
 `/refuge/tnr` ont été supprimés. La section ci-dessous documente la valeur

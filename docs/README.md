@@ -4,7 +4,7 @@ Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'
 
 > La **source de vérité** du projet est le fichier **[../CLAUDE.md](../CLAUDE.md)** à la racine, complété par un `CLAUDE.md` par workspace : [apps/api](../apps/api/CLAUDE.md) (qui porte le **modèle de données** complet), [apps/web](../apps/web/CLAUDE.md), [apps/pro](../apps/pro/CLAUDE.md), [apps/mobile](../apps/mobile/CLAUDE.md), [packages/ui](../packages/ui/CLAUDE.md), [packages/client](../packages/client/CLAUDE.md), [packages/api-client](../packages/api-client/CLAUDE.md). Les documents `docs/` ci-dessous apportent du détail, du contexte et de l'historique. Plusieurs documents de conception ont été rédigés à l'époque de l'ancien front Next.js (retiré) : ils portent un encart de contexte en tête précisant ce qui reste valable et ce qui est caduc.
 
-> **Périmètre produit** · deux fonctionnalités ont été **retirées** le 2026-03-07, en même temps que la réécriture du backend en NestJS : l'**annuaire vétérinaire** et la **gestion TNR (chats libres)**. Les documents de vision et de roadmap qui les évoquent encore le font au titre de pistes stratégiques, pas de l'état du code.
+> **Périmètre produit** · deux fonctionnalités ont été **retirées** le 2026-03-07, . Les documents de vision et de roadmap qui les évoquent encore le font au titre de pistes stratégiques, pas de l'état du code.
 
 ## Architecture & technique
 
