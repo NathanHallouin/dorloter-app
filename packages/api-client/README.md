@@ -55,7 +55,7 @@ variable d'env `OPENAPI_URL`). Le script est `scripts/generate-api-types.ts`.
 
 > **Note** : le document OpenAPI servi par l'API est encore **partiel**
 > (annotation exhaustive via `@nestjs/swagger` à venir). Le contrat étant resté
-> identique à travers les réécritures successives du backend, le `types.gen.ts`
+> identique depuis l'origine, le `types.gen.ts`
 > committé reste **valide** ; ne pas régénérer tant que l'annotation complète
 > n'est pas en place, au risque d'appauvrir le client.
 

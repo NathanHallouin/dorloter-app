@@ -15,7 +15,7 @@
 bun api:types      # depuis la racine du dépôt
 ```
 
-L'OpenAPI servi par l'API est encore **partiel** : l'annotation exhaustive est un chantier ouvert. Le fichier committé reste néanmoins valide, parce que le contrat n'a pas bougé depuis les réécritures successives du backend (NestJS, puis Rust, puis NestJS). Régénérer aujourd'hui appauvrirait le typage plutôt que de l'améliorer · ne le faire qu'après avoir complété les annotations côté API.
+L'OpenAPI servi par l'API est encore **partiel** : l'annotation exhaustive est un chantier ouvert. Le fichier committé reste néanmoins valide, parce que le contrat de l'API n'a pas bougé. Régénérer aujourd'hui appauvrirait le typage plutôt que de l'améliorer · ne le faire qu'après avoir complété les annotations côté API.
 
 ## Conséquence pratique
 
