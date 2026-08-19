@@ -8,6 +8,7 @@ const LEGAL: [string, string][] = [
 ];
 
 export function Footer() {
+  const annee = new Date().getFullYear();
   const COLS: [string, [string, string][]][] = [
     ["Adopter", [["Catalogue", "/adopter"], ["Mode swipe", "/adopter/swipe"], ["Quiz de compatibilité", "/quiz"], ["Événements", "/evenements"], ["Mes favoris", "/favoris"]]],
     ["Communauté", [["Perdus & trouvés", "/perdus-trouves"], ["Signaler un animal", "/perdus-trouves/nouveau"], ["Notre mission", "/a-propos"], ["Espace presse", "/presse"]]],
@@ -42,7 +43,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-5">
-          <p className="mono text-[11.5px] tracking-[0.04em] text-sable-300">© 2026 Dorloter · Association loi 1901</p>
+          <p className="mono text-[11.5px] tracking-[0.04em] text-sable-300">© {annee} Dorloter · Association loi 1901</p>
           <div className="flex gap-5">
             {LEGAL.map(([l, to]) => <Link key={l} to={to} className="mono text-[11.5px] tracking-[0.04em] text-sable-300">{l}</Link>)}
           </div>
