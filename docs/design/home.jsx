@@ -1,5 +1,5 @@
 /* ===========================================================================
-   DORLOTER · Accueil — « La Gazette » (home.jsx)
+   DORLOTER · Accueil · « La Gazette » (home.jsx)
    Couverture magazine · en chiffres · au sommaire · à la une · démarche
    =========================================================================== */
 const H = window.DORLOTER_DS;
@@ -72,7 +72,7 @@ function Home({ go, openPet }) {
             </h1>
             <p className="lead-drop" style={{ fontSize: 17.5, color: 'var(--foreground)', marginTop: 22, maxWidth: 500, lineHeight: 1.6 }}>
               Adopter, retrouver un animal perdu, ou confier le sien à une pension de confiance : la plateforme
-              qui réunit refuges, familles et bénévoles autour d'une idée simple — prendre soin, ensemble.
+              qui réunit refuges, familles et bénévoles autour d'une idée simple · prendre soin, ensemble.
             </p>
             <div style={{ display: 'flex', gap: 12, marginTop: 26, flexWrap: 'wrap' }}>
               <H.Btn size="lg" icon="sparkles" onClick={() => go('quiz')}>Trouver mon compagnon</H.Btn>
@@ -102,7 +102,7 @@ function Home({ go, openPet }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginTop: 8 }}>
               <span className="mono" style={{ fontSize: 10.5, color: 'var(--muted-fg)', textTransform: 'uppercase', letterSpacing: '.1em' }}>
-                Cliché — Nala, 4 mois
+                Cliché · Nala, 4 mois
               </span>
               <span className="mono" style={{ fontSize: 10.5, color: 'var(--muted-fg)' }}>Refuge des Brotteaux</span>
             </div>
@@ -119,7 +119,7 @@ function Home({ go, openPet }) {
           </div>
         </div>
 
-        {/* en chiffres — bande réglée */}
+        {/* en chiffres · bande réglée */}
         <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 32px 40px' }}>
           <div style={{ borderTop: '1.5px solid var(--foreground)', borderBottom: '1px solid var(--border)',
             display: 'grid', gridTemplateColumns: 'auto repeat(4, 1fr)', gap: 0, alignItems: 'center' }}>
@@ -136,7 +136,7 @@ function Home({ go, openPet }) {
         </div>
       </section>
 
-      {/* bandeau défilant — encre */}
+      {/* bandeau défilant · encre */}
       <H.Marquee tone="prune" items={['Adoption responsable', '14 refuges partenaires', '+1 200 adoptions / an', 'Perdus & trouvés', '8 pensions agréées', 'Association loi 1901']} />
 
       {/* ============================ AU SOMMAIRE ========================= */}

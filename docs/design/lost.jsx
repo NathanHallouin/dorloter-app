@@ -1,6 +1,6 @@
 /* ===========================================================================
    DORLOTER · Perdus & trouvés (lost.jsx)
-   Structure reprise du repo : ReportDetailShell — carte plein écran +
+   Structure reprise du repo : ReportDetailShell · carte plein écran +
    sidebar gauche « Fiche animal » + sidebar droite « Flux d'activité ».
    - LostBrowse : carte de recherche + liste à gauche (sélection → détail)
    - ReportDetail : fiche d'un signalement (shell plein écran)
@@ -277,7 +277,7 @@ function ReportDetail({ go, report, contact }) {
           ))}
         </div>
 
-        {/* SIDEBAR GAUCHE — Fiche animal */}
+        {/* SIDEBAR GAUCHE · Fiche animal */}
         <SidePanel side="left" open={leftOpen} onToggle={() => setLeftOpen(o => !o)} icon="info" label="Fiche animal">
           <div style={{ position: 'relative', height: 190, background: 'var(--muted)' }}>
             <img src={r.photo.replace('400', '600')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -315,7 +315,7 @@ function ReportDetail({ go, report, contact }) {
           </div>
         </SidePanel>
 
-        {/* SIDEBAR DROITE — Flux d'activité */}
+        {/* SIDEBAR DROITE · Flux d'activité */}
         <SidePanel side="right" open={rightOpen} onToggle={() => setRightOpen(o => !o)} icon="radio" label="Flux d'activité">
           <div style={{ padding: 16 }}>
             <L.Btn full icon="marker" onClick={() => contact("Merci ! Votre observation est sur la carte.")}>J'ai vu cet animal</L.Btn>

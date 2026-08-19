@@ -125,11 +125,11 @@ function EmptyState({ icon = 'paw', title, text, action }) {
 /* ------------------------------ Données ----------------------------------- */
 const SHELTERS = [
   { id: 'brotteaux', name: 'Refuge des Brotteaux', city: 'Lyon 3e', dist: 1.2, since: 2009, animals: 42, adopted: 1340,
-    photo: X.U('1450778869180-41d0601e046e', 900), verified: true, phone: '04 78 52 14 90', hours: 'Mar–Sam · 10h–18h',
+    photo: X.U('1450778869180-41d0601e046e', 900), verified: true, phone: '04 78 52 14 90', hours: 'Mar-Sam · 10h-18h',
     address: '14 rue Vendôme, 69003 Lyon', team: 8,
     about: "Au cœur du 3e arrondissement, le Refuge des Brotteaux accueille chats et chiens depuis 2009. Notre équipe de bénévoles veille à ce que chaque animal retrouve un foyer aimant, après un suivi vétérinaire complet." },
   { id: 'spa-lyon', name: 'SPA Lyon', city: 'Villeurbanne', dist: 3.4, since: 1987, animals: 76, adopted: 5210,
-    photo: X.U('1537151625747-768eb6cf92b2', 900), verified: true, phone: '04 78 38 71 71', hours: 'Lun–Dim · 9h–17h',
+    photo: X.U('1537151625747-768eb6cf92b2', 900), verified: true, phone: '04 78 38 71 71', hours: 'Lun-Dim · 9h-17h',
     address: '5 avenue Roger Salengro, 69100 Villeurbanne', team: 24,
     about: "Le plus grand refuge de la métropole. La SPA Lyon recueille les animaux abandonnés ou maltraités et œuvre chaque jour pour leur offrir une seconde chance, avec un service vétérinaire intégré." },
   { id: 'patte-douce', name: 'Asso Patte Douce', city: 'Lyon 7e', dist: 2.0, since: 2016, animals: 23, adopted: 480,

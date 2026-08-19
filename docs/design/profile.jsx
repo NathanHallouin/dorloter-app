@@ -45,7 +45,7 @@ function Profile({ go, openPet, logout }) {
       <div style={{ position: 'relative', height: 200, background: 'var(--muted)', overflow: 'hidden', borderBottom: '1.5px solid var(--foreground)' }}>
         <img src={ME.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: .92 }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background), transparent 72%)' }} />
-        <span className="mono" style={{ position: 'absolute', bottom: 12, right: 18, fontSize: 10, color: 'var(--sable-50)', textTransform: 'uppercase', letterSpacing: '.1em', background: 'rgba(12,22,16,.45)', padding: '4px 9px', borderRadius: 3 }}>Cliché — Léa &amp; Pluton, parc de la Tête d'Or</span>
+        <span className="mono" style={{ position: 'absolute', bottom: 12, right: 18, fontSize: 10, color: 'var(--sable-50)', textTransform: 'uppercase', letterSpacing: '.1em', background: 'rgba(12,22,16,.45)', padding: '4px 9px', borderRadius: 3 }}>Cliché · Léa &amp; Pluton, parc de la Tête d'Or</span>
       </div>
 
       <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 32px 60px' }}>
@@ -53,7 +53,7 @@ function Profile({ go, openPet, logout }) {
         {preview && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderRadius: 6, background: 'var(--tint-lavande)', border: '1px solid var(--lavande-300)', marginTop: 16 }}>
             <span style={{ color: 'var(--lavande-700)' }}><G.Icon name="eye" size={18} /></span>
-            <span style={{ flex: 1, fontSize: 13.5, color: 'var(--foreground)' }}>Aperçu public — voici ce que voit la communauté.</span>
+            <span style={{ flex: 1, fontSize: 13.5, color: 'var(--foreground)' }}>Aperçu public · voici ce que voit la communauté.</span>
             <G.Btn size="sm" variant="outline" icon="x" onClick={() => setPreview(false)}>Quitter l'aperçu</G.Btn>
           </div>
         )}

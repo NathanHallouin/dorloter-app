@@ -44,7 +44,7 @@ const AVIS = [
 
 const MODQUEUE = [
   { id: 'm1', type: 'Chat', label: 'Annonce « Minou gratuit à donner »', count: 6, reporters: 5, when: 'il y a 1 h', tone: 'brick' },
-  { id: 'm2', type: 'Signalement', label: 'Perdu — Parc Blandan (doublon)', count: 4, reporters: 3, when: 'il y a 4 h', tone: 'lavande' },
+  { id: 'm2', type: 'Signalement', label: 'Perdu · Parc Blandan (doublon)', count: 4, reporters: 3, when: 'il y a 4 h', tone: 'lavande' },
   { id: 'm3', type: 'Utilisateur', label: '@profil_suspect_88', count: 3, reporters: 3, when: 'hier', tone: 'prune' },
 ];
 

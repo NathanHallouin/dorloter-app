@@ -388,13 +388,13 @@ function Footer({ go }) {
     <footer style={{ background: 'var(--prune-900)', color: 'var(--sable-100)', marginTop: 20 }}>
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '52px 32px 28px' }}>
         <div className="mono" style={{ fontSize: 10.5, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.18em', color: 'var(--lavande-300)', borderBottom: '1px solid rgba(255,255,255,.15)', paddingBottom: 18, marginBottom: 26 }}>
-          La gazette des animaux — colophon
+          La gazette des animaux · colophon
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 36 }}>
           <div>
             <A.Logo light size="lg" />
             <p className="serif-i" style={{ fontSize: 18, color: 'var(--sable-200)', marginTop: 14, lineHeight: 1.5, maxWidth: 270 }}>
-              Réunir adoption responsable, entraide et services de confiance — pour chaque compagnon.
+              Réunir adoption responsable, entraide et services de confiance · pour chaque compagnon.
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               {['heart', 'paw', 'mail'].map((ic, i) => <span key={i} style={{ width: 38, height: 38, borderRadius: 6, border: '1px solid rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', color: 'var(--sable-100)' }}><A.Icon name={ic} size={18} /></span>)}

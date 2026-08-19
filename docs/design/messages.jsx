@@ -17,7 +17,7 @@ const CONVOS = [
       { me: true, t: "Samedi c'est parfait. Plutôt 10h ou 11h ?", at: 'Hier · 17:00' },
       { me: false, t: "Disons 10h30 au refuge, 14 rue Vendôme. On vous présentera Nala et on parlera de ses habitudes.", at: '10:24' },
     ] },
-  { id: 'c2', who: 'Les Coussinets Dorés', avatar: M.U('1583337130417-3346a1be7dee', 100), kind: 'Pension', about: 'Réservation 14–21 juin',
+  { id: 'c2', who: 'Les Coussinets Dorés', avatar: M.U('1583337130417-3346a1be7dee', 100), kind: 'Pension', about: 'Réservation 14-21 juin',
     aboutPhoto: null, unread: 0, when: 'Hier',
     msgs: [
       { me: true, t: "Bonjour, je confirme la réservation pour Felix du 14 au 21 juin.", at: 'Lun · 09:12' },

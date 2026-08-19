@@ -148,7 +148,7 @@ function SwipeDeck({ go, openPet, flash }) {
             border: '1.5px dashed var(--border)', borderRadius: 16, background: 'var(--card)' }}>
             <span style={{ width: 56, height: 56, borderRadius: 14, display: 'grid', placeItems: 'center', background: 'var(--coral-50)', border: '1px solid var(--coral-300)', color: 'var(--coral-600)' }}><S.Icon name="paw" size={28} /></span>
             <h3 style={{ fontSize: 22, fontWeight: 600, color: 'var(--foreground)', marginTop: 16 }}>Vous les avez tous vus</h3>
-            <p style={{ fontSize: 14, color: 'var(--muted-fg)', marginTop: 8, maxWidth: 320, lineHeight: 1.5 }}>Belles rencontres. Les refuges publient de nouveaux profils chaque semaine — repassez bientôt.</p>
+            <p style={{ fontSize: 14, color: 'var(--muted-fg)', marginTop: 8, maxWidth: 320, lineHeight: 1.5 }}>Belles rencontres. Les refuges publient de nouveaux profils chaque semaine · repassez bientôt.</p>
             <div style={{ display: 'flex', gap: 10, marginTop: 22, flexWrap: 'wrap', justifyContent: 'center' }}>
               <S.Btn icon="rotate" onClick={() => { setIndex(0); setHistory([]); }}>Recommencer</S.Btn>
               <S.Btn variant="outline" icon="heart" onClick={() => go('favorites')}>Voir mes favoris</S.Btn>

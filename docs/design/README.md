@@ -1,4 +1,4 @@
-# Handoff — Refonte « Dorloter » (DA éditoriale / gazette)
+# Handoff · Refonte « Dorloter » (DA éditoriale / gazette)
 
 > **Statut** : handoff de design **historique**, conservé tel qu'il a été livré.
 > La direction artistique décrite ici (tokens, typographies, primitives) est
@@ -16,9 +16,9 @@ Refonte complète de l'app web **Dorloter** (repo `dorloter`) : une plateforme d
 de perdus & trouvés, de pensions et de refuges, avec
 messagerie, profils membres et back-offices professionnels.
 
-Cette maquette propose une **nouvelle direction artistique** assumée — un parti pris
+Cette maquette propose une **nouvelle direction artistique** assumée · un parti pris
 « **gazette / éditorial** » (serif de presse, libellés mono, filets, angles nets,
-palette vert bouteille / ambre / crème / encre) — qui remplace l'ancien thème coral.
+palette vert bouteille / ambre / crème / encre) · qui remplace l'ancien thème coral.
 Le but du handoff : **recréer ces écrans à l'identique** dans l'app React existante.
 
 ## À propos des fichiers de design
@@ -34,7 +34,7 @@ Le code est volontairement structuré par domaine, ce qui facilite le mapping ve
 ## Fidélité
 **Haute fidélité (hifi).** Couleurs, typographies, espacements, rayons et interactions
 sont définitifs. Reproduire l'UI au pixel près en utilisant les primitives de
-`packages/ui` et les patterns du codebase. Les données sont fictives (mock) — à
+`packages/ui` et les patterns du codebase. Les données sont fictives (mock) · à
 remplacer par les vraies sources (API `/api/v1` via `@dorloter/client` + TanStack Query).
 
 ---
@@ -56,7 +56,7 @@ mais sont **repensées**. Ajout d'une couleur sémantique **brick** (terracotta)
 Sémantiques : `--background`, `--foreground`, `--card`, `--muted`, `--muted-fg`,
 `--border`, `--ring`, plus surfaces teintées `--tint-coral`, `--tint-lavande`, `--tint-prune`
 (toutes dark-aware). **Important** : `--sable-50` est une couleur de **texte clair** (sur
-boutons verts) — ne jamais l'utiliser comme fond (utiliser `--background`).
+boutons verts) · ne jamais l'utiliser comme fond (utiliser `--background`).
 
 Sémantique couleur cohérente sur tout le site :
 **vert = primaire / positif / « Trouvé »**, **terracotta = perdu / négatif / favori**,
@@ -64,28 +64,28 @@ Sémantique couleur cohérente sur tout le site :
 
 ### Typographie
 - **Titres** : `Newsreader` (serif de presse), weight 600, `letter-spacing: -.01em`. Italique utilisé en accent (`.serif-i`).
-- **Texte courant** : `Hanken Grotesk`, 400–700.
-- **Libellés / méta / chiffres** : `Geist Mono` (`.mono`), souvent UPPERCASE + `letter-spacing: .04–.16em`.
+- **Texte courant** : `Hanken Grotesk`, 400-700.
+- **Libellés / méta / chiffres** : `Geist Mono` (`.mono`), souvent UPPERCASE + `letter-spacing: .04-.16em`.
 - Lettrine éditoriale sur le hero (`::first-letter`, serif, `float:left`).
-- Échelles indicatives : h1 hero 60px, titres de page 30–40px, h3 carte 19–24px, corps 14–15.5px, méta mono 10–12px.
+- Échelles indicatives : h1 hero 60px, titres de page 30-40px, h3 carte 19-24px, corps 14-15.5px, méta mono 10-12px.
 - Mapping repo : polices chargées en CSS depuis `packages/ui` (Newsreader, Hanken Grotesk, Geist Mono).
 
 ### Formes & profondeur
-- **Rayons éditoriaux resserrés** : cartes/champs/boutons **4–6 px** (pages publiques),
-  jusqu'à 10–12 px sur les surfaces « app » (dashboards, messagerie). Avatars 6–8 px (pas de cercle, sauf petites pastilles).
+- **Rayons éditoriaux resserrés** : cartes/champs/boutons **4-6 px** (pages publiques),
+  jusqu'à 10-12 px sur les surfaces « app » (dashboards, messagerie). Avatars 6-8 px (pas de cercle, sauf petites pastilles).
 - **Filets** (hairlines `--border`) et **doubles filets** pour structurer (composant `Rule`).
-- Ombres douces et chaudes : `0 14px 36px rgba(20,16,8,.10–.16)`.
+- Ombres douces et chaudes : `0 14px 36px rgba(20,16,8,.10-.16)`.
 - Navbar : **îlot flottant** arrondi 20 px, fond `color-mix(... 86%)` + `backdrop-filter: blur(16px) saturate(1.4)`.
 
 ### Composants transverses (voir `ds.jsx`)
-- `Icon` — wrapper **lucide** (mêmes noms que `lucide-react`).
-- `Logo` — pastille verte + point ambre + mot « dorloter » (serif).
-- `Eyebrow` — libellé mono + petit trait (sur-titre de section).
-- `Rule` — filet horizontal avec libellé mono centré.
-- `Pill` — badge **mono UPPERCASE outline**, tons : coral(vert)/lavande(ambre)/prune/brick/green/sable/white.
-- `Btn` — variants `primary`(vert)/`soft`/`outline`/`ghost`/`white`, tailles sm/md/lg, rayon 6px.
-- `CompatPills` — compatibilités chats/chiens/enfants (vert OK / terracotta non / sable ?).
-- `Marquee`, `Stamp` — fioritures « identité affirmée » (toggle).
+- `Icon` · wrapper **lucide** (mêmes noms que `lucide-react`).
+- `Logo` · pastille verte + point ambre + mot « dorloter » (serif).
+- `Eyebrow` · libellé mono + petit trait (sur-titre de section).
+- `Rule` · filet horizontal avec libellé mono centré.
+- `Pill` · badge **mono UPPERCASE outline**, tons : coral(vert)/lavande(ambre)/prune/brick/green/sable/white.
+- `Btn` · variants `primary`(vert)/`soft`/`outline`/`ghost`/`white`, tailles sm/md/lg, rayon 6px.
+- `CompatPills` · compatibilités chats/chiens/enfants (vert OK / terracotta non / sable ?).
+- `Marquee`, `Stamp` · fioritures « identité affirmée » (toggle).
 
 ---
 
@@ -93,29 +93,29 @@ Sémantique couleur cohérente sur tout le site :
 Routeur par `view` (string) dans `app.jsx`. Mapping suggéré vers les routes du repo entre parenthèses.
 
 **Public / découverte**
-- **home** — Accueil « couverture magazine » : hero serif + lettrine, bande « en chiffres », bandeau défilant, 3 rubriques (Adopter/Perdus/Pensions), « à la une », mode d'emploi. *(/)*
-- **adopt** — Catalogue : filtres (espèce, âge, recherche), grille de `PetCard`, boutons « Mode swipe » + « Trouver par quiz ». *(/adopter/liste)*
-- **swipe** — Mode swipe façon Tinder : pile de cartes draggables, tampons « Oui » / « Pas pour moi », like/pass/annuler/fiche, raccourcis ←/→/⌫. *(domains/adoption pet-swipe-deck)*
-- **quiz** — Quiz de compatibilité : 7 questions, barre de progression, écran de résultats (filtres recommandés). *(/adopter/quiz)*
-- **lost** + **reportDetail** — Perdus & trouvés : **carte plein écran** + bandeaux latéraux rétractables (Fiche animal / Flux d'activité), reprend la structure `ReportDetailShell`. *(/perdus-trouves)*
-- **pensions** + **reserve** — Annuaire pensions + fiche/réservation (calendrier). *(/pensions)*
-- **shelters** + **shelter** — Annuaire refuges + fiche refuge. *(/refuges)*
-- **about** — Notre mission (page éditoriale).
+- **home** · Accueil « couverture magazine » : hero serif + lettrine, bande « en chiffres », bandeau défilant, 3 rubriques (Adopter/Perdus/Pensions), « à la une », mode d'emploi. *(/)*
+- **adopt** · Catalogue : filtres (espèce, âge, recherche), grille de `PetCard`, boutons « Mode swipe » + « Trouver par quiz ». *(/adopter/liste)*
+- **swipe** · Mode swipe façon Tinder : pile de cartes draggables, tampons « Oui » / « Pas pour moi », like/pass/annuler/fiche, raccourcis ←/→/⌫. *(domains/adoption pet-swipe-deck)*
+- **quiz** · Quiz de compatibilité : 7 questions, barre de progression, écran de résultats (filtres recommandés). *(/adopter/quiz)*
+- **lost** + **reportDetail** · Perdus & trouvés : **carte plein écran** + bandeaux latéraux rétractables (Fiche animal / Flux d'activité), reprend la structure `ReportDetailShell`. *(/perdus-trouves)*
+- **pensions** + **reserve** · Annuaire pensions + fiche/réservation (calendrier). *(/pensions)*
+- **shelters** + **shelter** · Annuaire refuges + fiche refuge. *(/refuges)*
+- **about** · Notre mission (page éditoriale).
 
 **Compte / membre**
-- **profile** — **Profil personnel public/privé** : couverture + légende, avatar, badges, bascule visibilité (+ aperçu public, lien partage), stats, onglets **Mes animaux** / **Galerie** (dépôt photo) / Favoris / Candidatures / Paramètres. *(/profil, /mes-animaux)*
-- **favorites** — Favoris. **messages** — Messagerie (liste conversations + fil + composer). *(/messages)*
-- **login** — Connexion / Inscription. **report** / **apply** — formulaires multi-étapes.
+- **profile** · **Profil personnel public/privé** : couverture + légende, avatar, badges, bascule visibilité (+ aperçu public, lien partage), stats, onglets **Mes animaux** / **Galerie** (dépôt photo) / Favoris / Candidatures / Paramètres. *(/profil, /mes-animaux)*
+- **favorites** · Favoris. **messages** · Messagerie (liste conversations + fil + composer). *(/messages)*
+- **login** · Connexion / Inscription. **report** / **apply** · formulaires multi-étapes.
 
 **Back-offices pro** (coquille console à sidebar, sélecteur de rôle)
-- **dash** — espaces implémentés : **refuge** (annonces, candidatures, adoptions), **pension** (réservations, calendrier, avis), **plateforme/admin** (modération, vérification refuges/pensions, utilisateurs). *(`apps/pro/src/pages/{shelter,pension,admin}`)* · l'espace **vétérinaire** de la maquette (scan de puce) n'a pas été retenu.
+- **dash** · espaces implémentés : **refuge** (annonces, candidatures, adoptions), **pension** (réservations, calendrier, avis), **plateforme/admin** (modération, vérification refuges/pensions, utilisateurs). *(`apps/pro/src/pages/{shelter,pension,admin}`)*
 
 ---
 
 ## Navigation (architecture d'information)
 Trois zones, à reproduire fidèlement (voir `nav.jsx`) :
-1. **Centre — découverte publique** : 3 menus déroulants (mega-menu icône+titre+desc) — **Adopter** / **Perdus & trouvés** / **Annuaires** (Refuges, Pensions). État actif = pastille verte ; passe en bouton **burger** ≤ 1024 px.
-2. **Droite — personnel** : **recherche globale** (palette de commandes, ouverture ⌘K/Ctrl-K, ↑↓/Entrée/Esc, indexe animaux + pages + prestataires), **Messagerie**, **Notifications** (popover + badge non-lus), **menu compte** (avatar) qui regroupe compte/favoris/candidatures/signalements **+ Espaces professionnels** (refuge/pension/admin avec rôle présélectionné).
+1. **Centre · découverte publique** : 3 menus déroulants (mega-menu icône+titre+desc) · **Adopter** / **Perdus & trouvés** / **Annuaires** (Refuges, Pensions). État actif = pastille verte ; passe en bouton **burger** ≤ 1024 px.
+2. **Droite · personnel** : **recherche globale** (palette de commandes, ouverture ⌘K/Ctrl-K, ↑↓/Entrée/Esc, indexe animaux + pages + prestataires), **Messagerie**, **Notifications** (popover + badge non-lus), **menu compte** (avatar) qui regroupe compte/favoris/candidatures/signalements **+ Espaces professionnels** (refuge/pension/admin avec rôle présélectionné).
 3. **Pro** : back-offices isolés dans leur coquille, accessibles uniquement via le menu compte ; chaque espace a « Retour au site ».
 - Popovers fermables au clic extérieur ; tout est responsive (panneau mobile structuré : Rechercher / Découvrir / Mon compte / Espaces pro).
 
@@ -125,7 +125,7 @@ Trois zones, à reproduire fidèlement (voir `nav.jsx`) :
 - **Swipe** : drag pointer (suivre `draggingRef` pour éviter les races), seuil ±110 px, rotation `clamp(x/18, -16, 16)`, opacité des tampons `clamp((±x-24)/110, 0, 1)`, envol 240 ms puis avance.
 - **Quiz** : `computeRecommendation(answers)` → filtres + bullet points (logique identique au repo).
 - **Profil** : visibilité publique/privée persistée (`localStorage` → remplacée par le champ `users.is_public`) ; mode aperçu masque les onglets privés et les actions d'édition.
-- **Transitions** : 0.14–0.3 s ; **respecter `prefers-reduced-motion`** (animations d'entrée gated, swipe sans tilt).
+- **Transitions** : 0.14-0.3 s ; **respecter `prefers-reduced-motion`** (animations d'entrée gated, swipe sans tilt).
 - **Important (repaint)** : pour les états actifs animés, utiliser le **longhand `background-color`** (le raccourci `background` + `var()` + transition ne repeint pas correctement).
 
 ## State management
@@ -133,24 +133,24 @@ Trois zones, à reproduire fidèlement (voir `nav.jsx`) :
 
 ## Assets
 - **Icônes** : lucide (déjà `lucide-react` dans le repo). Les SVG inline de `ds.jsx` reprennent les paths lucide ; utiliser directement les composants lucide-react.
-- **Photos** : Unsplash (URLs `images.unsplash.com/photo-…`) — **placeholders** à remplacer par les vraies photos (refuges/animaux). Le composant `<image-slot>` marque les zones d'upload utilisateur (galerie profil).
+- **Photos** : Unsplash (URLs `images.unsplash.com/photo-…`) · **placeholders** à remplacer par les vraies photos (refuges/animaux). Le composant `<image-slot>` marque les zones d'upload utilisateur (galerie profil).
 - **Polices** : Newsreader, Hanken Grotesk, Geist Mono (Google Fonts, chargées en CSS).
 
 ## Fichiers (références de design)
-- `Dorloter.html` — point d'entrée (tokens CSS dans `<style>`, ordre de chargement des scripts).
-- `ds.jsx` — **système de design** : icônes lucide, primitives (Icon/Logo/Eyebrow/Rule/Pill/Btn/CompatPills/Marquee/Stamp), données mock partagées.
-- `nav.jsx` — **navigation globale** (navbar 3 zones, mega-menus, palette ⌘K, popovers compte/notifs, footer).
-- `home.jsx` — accueil. `catalog.jsx` — catalogue + `PetCard` + modale fiche animal.
-- `swipe.jsx` — mode swipe. `quiz.jsx` — quiz de compatibilité.
-- `lost.jsx` — perdus & trouvés (carte + shells). `pensions.jsx` — pensions.
-- `messages.jsx` — messagerie.
-- `pages.jsx` — refuges (annuaire + fiche), favoris, à propos, (ancien) compte.
-- `profile.jsx` — profil personnel public/privé.
-- `ui2.jsx` — en-têtes de page, états vides, données (refuges, user).
-- `flows.jsx` — formulaires (signaler, connexion, réservation, candidature).
-- `dash.jsx` + `dash-views.jsx` — back-offices pro (kit + 4 espaces).
-- `app.jsx` — coquille : routeur de vues, navbar/footer, toast, panneau Tweaks.
-- `tweaks-panel.jsx`, `image-slot.js` — utilitaires de prototypage (non nécessaires en prod).
+- `Dorloter.html` · point d'entrée (tokens CSS dans `<style>`, ordre de chargement des scripts).
+- `ds.jsx` · **système de design** : icônes lucide, primitives (Icon/Logo/Eyebrow/Rule/Pill/Btn/CompatPills/Marquee/Stamp), données mock partagées.
+- `nav.jsx` · **navigation globale** (navbar 3 zones, mega-menus, palette ⌘K, popovers compte/notifs, footer).
+- `home.jsx` · accueil. `catalog.jsx` · catalogue + `PetCard` + modale fiche animal.
+- `swipe.jsx` · mode swipe. `quiz.jsx` · quiz de compatibilité.
+- `lost.jsx` · perdus & trouvés (carte + shells). `pensions.jsx` · pensions.
+- `messages.jsx` · messagerie.
+- `pages.jsx` · refuges (annuaire + fiche), favoris, à propos, (ancien) compte.
+- `profile.jsx` · profil personnel public/privé.
+- `ui2.jsx` · en-têtes de page, états vides, données (refuges, user).
+- `flows.jsx` · formulaires (signaler, connexion, réservation, candidature).
+- `dash.jsx` + `dash-views.jsx` · back-offices pro (kit + 3 espaces).
+- `app.jsx` · coquille : routeur de vues, navbar/footer, toast, panneau Tweaks.
+- `tweaks-panel.jsx`, `image-slot.js` · utilitaires de prototypage (non nécessaires en prod).
 
 > Pour visualiser l'ensemble : ouvrir `Dorloter.html`. Une version autonome hors-ligne
 > peut aussi être générée pour partage.
