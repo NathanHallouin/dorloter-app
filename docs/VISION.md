@@ -442,7 +442,7 @@ Dorloter doit rester **gratuit pour adoptants, refuges et associations** (c'est 
 
 ## L'étape d'après
 
-Ce doc ne propose pas de roadmap temporelle précise · c'est une **vision**. Chaque idée vaut une réflexion approfondie individuelle (mini-doc dédié, comme `GAMIFICATION.md` ou `MESSAGING.md`), un sondage auprès de l'audience cible, et éventuellement un prototype.
+Ce doc ne propose pas de roadmap temporelle précise · c'est une **vision**. Chaque idée vaut une réflexion approfondie individuelle (mini-doc dédié, comme `GAMIFICATION.md`), un sondage auprès de l'audience cible, et éventuellement un prototype.
 
 **Proposition concrète** : choisir **1 idée P0** pour le prochain cycle de 6 mois, aller en profondeur, et mesurer. Si ça marche → on enchaîne. Si ça ne marche pas → on apprend. Pas de fuite en avant sur 15 features à la fois.
 

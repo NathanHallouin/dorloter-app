@@ -351,7 +351,7 @@ Bouton « Suivre ce refuge » sur chaque page refuge. Le user reçoit :
 
 ## 13. Investissements lourds (3-6 mois)
 
-- App mobile native (cf. `HEBERGEMENT-ET-API.md`)
+- App mobile native
 - Feed communautaire de témoignages
 - Module bénévolat / parrainage
 - Module dons aux refuges

@@ -12,7 +12,6 @@ Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture de référence : monorepo bun workspaces (apps/api NestJS, apps/web, apps/pro, apps/mobile), packages partagés (ui, client, api-client), modules de l'API, séparation public/pro, déploiement, gaps. |
 | [SERVICES-API.md](./SERVICES-API.md) | Pattern services + contrat d'API REST (versioning, enveloppe `{ data }` / `{ error }`, pagination cursor, DTO). |
-| [MESSAGING.md](./MESSAGING.md) | Design de la messagerie 1-to-1 (flux, modèle de données, réactions). Implémentation en polling côté API. |
 | [GAMIFICATION.md](./GAMIFICATION.md) | Stratégie d'engagement : crédits de résolution, badges de contribution, garde-fous anti dark-patterns. |
 | [CONTRATS.md](./CONTRATS.md) | Système de contrats du module Adoption : table `contracts` (type adoption / foster), contrats d'adoption et conventions de famille d'accueil. |
 | [EMAIL.md](./EMAIL.md) | Email transactionnel : émetteur `infra/email` (gabarits + déclencheurs en place · transport SMTP réel à brancher, provider Brevo/OVH/Scaleway/Postfix). |
@@ -24,7 +23,6 @@ Dorloter est une plateforme française d'**adoption** et de **retrouvailles** d'
 | Document | Description |
 |---|---|
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de mise en production de bout en bout : provisioning VPS, Caddy, Docker Compose, backups, CI/CD, incidents. |
-| [HEBERGEMENT-ET-API.md](./HEBERGEMENT-ET-API.md) | Stratégie d'hébergement souverain (EU) et API partagée web/mobile, coûts indicatifs et plan de montée en charge. |
 | [ENV.md](./ENV.md) | Inventaire des variables d'environnement (dev et prod) et procédure de génération des secrets. |
 
 ## Produit & roadmap

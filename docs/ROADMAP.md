@@ -273,7 +273,7 @@ Stack et runbook livrés dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Le provi
 
 ## 10. Messagerie temps réel particuliers ↔ refuges
 
-Design complet : [docs/MESSAGING.md](docs/MESSAGING.md).
+Implémentation réelle : module `Messaging` de l'API (`apps/api`), en polling.
 
 - [x] **Server-Sent Events (SSE)** sur `/api/messages/stream?conversationId=X` avec heartbeat 30s, reconnect natif via `EventSource`, fallback polling `/api/messages/poll?since=...` si SSE échoue 3× d'affilée
 - [x] **Event bus in-process** ([src/server/messaging/bus.ts](src/server/messaging/bus.ts)) avec tracking de la presence (streams SSE actifs par conversation × user) pour éviter le double push quand le destinataire est en ligne
