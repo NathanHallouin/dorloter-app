@@ -35,17 +35,7 @@ const SPACES = {
       { id: 'moderation', label: 'Modération', icon: 'flag', count: 3 },
       { id: 'refuges', label: 'Refuges à vérifier', icon: 'shield', count: 2 },
       { id: 'pensions', label: 'Pensions à vérifier', icon: 'store', count: 1 },
-      { id: 'vetos', label: 'Vétérinaires à vérifier', icon: 'stethoscope', count: 2 },
       { id: 'users', label: 'Utilisateurs', icon: 'users' },
-    ],
-  },
-  vet: {
-    label: 'Espace vétérinaire', org: 'Cabinet Croix-Rousse', icon: 'stethoscope', photo: D.U('1629909613654-28e377c37b09', 100),
-    nav: [
-      { id: 'home', label: 'Tableau de bord', icon: 'gauge' },
-      { id: 'scan', label: 'Recherche signalements', icon: 'scanSearch', count: 1 },
-      { id: 'equipe', label: 'Équipe', icon: 'users' },
-      { id: 'profil', label: 'Profil du cabinet', icon: 'settings' },
     ],
   },
 };
@@ -382,15 +372,13 @@ function AdminBody({ sub, setSub, flash }) {
   if (sub === 'moderation') return <AdminModeration flash={flash} />;
   if (sub === 'refuges') return <AdminVerif kind="refuge" list={K.VERIF_REFUGES} flash={flash} />;
   if (sub === 'pensions') return <AdminVerif kind="pension" list={K.VERIF_PENSIONS} flash={flash} />;
-  if (sub === 'vetos') return <AdminVerif kind="véto" list={K.VERIF_VETOS} flash={flash} />;
   if (sub === 'users') return <AdminUsers flash={flash} />;
   const actions = [
     ['moderation', 'flag', 'Modération', 3, 'signalement', 'Aucun contenu signalé.'],
     ['refuges', 'shield', 'Refuges à vérifier', 2, 'refuge', 'Tous les refuges sont vérifiés.'],
     ['pensions', 'store', 'Pensions à vérifier', 1, 'pension', 'Toutes les pensions sont vérifiées.'],
-    ['vetos', 'stethoscope', 'Vétérinaires à vérifier', 2, 'cabinet', 'Tous les cabinets sont vérifiés.'],
   ];
-  const stats = [['Utilisateurs', '4 820', 'users'], ['Refuges', '14', 'shield'], ['Pensions', '8', 'store'], ['Vétos', '23', 'stethoscope'], ['Animaux', '248', 'heart'], ['Signalements', '19', 'radio']];
+  const stats = [['Utilisateurs', '4 820', 'users'], ['Refuges', '14', 'shield'], ['Pensions', '8', 'store'], ['Animaux', '248', 'heart'], ['Signalements', '19', 'radio']];
   return (
     <div>
       <PageHead title="Administration" desc="Ce qui nécessite votre attention, et l'état général de la plateforme." />
@@ -448,7 +436,7 @@ function AdminModeration({ flash }) {
 }
 
 function AdminVerif({ kind, list, flash }) {
-  const titles = { refuge: 'Refuges à vérifier', pension: 'Pensions à vérifier', 'véto': 'Vétérinaires à vérifier' };
+  const titles = { refuge: 'Refuges à vérifier', pension: 'Pensions à vérifier' };
   return (
     <div>
       <PageHead title={titles[kind]} desc={<>Validez manuellement avant l'affichage du badge <strong>Vérifié</strong>. Contrôlez le SIRET et les coordonnées.</>} />
@@ -526,114 +514,6 @@ function ProfilStub({ org, flash }) {
   );
 }
 
-/* ============================ ESPACE VÉTÉRINAIRE ========================= */
-function VetBody({ sub, setSub, flash }) {
-  if (sub === 'scan') return <VetScan flash={flash} />;
-  if (sub === 'equipe') return <VetTeam flash={flash} />;
-  if (sub === 'profil') return <ProfilStub org="Cabinet de la Croix-Rousse" flash={flash} />;
-  const acts = [
-    { t: 'syringe', tone: 'coral', who: 'Dr. Lemaire', when: 'il y a 1 h', text: 'Vaccination CHPPiL réalisée sur Maximus (golden retriever).' },
-    { t: 'scanSearch', tone: 'lavande', who: 'Système', when: 'il y a 3 h', text: 'Puce 250268500… scannée → correspond à un signalement « perdu » actif.' },
-    { t: 'badgeCheck', tone: 'prune', who: 'Dr. Sahra', when: 'hier', text: 'Identification (pose de puce) sur 2 chatons du Refuge des Brotteaux.' },
-  ];
-  return (
-    <div>
-      <PageHead title="Bonjour, Cabinet Croix-Rousse" desc="Votre activité du jour, et les puces à rapprocher des signalements perdus & trouvés."
-        action={<D.Btn icon="scanSearch" onClick={() => setSub('scan')}>Scanner une puce</D.Btn>} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 22 }} className="dash-stats">
-        <Stat icon="calendar" label="Consultations du jour" value="14" delta={5} sub="3 à venir" />
-        <Stat icon="scanSearch" label="Puces à rapprocher" value="1" tone="brick" sub="correspondance possible" />
-        <Stat icon="syringe" label="Vaccinations / mois" value="86" delta={9} tone="lavande" />
-        <Stat icon="badgeCheck" label="Identifications / mois" value="23" tone="prune" />
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 18 }} className="dash-split">
-        <Panel title="Correspondance détectée" hint="Une puce scannée correspond à un signalement actif" action={<MiniBtn label="Recherche" icon="scanSearch" onClick={() => setSub('scan')} />}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 14, borderRadius: 10, background: 'var(--brick-50)', border: '1px solid var(--brick-300)', flexWrap: 'wrap' }}>
-            <img src={D.U('1495360010541-f48722b34f7d', 100)} alt="" style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flex: 'none' }} />
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><D.Pill tone="brick">Perdu</D.Pill><span style={{ fontWeight: 600, color: 'var(--foreground)' }}>Tigrou</span></div>
-              <div className="mono" style={{ fontSize: 11, color: 'var(--muted-fg)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.04em' }}>Puce 250268500123456 · disparu Parc de la Tête d'Or</div>
-            </div>
-            <D.Btn size="sm" icon="phone" onClick={() => flash('Propriétaire de Tigrou prévenu !')}>Prévenir le propriétaire</D.Btn>
-          </div>
-        </Panel>
-        <Panel title="Activité récente"><Feed items={acts} /></Panel>
-      </div>
-    </div>
-  );
-}
-
-function VetScan({ flash }) {
-  const [chip, setChip] = useState('');
-  const [result, setResult] = useState(null);
-  const run = () => {
-    const c = chip.replace(/\s/g, '');
-    if (c.length < 6) { flash('Numéro de puce trop court'); return; }
-    setResult(c.startsWith('250') ? 'match' : 'none');
-  };
-  return (
-    <div>
-      <PageHead title="Recherche de signalements" desc="Scannez ou saisissez un numéro de puce pour vérifier s'il correspond à un animal perdu déclaré sur Dorloter." />
-      <Panel pad>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <label style={{ flex: 1, minWidth: 240 }}>
-            <span className="mono" style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted-fg)' }}>Numéro de puce (15 chiffres)</span>
-            <input value={chip} onChange={e => setChip(e.target.value)} placeholder="250 268 500 123 456" className="mono"
-              style={{ display: 'block', width: '100%', height: 46, borderRadius: 9, border: '1px solid var(--border)', background: 'var(--background)', color: 'var(--foreground)', padding: '0 14px', fontSize: 15, marginTop: 7, outline: 'none', letterSpacing: '.04em' }} />
-          </label>
-          <D.Btn size="lg" icon="scanSearch" onClick={run}>Rechercher</D.Btn>
-        </div>
-        <p className="mono" style={{ fontSize: 11, color: 'var(--muted-fg)', marginTop: 12, textTransform: 'uppercase', letterSpacing: '.05em' }}>Astuce démo : un numéro commençant par « 250 » trouve une correspondance.</p>
-      </Panel>
-
-      {result === 'match' && (
-        <div style={{ marginTop: 18, background: 'var(--card)', border: '1px solid var(--coral-400)', borderRadius: 12, padding: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}><span style={{ color: 'var(--coral-600)' }}><D.Icon name="badgeCheck" size={20} /></span><h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--foreground)' }}>Correspondance trouvée</h3></div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <img src={D.U('1495360010541-f48722b34f7d', 100)} alt="" style={{ width: 64, height: 64, borderRadius: 10, objectFit: 'cover' }} />
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><D.Pill tone="brick">Perdu</D.Pill><span style={{ fontWeight: 600, fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--foreground)' }}>Tigrou</span></div>
-              <div className="mono" style={{ fontSize: 11.5, color: 'var(--muted-fg)', marginTop: 5, textTransform: 'uppercase', letterSpacing: '.04em' }}>Chat européen · disparu le 5 juin · Lyon 3e · propriétaire : Léa F.</div>
-            </div>
-            <D.Btn icon="phone" onClick={() => flash('Le propriétaire de Tigrou a été prévenu')}>Prévenir le propriétaire</D.Btn>
-          </div>
-        </div>
-      )}
-      {result === 'none' && (
-        <div style={{ marginTop: 18, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 26, textAlign: 'center', color: 'var(--muted-fg)' }}>
-          <D.Icon name="search" size={30} /><p style={{ marginTop: 10, fontSize: 14 }}>Aucun signalement actif ne correspond à cette puce.</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function VetTeam({ flash }) {
-  const team = [
-    { name: 'Dr. Camille Lemaire', role: 'Vétérinaire · gérante', since: 2011, avatar: D.U('1594824476967-48c8b964273f', 100) },
-    { name: 'Dr. Sahra Benali', role: 'Vétérinaire · chirurgie', since: 2016, avatar: D.U('1559839734-2b71ea197ec2', 100) },
-    { name: 'Lucas Mercier', role: 'Auxiliaire de santé (ASV)', since: 2020, avatar: D.U('1607990281513-2c110a25bd8c', 100) },
-    { name: 'Emma Roussel', role: 'Auxiliaire de santé (ASV)', since: 2022, avatar: null },
-  ];
-  return (
-    <div>
-      <PageHead title="Équipe" desc="Les praticiens et auxiliaires du cabinet." action={<D.Btn icon="plus" onClick={() => flash('Inviter un membre')}>Inviter un membre</D.Btn>} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }} className="dash-split">
-        {team.map(m => (
-          <div key={m.name} style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
-            <Avatar src={m.avatar} name={m.name} size={52} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--foreground)' }}>{m.name}</div>
-              <div className="mono" style={{ fontSize: 11, color: 'var(--muted-fg)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '.04em' }}>{m.role} · depuis {m.since}</div>
-            </div>
-            <MiniBtn icon="more" onClick={() => flash(`Gérer ${m.name}`)} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ------------------------------ Export racine ----------------------------- */
 function Dashboard({ go, flash, initialRole }) {
   const [role, setRole] = useState(initialRole || 'refuge');
@@ -643,7 +523,6 @@ function Dashboard({ go, flash, initialRole }) {
       {role === 'refuge' && <RefugeBody sub={sub} setSub={setSub} flash={flash} />}
       {role === 'pension' && <PensionBody sub={sub} setSub={setSub} flash={flash} />}
       {role === 'admin' && <AdminBody sub={sub} setSub={setSub} flash={flash} />}
-      {role === 'vet' && <VetBody sub={sub} setSub={setSub} flash={flash} />}
     </DashShell>
   );
 }

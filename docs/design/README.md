@@ -8,15 +8,12 @@
 > est aujourd'hui **deux SPA React 19 + Vite** (`apps/web` public,
 > `apps/pro` back-office) qui consomment l'**API NestJS** via `/api/v1` avec
 > TanStack Query, et partagent `@dorloter/ui` + `@dorloter/client`.
-> Les écrans **vétérinaires** (`vet.jsx`, vue `veterinaires`/`vetDetail`) et
-> l'espace pro **vétérinaire** décrits plus bas **ne font plus partie du produit**
-> (feature retirée le 2026-03-07) ; les fichiers sont laissés intacts pour que le
-> prototype `Dorloter.html` reste affichable. Source de vérité du stack :
+> Source de vérité du stack :
 > **[../../CLAUDE.md](../../CLAUDE.md)**.
 
 ## Vue d'ensemble
 Refonte complète de l'app web **Dorloter** (repo `dorloter`) : une plateforme d'adoption,
-de perdus & trouvés, de pensions, de refuges et (à l'époque) de vétérinaires, avec
+de perdus & trouvés, de pensions et de refuges, avec
 messagerie, profils membres et back-offices professionnels.
 
 Cette maquette propose une **nouvelle direction artistique** assumée — un parti pris
@@ -103,7 +100,6 @@ Routeur par `view` (string) dans `app.jsx`. Mapping suggéré vers les routes du
 - **lost** + **reportDetail** — Perdus & trouvés : **carte plein écran** + bandeaux latéraux rétractables (Fiche animal / Flux d'activité), reprend la structure `ReportDetailShell`. *(/perdus-trouves)*
 - **pensions** + **reserve** — Annuaire pensions + fiche/réservation (calendrier). *(/pensions)*
 - **shelters** + **shelter** — Annuaire refuges + fiche refuge. *(/refuges)*
-- ~~**veterinaires** + **vetDetail** — Annuaire vétérinaires + fiche.~~ *(feature retirée du produit)*
 - **about** — Notre mission (page éditoriale).
 
 **Compte / membre**
@@ -147,7 +143,7 @@ Trois zones, à reproduire fidèlement (voir `nav.jsx`) :
 - `home.jsx` — accueil. `catalog.jsx` — catalogue + `PetCard` + modale fiche animal.
 - `swipe.jsx` — mode swipe. `quiz.jsx` — quiz de compatibilité.
 - `lost.jsx` — perdus & trouvés (carte + shells). `pensions.jsx` — pensions.
-- `vet.jsx` — vétérinaires (annuaire + fiche) · **feature retirée**, fichier conservé pour le prototype. `messages.jsx` — messagerie.
+- `messages.jsx` — messagerie.
 - `pages.jsx` — refuges (annuaire + fiche), favoris, à propos, (ancien) compte.
 - `profile.jsx` — profil personnel public/privé.
 - `ui2.jsx` — en-têtes de page, états vides, données (refuges, user).

@@ -21,10 +21,9 @@ const PRIMARY = [
     { id: 'lost', icon: 'map', title: 'Carte des signalements', desc: 'Les alertes autour de vous' },
     { id: 'report', icon: 'radio', title: 'Signaler un animal', desc: 'Publier une alerte en 3 étapes' },
   ] },
-  { id: 'annuaires', label: 'Annuaires', land: null, match: ['shelters', 'shelter', 'pensions', 'reserve', 'veterinaires', 'vetDetail', 'about'], menu: [
+  { id: 'annuaires', label: 'Annuaires', land: null, match: ['shelters', 'shelter', 'pensions', 'reserve', 'about'], menu: [
     { id: 'shelters', icon: 'shield', title: 'Refuges', desc: 'Associations & SPA partenaires' },
     { id: 'pensions', icon: 'home', title: 'Pensions', desc: 'Garde vérifiée pour vos absences' },
-    { id: 'veterinaires', icon: 'stethoscope', title: 'Vétérinaires', desc: 'Cabinets & urgences 24/7' },
   ] },
 ];
 const groupActive = (n, view) => view === n.id || (n.match && n.match.includes(view));
@@ -32,7 +31,6 @@ const groupActive = (n, view) => view === n.id || (n.match && n.match.includes(v
 const PRO = [
   { role: 'refuge', icon: 'shield', label: 'Espace refuge', desc: 'Refuge des Brotteaux' },
   { role: 'pension', icon: 'home', label: 'Espace pension', desc: 'Les Coussinets Dorés' },
-  { role: 'vet', icon: 'stethoscope', label: 'Espace vétérinaire', desc: 'Cabinet Croix-Rousse' },
   { role: 'admin', icon: 'shieldCheck', label: 'Administration', desc: 'Modération & plateforme' },
 ];
 
@@ -61,21 +59,18 @@ function buildIndex() {
     ['Signaler un animal', 'Perdus & trouvés', 'radio', { go: 'report' }],
     ['Refuges', 'Annuaire', 'shield', { go: 'shelters' }],
     ['Pensions', 'Annuaire', 'home', { go: 'pensions' }],
-    ['Vétérinaires', 'Annuaire', 'stethoscope', { go: 'veterinaires' }],
     ['Mes favoris', 'Compte', 'heart', { go: 'favorites' }],
     ['Messagerie', 'Compte', 'message', { go: 'messages' }],
     ['Mon compte', 'Compte', 'user', { go: 'profile' }],
     ['Notre mission', 'À propos', 'compass', { go: 'about' }],
     ['Espace refuge', 'Pro', 'shield', { pro: 'refuge' }],
     ['Espace pension', 'Pro', 'home', { pro: 'pension' }],
-    ['Espace vétérinaire', 'Pro', 'stethoscope', { pro: 'vet' }],
     ['Administration', 'Pro', 'shieldCheck', { pro: 'admin' }],
   ].map(([label, hint, icon, act]) => ({ label, hint, icon, act }));
   const pets = (S.PETS || []).map(p => ({ label: p.name, hint: `${p.breed} · ${p.city}`, img: p.photo, act: { pet: p } }));
-  const vets = (window.DORLOTER_VETOS || []).map(v => ({ label: v.name, hint: `Vétérinaire · ${v.city}`, icon: 'stethoscope', act: { vet: v.id } }));
   const pens = (S.PENSIONS || []).map(p => ({ label: p.name, hint: `Pension · ${p.city}`, icon: 'home', act: { go: 'pensions' } }));
   const shel = ((window.DORLOTER_UI2 && window.DORLOTER_UI2.SHELTERS) || []).map(s => ({ label: s.name, hint: `Refuge · ${s.city}`, icon: 'shield', act: { shelter: s.id } }));
-  return [...pages, ...pets, ...vets, ...pens, ...shel];
+  return [...pages, ...pets, ...pens, ...shel];
 }
 
 /* ============================ Command palette ============================= */
@@ -98,7 +93,6 @@ function SearchPalette({ open, onClose, nav }) {
     onClose();
     const a = r.act;
     if (a.pet) nav.openPet(a.pet);
-    else if (a.vet) nav.openVet(a.vet);
     else if (a.shelter) nav.openShelter(a.shelter);
     else if (a.pro) nav.openPro(a.pro);
     else if (a.go) nav.go(a.go);
@@ -388,7 +382,7 @@ function Footer({ go }) {
   const cols = [
     ['Adopter', [['Catalogue', 'adopt'], ['Mode swipe', 'swipe'], ['Quiz de compatibilité', 'quiz'], ['Mes favoris', 'favorites']]],
     ['Communauté', [['Perdus & trouvés', 'lost'], ['Signaler un animal', 'report'], ['Messagerie', 'messages'], ['Notre mission', 'about']]],
-    ['Annuaires', [['Refuges', 'shelters'], ['Pensions', 'pensions'], ['Vétérinaires', 'veterinaires'], ['Mon compte', 'profile']]],
+    ['Annuaires', [['Refuges', 'shelters'], ['Pensions', 'pensions'], ['Mon compte', 'profile']]],
   ];
   return (
     <footer style={{ background: 'var(--prune-900)', color: 'var(--sable-100)', marginTop: 20 }}>

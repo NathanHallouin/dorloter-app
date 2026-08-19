@@ -55,11 +55,6 @@ const VERIF_REFUGES = [
 const VERIF_PENSIONS = [
   { id: 'vp1', name: 'Chez Mistigri', city: 'Oullins', siret: '912 408 551 00022', email: 'hello@chezmistigri.fr', phone: '04 78 90 11 23', when: 'hier' },
 ];
-const VERIF_VETOS = [
-  { id: 'vt1', name: 'Cabinet de la Croix-Rousse', city: 'Lyon 4e', siret: '784 220 119 00010', email: 'cabinet.croixrousse@veto.fr', phone: '04 78 28 44 90', when: 'il y a 1 j' },
-  { id: 'vt2', name: 'Clinique Vétérinaire Gerland', city: 'Lyon 7e', siret: '651 339 882 00033', email: 'gerland@vetoclinique.fr', phone: '04 72 73 12 00', when: 'il y a 3 j' },
-];
-
 const USERS = [
   { id: 'u1', name: 'Léa Fontaine', email: 'lea.fontaine@email.fr', role: 'Adoptant', since: 'mars 2024', status: 'actif', avatar: D.U('1438761681033-6461ffad8d80', 100) },
   { id: 'u2', name: 'Refuge des Brotteaux', email: 'contact@brotteaux.org', role: 'Refuge', since: 'janv. 2023', status: 'vérifié', avatar: null },
@@ -186,5 +181,5 @@ function Table({ head, children }) {
 const Td = ({ children, right, style }) => <td style={{ padding: '12px 14px', borderTop: '1px solid var(--border)', textAlign: right ? 'right' : 'left', fontSize: 14, color: 'var(--foreground)', verticalAlign: 'middle', ...style }}>{children}</td>;
 
 window.DORLOTER_DASHKIT = { D, Stat, Panel, Tag, Bars, Avatar, MiniBtn, PageHead, Table, Td, STATUS,
-  CANDIDATURES, ANNONCES, RESAS, AVIS, MODQUEUE, VERIF_REFUGES, VERIF_PENSIONS, VERIF_VETOS, USERS };
+  CANDIDATURES, ANNONCES, RESAS, AVIS, MODQUEUE, VERIF_REFUGES, VERIF_PENSIONS, USERS };
 })();

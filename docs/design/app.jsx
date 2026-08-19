@@ -29,7 +29,6 @@ function DorloterApp() {
   const [pension, setPension] = A.useState(null);
   const [applyPet, setApplyPet] = A.useState(null);
   const [report, setReport] = A.useState(null);
-  const [vetId, setVetId] = A.useState('croixrousse');
   const [dashRole, setDashRole] = A.useState('refuge');
   const [toast, setToast] = A.useState(null);
   const [scrolled, setScrolled] = A.useState(false);
@@ -57,13 +56,12 @@ function DorloterApp() {
   const openApply = (p) => { setPet(null); setApplyPet(p); go('apply'); };
   const openReport = (r) => { if (r === 'new') go('report'); else flash('Merci ! Votre indice a été transmis au propriétaire.'); };
   const openDetail = (r) => { setReport(r); go('reportDetail'); };
-  const openVet = (id) => { setVetId(id); go('vetDetail'); };
   const openPro = (role) => { setDashRole(role || 'refuge'); go('dash'); };
   const logout = () => { flash('Vous êtes déconnectée.'); go('login'); };
-  const navApi = { go, openPet: setPet, openVet, openShelter, openPro, logout };
+  const navApi = { go, openPet: setPet, openShelter, openPro, logout };
   const contactShelter = (name) => flash(`Demande envoyée à ${name || 'l\u2019annonceur'} · réponse sous 48 h`);
 
-  const { DorloterHome, DorloterCatalog, DorloterLost, DorloterReportDetail, DorloterPensions, DorloterPetModal, DorloterDashboard, DorloterQuiz, DorloterVets, DorloterVet, DorloterMessages } = window;
+  const { DorloterHome, DorloterCatalog, DorloterLost, DorloterReportDetail, DorloterPensions, DorloterPetModal, DorloterDashboard, DorloterQuiz, DorloterMessages } = window;
   const P = window.DORLOTER_PAGES, FL = window.DORLOTER_FLOWS;
   const fullscreen = view === 'lost' || view === 'reportDetail' || view === 'dash' || view === 'messages';
 
@@ -80,8 +78,6 @@ function DorloterApp() {
         {view === 'dash' && <DorloterDashboard go={go} flash={flash} initialRole={dashRole} />}
         {view === 'quiz' && <DorloterQuiz go={go} />}
         {view === 'swipe' && <window.DorloterSwipe go={go} openPet={setPet} flash={flash} />}
-        {view === 'veterinaires' && <DorloterVets go={go} openVet={openVet} />}
-        {view === 'vetDetail' && <DorloterVet go={go} vetId={vetId} contact={flash} />}
         {view === 'messages' && <DorloterMessages go={go} flash={flash} />}
         {view === 'pensions' && <DorloterPensions openPension={openPension} />}
         {view === 'shelters' && <P.SheltersPage go={go} openShelter={openShelter} />}
